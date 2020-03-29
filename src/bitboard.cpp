@@ -40,31 +40,31 @@ void bitboard::print() const
     {
         if ((1ULL << i) & pawns[Color::BOTH])
         {
-            pieces[i] = 'P';
+            pieces[i] = PieceChar::PAWN;
         }
         else if ((1ULL << i) & knights[Color::BOTH])
         {
-            pieces[i] = 'N';
+            pieces[i] = PieceChar::KNIGHT;
         }
         else if ((1ULL << i) & bishops[Color::BOTH])
         {
-            pieces[i] = 'B';
+            pieces[i] = PieceChar::BISHOP;
         }
         else if ((1ULL << i) & rooks[Color::BOTH])
         {
-            pieces[i] = 'R';
+            pieces[i] = PieceChar::ROOK;
         }
         else if ((1ULL << i) & queens[Color::BOTH])
         {
-            pieces[i] = 'Q';
+            pieces[i] = PieceChar::QUEEN;
         }
         else if ((1ULL << i) & kings[Color::BOTH])
         {
-            pieces[i] = 'K';
+            pieces[i] = PieceChar::KING;
         }
         else
         {
-            pieces[i] = '.';
+            pieces[i] = PieceChar::EMPTY;
         }
     }
 

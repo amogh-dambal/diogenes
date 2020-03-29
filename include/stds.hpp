@@ -70,4 +70,18 @@ namespace Board {
     const int SQUARES = 64;
 }
 
+namespace PieceChar
+{
+    enum
+    {
+        EMPTY = '.',
+        PAWN = 'P',
+        KNIGHT = 'N',
+        BISHOP = 'B',
+        ROOK = 'R',
+        QUEEN = 'Q',
+        KING = 'K'
+    };
+}
+
 #endif //DIOGENES_STDS_HPP

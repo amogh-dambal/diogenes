@@ -9,7 +9,7 @@
 int main()
 {
     bitboard bb;
-    bb.init();
+    
     bb.print();
 
     return 0;
