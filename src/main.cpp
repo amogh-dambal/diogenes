@@ -2,8 +2,15 @@
 // Created by Amogh on 3/29/20.
 //
 #include <iostream>
+#include <cstdio>
+
+#include "../include/bitboard.hpp"
 
 int main()
 {
-    std::cout << "testing build config and cmake" << std::endl;
+    bitboard bb;
+    bb.init();
+    bb.print();
+
+    return 0;
 }
