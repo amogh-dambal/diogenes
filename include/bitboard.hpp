@@ -11,8 +11,7 @@
 
 #include "stds.hpp"
 
-typedef u_int64_t U64;
-typedef u_int8_t U8;
+
 
 // TODO: add representation for "off the board"
 // TODO: add support for checking position legality

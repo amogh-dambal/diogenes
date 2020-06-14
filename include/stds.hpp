@@ -5,6 +5,9 @@
 #ifndef DIOGENES_STDS_HPP
 #define DIOGENES_STDS_HPP
 
+typedef u_int64_t U64;
+typedef u_int8_t U8;
+
 namespace Color
 {
     enum Value
@@ -102,6 +105,15 @@ namespace Board {
         W = -1,
         NW = +7
     };
+
+    const U64 a_file =          0x0101010101010101;
+    const U64 h_file =          0x8080808080808080;
+    const U64 first_rank =      0x00000000000000ff;
+    const U64 eighth_rank =     0xff00000000000000;
+    const U64 a1_h8_diagonal =  0x8040201008040201;
+    const U64 h1_a8_diagonal =  0x0102040810204080;
+    const U64 light_squares =   0x55aa55aa55aa55aa;
+    const U64 dark_squares =    0xaa55aa55aa55aa55;
 }
 
 namespace PieceChar
