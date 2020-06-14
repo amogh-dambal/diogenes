@@ -11,8 +11,6 @@
 
 #include "stds.hpp"
 
-
-
 // TODO: add representation for "off the board"
 // TODO: add support for checking position legality
 // TODO: add support for castling permissions
@@ -28,6 +26,7 @@ public:
     bool game_over;
 
 private:
+    // piece bitboard sets
     U64 pawns[3];
     U64 bishops[3];
     U64 knights[3];
@@ -38,12 +37,12 @@ private:
     // number of half-moves
     int ply;
 
+    // game state booleans
     bool is_black_in_check;
     bool is_white_in_check;
 
     bool can_black_castle;
     bool can_white_castle;
-
 
     static int fr_to_board_index(const int file, const int rank);
 };
