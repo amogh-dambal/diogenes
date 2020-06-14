@@ -5,8 +5,10 @@
 #ifndef DIOGENES_STDS_HPP
 #define DIOGENES_STDS_HPP
 
-typedef u_int64_t U64;
-typedef u_int8_t U8;
+typedef u_int64_t   U64;
+typedef u_int8_t    U8;
+typedef u_int16_t   U16;
+typedef u_int32_t   U32;
 
 namespace Color
 {
