@@ -4,7 +4,8 @@
 
 #include "../include/bitboard.hpp"
 
-bitboard::bitboard()
+bitboard::bitboard() : ply(0), side_to_move(Color::WHITE), is_black_in_check(false),
+is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_over(false)
 {
     // white pieces
     pawns[Color::WHITE] = 0xff00;
@@ -29,6 +30,7 @@ bitboard::bitboard()
     rooks[Color::BOTH] = rooks[Color::WHITE] | rooks[Color::BLACK];
     queens[Color::BOTH] = queens[Color::WHITE] | queens[Color::BLACK];
     kings[Color::BOTH] = kings[Color::WHITE] | kings[Color::BLACK];
+
 }
 
 void bitboard::print() const
@@ -38,27 +40,28 @@ void bitboard::print() const
     // build CLI text representation
     for (unsigned int i = 0; i < Board::SQUARES; ++i)
     {
-        if ((1ULL << i) & pawns[Color::BOTH])
+        U64 k = 1ULL << i;
+        if (k & pawns[Color::BOTH])
         {
             pieces[i] = PieceChar::PAWN;
         }
-        else if ((1ULL << i) & knights[Color::BOTH])
+        else if (k & knights[Color::BOTH])
         {
             pieces[i] = PieceChar::KNIGHT;
         }
-        else if ((1ULL << i) & bishops[Color::BOTH])
+        else if (k & bishops[Color::BOTH])
         {
             pieces[i] = PieceChar::BISHOP;
         }
-        else if ((1ULL << i) & rooks[Color::BOTH])
+        else if (k & rooks[Color::BOTH])
         {
             pieces[i] = PieceChar::ROOK;
         }
-        else if ((1ULL << i) & queens[Color::BOTH])
+        else if (k & queens[Color::BOTH])
         {
             pieces[i] = PieceChar::QUEEN;
         }
-        else if ((1ULL << i) & kings[Color::BOTH])
+        else if (k & kings[Color::BOTH])
         {
             pieces[i] = PieceChar::KING;
         }
@@ -73,14 +76,14 @@ void bitboard::print() const
     {
         for (int file = File::A; file <= File::H; ++file)
         {
-            const int index = fr_to_index(file, rank);
+            const int index = fr_to_board_index(file, rank);
             std::cout << pieces[index] << "\t";
         }
         std::cout << std::endl;
     }
 }
 
-const int bitboard::fr_to_index(const int file, const int rank)
+int bitboard::fr_to_board_index(const int file, const int rank)
 {
     return 8 * rank + file;
 }
