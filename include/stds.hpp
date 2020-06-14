@@ -51,22 +51,6 @@ namespace Rank
 }
 
 namespace Piece {
-    enum Type
-    {
-        wP = 1,
-        wN,
-        wB,
-        wR,
-        wQ,
-        wK,
-        bP,
-        bN,
-        bB,
-        bR,
-        bQ,
-        bK,
-        EMPTY = 15
-    };
 
     enum Value
     {
