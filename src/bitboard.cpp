@@ -31,6 +31,10 @@ is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_o
     queens[Color::BOTH] = queens[Color::WHITE] | queens[Color::BLACK];
     kings[Color::BOTH] = kings[Color::WHITE] | kings[Color::BLACK];
 
+    // game state sets
+    occupied_squares = pawns[Color::BOTH] | knights[Color::BOTH] | bishops[Color::BOTH] | rooks[Color::BOTH] | queens[Color::BOTH] | kings[Color::BOTH];
+    empty_squares = ~occupied_squares;
+
 }
 
 U64 bitboard::get_white_pawns() const
@@ -92,7 +96,6 @@ U64 bitboard::get_black_kings() const
 {
     return this->kings[Color::BLACK];
 }
-
 
 void bitboard::print() const
 {

@@ -45,6 +45,8 @@ private:
     U64 queens[3];
     U64 kings[3];
 
+    U64 occupied_squares;
+    U64 empty_squares;
 
     // game state booleans
     bool is_black_in_check;
