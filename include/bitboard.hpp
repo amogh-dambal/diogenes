@@ -11,10 +11,6 @@
 
 #include "stds.hpp"
 
-// TODO: add representation for "off the board"
-// TODO: add support for checking position legality
-// TODO: add support for castling permissions
-// TODO: add game state data
 
 class bitboard
 {
@@ -22,7 +18,22 @@ public:
     bitboard();
     void print() const;
 
+    U64 get_white_pawns() const;
+    U64 get_white_knights() const;
+    U64 get_white_bishops() const;
+    U64 get_white_rooks() const;
+    U64 get_white_queens() const;
+    U64 get_white_kings() const;
+
+    U64 get_black_pawns() const;
+    U64 get_black_knights() const;
+    U64 get_black_bishops() const;
+    U64 get_black_rooks() const;
+    U64 get_black_queens() const;
+    U64 get_black_kings() const;
+
     Color::Value side_to_move;
+    int ply;
     bool game_over;
 
 private:
@@ -34,8 +45,6 @@ private:
     U64 queens[3];
     U64 kings[3];
 
-    // number of half-moves
-    int ply;
 
     // game state booleans
     bool is_black_in_check;

@@ -33,6 +33,67 @@ is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_o
 
 }
 
+U64 bitboard::get_white_pawns() const
+{
+    return this->pawns[Color::WHITE];
+}
+
+U64 bitboard::get_white_knights() const
+{
+    return this->knights[Color::WHITE];
+}
+
+U64 bitboard::get_white_bishops() const
+{
+    return this->bishops[Color::WHITE];
+}
+
+U64 bitboard::get_white_rooks() const
+{
+    return this->rooks[Color::WHITE];
+}
+
+U64 bitboard::get_white_queens() const
+{
+    return this->queens[Color::WHITE];
+}
+
+U64 bitboard::get_white_kings() const
+{
+    return this->kings[Color::WHITE];
+}
+
+U64 bitboard::get_black_pawns() const
+{
+    return this->pawns[Color::BLACK];
+}
+
+U64 bitboard::get_black_knights() const
+{
+    return this->knights[Color::BLACK];
+}
+
+U64 bitboard::get_black_bishops() const
+{
+    return this->bishops[Color::BLACK];
+}
+
+U64 bitboard::get_black_rooks() const
+{
+    return this->rooks[Color::BLACK];
+}
+
+U64 bitboard::get_black_queens() const
+{
+    return this->queens[Color::BLACK];
+}
+
+U64 bitboard::get_black_kings() const
+{
+    return this->kings[Color::BLACK];
+}
+
+
 void bitboard::print() const
 {
     char pieces[Board::SQUARES];
