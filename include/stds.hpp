@@ -5,10 +5,13 @@
 #ifndef DIOGENES_STDS_HPP
 #define DIOGENES_STDS_HPP
 
+// #define C64(x) x##ULL
+
 typedef u_int64_t   U64;
 typedef u_int8_t    U8;
 typedef u_int16_t   U16;
 typedef u_int32_t   U32;
+
 
 namespace Color
 {
@@ -68,6 +71,8 @@ namespace Piece {
 namespace Board {
     const int SQUARES = 64;
 
+    // LERF
+    // little-endian rank-file mapping
     enum class Square
     {
         a1, a2, a3, a4, a5, a6, a7, a8,

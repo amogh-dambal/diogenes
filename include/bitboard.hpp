@@ -51,9 +51,11 @@ private:
     // game state booleans
     bool is_black_in_check;
     bool is_white_in_check;
-
     bool can_black_castle;
     bool can_white_castle;
+
+    // helper functions
+    int pop_count(U64 b) const;
 
     static int fr_to_board_index(const int file, const int rank);
 };

@@ -35,6 +35,8 @@ is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_o
     occupied_squares = pawns[Color::BOTH] | knights[Color::BOTH] | bishops[Color::BOTH] | rooks[Color::BOTH] | queens[Color::BOTH] | kings[Color::BOTH];
     empty_squares = ~occupied_squares;
 
+    // attack sets
+
 }
 
 U64 bitboard::get_white_pawns() const
