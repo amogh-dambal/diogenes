@@ -101,7 +101,7 @@ U64 board::get_black_kings() const
 
 void board::print() const
 {
-    char pieces[Board::SQUARES];
+    Board::PieceChar pieces[Board::SQUARES];
 
     // build CLI text representation
     for (unsigned int i = 0; i < Board::SQUARES; ++i)
@@ -109,31 +109,31 @@ void board::print() const
         U64 k = 1ULL << i;
         if (k & pawns[Color::BOTH])
         {
-            pieces[i] = PieceChar::PAWN;
+            pieces[i] = Board::PieceChar::PAWN;
         }
         else if (k & knights[Color::BOTH])
         {
-            pieces[i] = PieceChar::KNIGHT;
+            pieces[i] = Board::PieceChar::KNIGHT;
         }
         else if (k & bishops[Color::BOTH])
         {
-            pieces[i] = PieceChar::BISHOP;
+            pieces[i] = Board::PieceChar::BISHOP;
         }
         else if (k & rooks[Color::BOTH])
         {
-            pieces[i] = PieceChar::ROOK;
+            pieces[i] = Board::PieceChar::ROOK;
         }
         else if (k & queens[Color::BOTH])
         {
-            pieces[i] = PieceChar::QUEEN;
+            pieces[i] = Board::PieceChar::QUEEN;
         }
         else if (k & kings[Color::BOTH])
         {
-            pieces[i] = PieceChar::KING;
+            pieces[i] = Board::PieceChar::KING;
         }
         else
         {
-            pieces[i] = PieceChar::EMPTY;
+            pieces[i] = Board::PieceChar::EMPTY;
         }
     }
 

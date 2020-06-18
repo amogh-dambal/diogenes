@@ -13,7 +13,7 @@ public:
 
 private:
     // what piece is it?
-
+    Board::Piece p;
 
     Board::Square sq_from;
     Board::Square sq_to;

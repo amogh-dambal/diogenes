@@ -55,19 +55,6 @@ namespace Rank
     };
 }
 
-namespace Piece {
-
-    enum Value
-    {
-        PAWN = 1,
-        KNIGHT = 3,
-        BISHOP = 3,
-        ROOK = 5,
-        QUEEN = 9,
-        KING = 4
-    };
-}
-
 namespace Board {
     const int SQUARES = 64;
 
@@ -97,6 +84,27 @@ namespace Board {
         NW = +7
     };
 
+    enum class Piece
+    {
+        PAWN,
+        KNIGHT,
+        BISHOP,
+        ROOK,
+        QUEEN,
+        KING
+    };
+
+    enum PieceChar
+    {
+        EMPTY = '.',
+        PAWN = 'P',
+        KNIGHT = 'N',
+        BISHOP = 'B',
+        ROOK = 'R',
+        QUEEN = 'Q',
+        KING = 'K'
+    };
+
     const U64 a_file =          0x0101010101010101;
     const U64 h_file =          0x8080808080808080;
     const U64 first_rank =      0x00000000000000ff;
@@ -107,18 +115,5 @@ namespace Board {
     const U64 dark_squares =    0xaa55aa55aa55aa55;
 }
 
-namespace PieceChar
-{
-    enum
-    {
-        EMPTY = '.',
-        PAWN = 'P',
-        KNIGHT = 'N',
-        BISHOP = 'B',
-        ROOK = 'R',
-        QUEEN = 'Q',
-        KING = 'K'
-    };
-}
 
 #endif //DIOGENES_STDS_HPP
