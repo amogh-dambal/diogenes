@@ -2,10 +2,10 @@
 // Created by Amogh on 3/29/20.
 //
 
-#include "../include/bitboard.hpp"
+#include "board.hpp"
 
-bitboard::bitboard() : ply(0), side_to_move(Color::WHITE), is_black_in_check(false),
-is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_over(false)
+board::board() : ply(0), side_to_move(Color::WHITE), is_black_in_check(false),
+                 is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_over(false)
 {
     // white pieces
     pawns[Color::WHITE] = 0xff00;
@@ -39,67 +39,67 @@ is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_o
 
 }
 
-U64 bitboard::get_white_pawns() const
+U64 board::get_white_pawns() const
 {
     return this->pawns[Color::WHITE];
 }
 
-U64 bitboard::get_white_knights() const
+U64 board::get_white_knights() const
 {
     return this->knights[Color::WHITE];
 }
 
-U64 bitboard::get_white_bishops() const
+U64 board::get_white_bishops() const
 {
     return this->bishops[Color::WHITE];
 }
 
-U64 bitboard::get_white_rooks() const
+U64 board::get_white_rooks() const
 {
     return this->rooks[Color::WHITE];
 }
 
-U64 bitboard::get_white_queens() const
+U64 board::get_white_queens() const
 {
     return this->queens[Color::WHITE];
 }
 
-U64 bitboard::get_white_kings() const
+U64 board::get_white_kings() const
 {
     return this->kings[Color::WHITE];
 }
 
-U64 bitboard::get_black_pawns() const
+U64 board::get_black_pawns() const
 {
     return this->pawns[Color::BLACK];
 }
 
-U64 bitboard::get_black_knights() const
+U64 board::get_black_knights() const
 {
     return this->knights[Color::BLACK];
 }
 
-U64 bitboard::get_black_bishops() const
+U64 board::get_black_bishops() const
 {
     return this->bishops[Color::BLACK];
 }
 
-U64 bitboard::get_black_rooks() const
+U64 board::get_black_rooks() const
 {
     return this->rooks[Color::BLACK];
 }
 
-U64 bitboard::get_black_queens() const
+U64 board::get_black_queens() const
 {
     return this->queens[Color::BLACK];
 }
 
-U64 bitboard::get_black_kings() const
+U64 board::get_black_kings() const
 {
     return this->kings[Color::BLACK];
 }
 
-void bitboard::print() const
+void board::print() const
 {
     char pieces[Board::SQUARES];
 
@@ -150,8 +150,8 @@ void bitboard::print() const
 }
 
 // function to calculate the number of bits set
-// in a given bitboard
-int bitboard::pop_count(U64 b) const
+// in a given board
+int board::pop_count(U64 b)
 {
     if (b == 0)
     {
@@ -181,7 +181,28 @@ int bitboard::pop_count(U64 b) const
 
 }
 
-int bitboard::fr_to_board_index(const int file, const int rank)
+// returns the index of the least significant bit
+int board::bitscan_forward(U64 b)
+{
+    assert(b != 0);
+    const int debruijn_lookup[64] = {
+            0,  1, 48,  2, 57, 49, 28,  3,
+            61, 58, 50, 42, 38, 29, 17,  4,
+            62, 55, 59, 36, 53, 51, 43, 22,
+            45, 39, 33, 30, 24, 18, 12,  5,
+            63, 47, 56, 27, 60, 41, 37, 16,
+            54, 35, 52, 21, 44, 32, 23, 11,
+            46, 26, 40, 15, 34, 20, 31, 10,
+            25, 14, 19,  9, 13,  8,  7,  6
+    };
+
+    const U64 db = 0x03f79d71b4cb0a89ULL;
+    return debruijn_lookup[((b & ~b) * db) >> 58ULL];
+}
+
+// converts file, rank 2D board indexing
+// to 1d index in [0, 64)
+int board::fr_to_board_index(const int file, const int rank)
 {
     return 8 * rank + file;
 }

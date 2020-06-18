@@ -1,12 +1,12 @@
 //
 // Created by Amogh on 3/29/20.
 //
-#include "../include/bitboard.hpp"
+#include "board.hpp"
 
 
 int main()
 {
-    bitboard bb;
+    board bb;
     bb.print();
 
     return 0;

@@ -2,8 +2,8 @@
 // Created by Amogh on 3/29/20.
 //
 
-#ifndef DIOGENES_BITBOARD_HPP
-#define DIOGENES_BITBOARD_HPP
+#ifndef DIOGENES_BOARD_HPP
+#define DIOGENES_BOARD_HPP
 
 
 #include <cstdint>
@@ -12,10 +12,10 @@
 #include "stds.hpp"
 
 
-class bitboard
+class board
 {
 public:
-    bitboard();
+    board();
     void print() const;
 
     U64 get_white_pawns() const;
@@ -37,7 +37,7 @@ public:
     bool game_over;
 
 private:
-    // piece bitboard sets
+    // piece board sets
     U64 pawns[3];
     U64 bishops[3];
     U64 knights[3];
@@ -54,10 +54,10 @@ private:
     bool can_black_castle;
     bool can_white_castle;
 
-    // helper functions
-    int pop_count(U64 b) const;
+    static int pop_count(U64 b);
+    static int bitscan_forward(U64 b);
 
     static int fr_to_board_index(const int file, const int rank);
 };
 
-#endif //DIOGENES_BITBOARD_HPP
+#endif //DIOGENES_BOARD_HPP
