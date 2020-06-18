@@ -149,6 +149,38 @@ void bitboard::print() const
     }
 }
 
+// function to calculate the number of bits set
+// in a given bitboard
+int bitboard::pop_count(U64 b) const
+{
+    if (b == 0)
+    {
+        return 0;
+    }
+    else if (b & (b - 1) == 0)
+    {
+        return 1;
+    }
+    else
+    {
+        // SWAR popcount
+        const U64 k1 = 0x5555555555555555ULL;
+        const U64 k2 = 0x3333333333333333ULL;
+        const U64 k4 = 0x0f0f0f0f0f0f0f0fULL;
+        const U64 kf = 0x0101010101010101ULL;
+
+        U64 x;
+        x = b - (b >> 1ULL) & k1;
+        x = (x & k2) + ((x >> 2ULL) & k2);
+        x = x + ((x >> 4ULL) & k4);
+        x = (x * kf) >> 56ULL;
+        return (int) x;
+
+
+    }
+
+}
+
 int bitboard::fr_to_board_index(const int file, const int rank)
 {
     return 8 * rank + file;
