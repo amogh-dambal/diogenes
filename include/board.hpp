@@ -48,16 +48,32 @@ private:
     U64 occupied_squares;
     U64 empty_squares;
 
+    // attack sets
+    U64 knight_attacks[64];
+
     // game state booleans
     bool is_black_in_check;
     bool is_white_in_check;
     bool can_black_castle;
     bool can_white_castle;
 
+    // helper bitboard functions
     static int pop_count(U64 b);
     static int bitscan_forward(U64 b);
 
-    static int fr_to_board_index(const int file, const int rank);
+    // shifts
+    static U64 east(U64 b);
+    static U64 west(U64 b);
+    static U64 north(U64 b);
+    static U64 south(U64 b);
+    static U64 northeast(U64 b);
+    static U64 southeast(U64 b);
+    static U64 northwest(U64 b);
+    static U64 southwest(U64 b);
+
+    static int fr_to_board_index(int file, int rank);
+
+    void knight_fill(U64 ksq);
 };
 
 #endif //DIOGENES_BOARD_HPP

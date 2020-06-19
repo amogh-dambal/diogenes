@@ -4,8 +4,13 @@
 
 #include "board.hpp"
 
-board::board() : ply(0), side_to_move(Color::WHITE), is_black_in_check(false),
-                 is_white_in_check(false), can_black_castle(true), can_white_castle(true), game_over(false)
+board::board() :
+ply(0), side_to_move(Color::WHITE),
+is_black_in_check(false),
+is_white_in_check(false),
+can_black_castle(true),
+can_white_castle(true),
+game_over(false)
 {
     // white pieces
     pawns[Color::WHITE] = 0xff00;
@@ -16,12 +21,12 @@ board::board() : ply(0), side_to_move(Color::WHITE), is_black_in_check(false),
     kings[Color::WHITE] = 0x10;
 
     // black pieces
-    pawns[Color::BLACK] = pawns[Color::WHITE] << 40;
-    knights[Color::BLACK] = knights[Color::WHITE] << 56;
-    bishops[Color::BLACK] = bishops[Color::WHITE] << 56;
-    rooks[Color::BLACK] = rooks[Color::WHITE] << 56;
-    queens[Color::BLACK] = queens[Color::WHITE] << 56;
-    kings[Color::BLACK] = kings[Color::WHITE] << 56;
+    pawns[Color::BLACK] = pawns[Color::WHITE] << 40ULL;
+    knights[Color::BLACK] = knights[Color::WHITE] << 56ULL;
+    bishops[Color::BLACK] = bishops[Color::WHITE] << 56ULL;
+    rooks[Color::BLACK] = rooks[Color::WHITE] << 56ULL;
+    queens[Color::BLACK] = queens[Color::WHITE] << 56ULL;
+    kings[Color::BLACK] = kings[Color::WHITE] << 56ULL;
 
     // both pieces
     pawns[Color::BOTH] = pawns[Color::WHITE] | pawns[Color::BLACK];
@@ -37,6 +42,13 @@ board::board() : ply(0), side_to_move(Color::WHITE), is_black_in_check(false),
 
     // attack sets
 
+    // knight attacks
+    U64 csq;
+    for (unsigned int sq = Board::Square::a1; sq <= Board::Square::h8; sq++)
+    {
+        csq = 1ULL << sq;
+        knight_fill(csq);
+    }
 }
 
 U64 board::get_white_pawns() const
@@ -99,54 +111,24 @@ U64 board::get_black_kings() const
     return this->kings[Color::BLACK];
 }
 
-void board::print() const
+void board::knight_fill(const U64 ksq)
 {
-    Board::PieceChar pieces[Board::SQUARES];
+    U64 e, w;
+    e = east(ksq);
+    w = west(ksq);
 
-    // build CLI text representation
-    for (unsigned int i = 0; i < Board::SQUARES; ++i)
-    {
-        U64 k = 1ULL << i;
-        if (k & pawns[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::PAWN;
-        }
-        else if (k & knights[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::KNIGHT;
-        }
-        else if (k & bishops[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::BISHOP;
-        }
-        else if (k & rooks[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::ROOK;
-        }
-        else if (k & queens[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::QUEEN;
-        }
-        else if (k & kings[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::KING;
-        }
-        else
-        {
-            pieces[i] = Board::PieceChar::EMPTY;
-        }
-    }
+    knight_attacks[ksq] |= (e << (unsigned)( 2 * Board::Direction::N));
+    knight_attacks[ksq] |= (e >> (unsigned)(-2 * Board::Direction::S));
+    knight_attacks[ksq] |= (w << (unsigned)( 2 * Board::Direction::N));
+    knight_attacks[ksq] |= (w >> (unsigned)(-2 * Board::Direction::S));
 
-    // output it in the correct format
-    for (int rank = Rank::EIGHT; rank >= Rank::ONE; --rank)
-    {
-        for (int file = File::A; file <= File::H; ++file)
-        {
-            const int index = fr_to_board_index(file, rank);
-            std::cout << pieces[index] << "\t";
-        }
-        std::cout << std::endl;
-    }
+    e = east(e);
+    w = west(w);
+
+    knight_attacks[ksq] |= north(e);
+    knight_attacks[ksq] |= south(e);
+    knight_attacks[ksq] |= north(w);
+    knight_attacks[ksq] |= south(w);
 }
 
 // function to calculate the number of bits set
@@ -200,9 +182,110 @@ int board::bitscan_forward(U64 b)
     return debruijn_lookup[((b & ~b) * db) >> 58ULL];
 }
 
+// helper shift functions
+U64 board::north(const U64 b)
+{
+    unsigned int shift = Board::Direction::N;
+    return b << shift;
+}
+
+U64 board::northeast(const U64 b)
+{
+    unsigned int shift = Board::Direction::NE;
+    return (b << shift) & Board::not_a_file;
+}
+
+U64 board::east(const U64 b)
+{
+    unsigned int shift = Board::Direction::E;
+    return (b << shift) & Board::not_a_file;
+}
+
+U64 board::southeast(const U64 b)
+{
+    unsigned int shift = -Board::Direction::SE;
+    return (b >> shift) & Board::not_a_file;
+}
+
+U64 board::south(const U64 b)
+{
+    unsigned int shift = -Board::Direction::S;
+    return b >> shift;
+}
+
+U64 board::southwest(const U64 b)
+{
+    unsigned int shift = -Board::Direction::SW;
+    return (b >> shift) & Board::not_h_file;
+}
+
+U64 board::west(const U64 b)
+{
+    unsigned int shift = -Board::Direction::W;
+    return (b >> shift) & Board::not_h_file;
+}
+
+U64 board::northwest(const U64 b)
+{
+    unsigned int shift = Board::Direction::NW;
+    return (b << shift) & Board::not_h_file;
+}
+
 // converts file, rank 2D board indexing
 // to 1d index in [0, 64)
 int board::fr_to_board_index(const int file, const int rank)
 {
     return 8 * rank + file;
+}
+
+// helper function to output text
+// representation of the board
+void board::print() const
+{
+    Board::PieceChar pieces[Board::SQUARES];
+
+    // build CLI text representation
+    for (unsigned int i = 0; i < Board::SQUARES; ++i)
+    {
+        U64 k = 1ULL << i;
+        if (k & pawns[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::PAWN;
+        }
+        else if (k & knights[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::KNIGHT;
+        }
+        else if (k & bishops[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::BISHOP;
+        }
+        else if (k & rooks[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::ROOK;
+        }
+        else if (k & queens[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::QUEEN;
+        }
+        else if (k & kings[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::KING;
+        }
+        else
+        {
+            pieces[i] = Board::PieceChar::EMPTY;
+        }
+    }
+
+    // output it in the correct format
+    for (int rank = Rank::EIGHT; rank >= Rank::ONE; --rank)
+    {
+        for (int file = File::A; file <= File::H; ++file)
+        {
+            const int index = fr_to_board_index(file, rank);
+            std::cout << pieces[index] << "\t";
+        }
+        std::cout << std::endl;
+    }
 }
