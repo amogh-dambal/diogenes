@@ -49,6 +49,7 @@ game_over(false)
         piece_pos = 1ULL << sq;
         knight_fill(piece_pos, sq);
         king_fill(piece_pos, sq);
+        pawn_fill(piece_pos, sq);
     }
 
 }
@@ -150,6 +151,16 @@ U64 board::get_king_attacks(Board::Square sq) const
     return king_attacks[sq];
 }
 
+U64 board::get_white_pawn_attacks(Board::Square sq) const
+{
+    return white_pawn_attacks[sq];
+}
+
+U64 board::get_black_pawn_attacks(Board::Square sq) const
+{
+    return black_pawn_attacks[sq];
+}
+
 void board::knight_fill(const U64 kpos, const int ksq)
 {
     // set mem to 0
@@ -178,6 +189,15 @@ void board::king_fill(const U64 kpos, const int ksq)
     // set mem to 0
     king_attacks[ksq] =     east(kpos) | west(kpos) | north(kpos) | south(kpos);
     king_attacks[ksq] |=    northeast(kpos) | northwest(kpos) | southeast(kpos) | southwest(kpos);
+}
+
+void board::pawn_fill(const U64 ppos, const int psq)
+{
+    // white pawn attacks
+    white_pawn_attacks[psq] = northeast(ppos) | northwest(ppos);
+
+    // black pawns
+    black_pawn_attacks[psq] = southeast(ppos) | southwest(ppos);
 }
 
 // function to calculate the number of bits set

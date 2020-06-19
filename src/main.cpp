@@ -9,10 +9,10 @@ int main()
     board bb;
     // attack sets
     std::cout << std::endl;
-    std::cout << "Testing king attack sets" << std::endl;
-    for (int sq = Board::Square::a1; sq <= Board::Square::h8; sq++)
+    std::cout << "Testing pawn attack sets" << std::endl;
+    for (int sq = Board::Square::b1; sq <= Board::Square::g8; sq++)
     {
-        board::print_bitboard(bb.get_king_attacks((Board::Square)sq));
+        board::print_bitboard(bb.get_black_pawn_attacks((Board::Square)sq));
         std::cout << std::endl;
     }
     return 0;

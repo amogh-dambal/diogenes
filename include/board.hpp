@@ -35,6 +35,8 @@ public:
 
     U64 get_knight_attacks(Board::Square sq) const;
     U64 get_king_attacks(Board::Square sq) const;
+    U64 get_white_pawn_attacks(Board::Square sq) const;
+    U64 get_black_pawn_attacks(Board::Square sq) const;
 
     Color::Value side_to_move;
     int ply;
@@ -55,6 +57,8 @@ private:
     // attack sets
     U64 knight_attacks[64];
     U64 king_attacks[64];
+    U64 black_pawn_attacks[64];
+    U64 white_pawn_attacks[64];
 
     // game state booleans
     bool is_black_in_check;
@@ -80,6 +84,7 @@ private:
 
     void knight_fill(U64 kpos, int sq);
     void king_fill(U64 kpos, int sq);
+    void pawn_fill(U64 ppos, int sq);
 };
 
 #endif //DIOGENES_BOARD_HPP
