@@ -188,7 +188,7 @@ int board::pop_count(U64 b)
     {
         return 0;
     }
-    else if (b & (b - 1) == 0)
+    else if ((b & (b - 1)) == 0)
     {
         return 1;
     }
