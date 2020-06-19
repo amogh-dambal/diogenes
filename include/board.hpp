@@ -17,6 +17,7 @@ class board
 public:
     board();
     void print() const;
+    static void print_bitboard(U64 bb);
 
     U64 get_white_pawns() const;
     U64 get_white_knights() const;
@@ -31,6 +32,9 @@ public:
     U64 get_black_rooks() const;
     U64 get_black_queens() const;
     U64 get_black_kings() const;
+
+    U64 get_knight_attacks(Board::Square sq) const;
+    U64 get_king_attacks(Board::Square sq) const;
 
     Color::Value side_to_move;
     int ply;
@@ -50,6 +54,7 @@ private:
 
     // attack sets
     U64 knight_attacks[64];
+    U64 king_attacks[64];
 
     // game state booleans
     bool is_black_in_check;
@@ -73,7 +78,8 @@ private:
 
     static int fr_to_board_index(int file, int rank);
 
-    void knight_fill(U64 ksq);
+    void knight_fill(U64 kpos, int sq);
+    void king_fill(U64 kpos, int sq);
 };
 
 #endif //DIOGENES_BOARD_HPP

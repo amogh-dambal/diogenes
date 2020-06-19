@@ -7,7 +7,13 @@
 int main()
 {
     board bb;
-    bb.print();
-
+    // attack sets
+    std::cout << std::endl;
+    std::cout << "Testing king attack sets" << std::endl;
+    for (int sq = Board::Square::a1; sq <= Board::Square::h8; sq++)
+    {
+        board::print_bitboard(bb.get_king_attacks((Board::Square)sq));
+        std::cout << std::endl;
+    }
     return 0;
 }

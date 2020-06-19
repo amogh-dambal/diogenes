@@ -42,12 +42,41 @@ game_over(false)
 
     // attack sets
 
-    // knight attacks
-    U64 csq;
-    for (unsigned int sq = Board::Square::a1; sq <= Board::Square::h8; sq++)
+    // knight and king attacks
+    U64 piece_pos;
+    for (int sq = Board::Square::a1; sq <= Board::Square::h8; ++sq)
     {
-        csq = 1ULL << sq;
-        knight_fill(csq);
+        piece_pos = 1ULL << sq;
+        knight_fill(piece_pos, sq);
+        king_fill(piece_pos, sq);
+    }
+
+}
+
+void board::print_bitboard(const U64 bb)
+{
+    char pieces[Board::SQUARES];
+    U64 k;
+    for (unsigned int i = 0; i < 64; ++i)
+    {
+        k = 1ULL << i;
+        if (k & bb)
+        {
+            pieces[i] = '1';
+        }
+        else
+        {
+            pieces[i] = '0';
+        }
+    }
+    for (int rank = Rank::EIGHT; rank >= Rank::ONE; --rank)
+    {
+        for (int file = File::A; file <= File::H; ++file)
+        {
+            const int index = fr_to_board_index(file, rank);
+            std::cout << pieces[index] << "\t";
+        }
+        std::cout << std::endl;
     }
 }
 
@@ -111,16 +140,29 @@ U64 board::get_black_kings() const
     return this->kings[Color::BLACK];
 }
 
-void board::knight_fill(const U64 ksq)
+U64 board::get_knight_attacks(Board::Square sq) const
 {
-    U64 e, w;
-    e = east(ksq);
-    w = west(ksq);
+    return knight_attacks[sq];
+}
 
-    knight_attacks[ksq] |= (e << (unsigned)( 2 * Board::Direction::N));
-    knight_attacks[ksq] |= (e >> (unsigned)(-2 * Board::Direction::S));
-    knight_attacks[ksq] |= (w << (unsigned)( 2 * Board::Direction::N));
-    knight_attacks[ksq] |= (w >> (unsigned)(-2 * Board::Direction::S));
+U64 board::get_king_attacks(Board::Square sq) const
+{
+    return king_attacks[sq];
+}
+
+void board::knight_fill(const U64 kpos, const int ksq)
+{
+    // set mem to 0
+    knight_attacks[ksq] = 0;
+
+    U64 e, w;
+    e = east(kpos);
+    w = west(kpos);
+
+    knight_attacks[ksq] |= north(north(e));
+    knight_attacks[ksq] |= south(south(e));
+    knight_attacks[ksq] |= north(north(w));
+    knight_attacks[ksq] |= south(south(w));
 
     e = east(e);
     w = west(w);
@@ -129,6 +171,13 @@ void board::knight_fill(const U64 ksq)
     knight_attacks[ksq] |= south(e);
     knight_attacks[ksq] |= north(w);
     knight_attacks[ksq] |= south(w);
+}
+
+void board::king_fill(const U64 kpos, const int ksq)
+{
+    // set mem to 0
+    king_attacks[ksq] =     east(kpos) | west(kpos) | north(kpos) | south(kpos);
+    king_attacks[ksq] |=    northeast(kpos) | northwest(kpos) | southeast(kpos) | southwest(kpos);
 }
 
 // function to calculate the number of bits set
@@ -242,7 +291,7 @@ int board::fr_to_board_index(const int file, const int rank)
 // representation of the board
 void board::print() const
 {
-    Board::PieceChar pieces[Board::SQUARES];
+    char pieces[Board::SQUARES];
 
     // build CLI text representation
     for (unsigned int i = 0; i < Board::SQUARES; ++i)
