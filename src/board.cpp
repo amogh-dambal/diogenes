@@ -3,6 +3,8 @@
 //
 
 #include "board.hpp"
+#include "bitboard.hpp"
+#include "utils.hpp"
 
 board::board() :
 ply(0), side_to_move(Color::WHITE),
@@ -41,8 +43,6 @@ game_over(false)
     empty_squares = ~occupied_squares;
 
     // attack sets
-
-    // knight and king attacks
     U64 piece_pos;
     for (int sq = Board::Square::a1; sq <= Board::Square::h8; ++sq)
     {
@@ -54,32 +54,7 @@ game_over(false)
 
 }
 
-void board::print_bitboard(const U64 bb)
-{
-    char pieces[Board::SQUARES];
-    U64 k;
-    for (unsigned int i = 0; i < 64; ++i)
-    {
-        k = 1ULL << i;
-        if (k & bb)
-        {
-            pieces[i] = '1';
-        }
-        else
-        {
-            pieces[i] = '0';
-        }
-    }
-    for (int rank = Rank::EIGHT; rank >= Rank::ONE; --rank)
-    {
-        for (int file = File::A; file <= File::H; ++file)
-        {
-            const int index = fr_to_board_index(file, rank);
-            std::cout << pieces[index] << "\t";
-        }
-        std::cout << std::endl;
-    }
-}
+
 
 U64 board::get_white_pawns() const
 {
@@ -167,144 +142,36 @@ void board::knight_fill(const U64 kpos, const int ksq)
     knight_attacks[ksq] = 0;
 
     U64 e, w;
-    e = east(kpos);
-    w = west(kpos);
+    e = bitboard::east(kpos);
+    w = bitboard::west(kpos);
 
-    knight_attacks[ksq] |= north(north(e));
-    knight_attacks[ksq] |= south(south(e));
-    knight_attacks[ksq] |= north(north(w));
-    knight_attacks[ksq] |= south(south(w));
+    knight_attacks[ksq] |= bitboard::north(bitboard::north(e));
+    knight_attacks[ksq] |= bitboard::south(bitboard::south(e));
+    knight_attacks[ksq] |= bitboard::north(bitboard::north(w));
+    knight_attacks[ksq] |= bitboard::south(bitboard::south(w));
 
-    e = east(e);
-    w = west(w);
+    e = bitboard::east(e);
+    w = bitboard::west(w);
 
-    knight_attacks[ksq] |= north(e);
-    knight_attacks[ksq] |= south(e);
-    knight_attacks[ksq] |= north(w);
-    knight_attacks[ksq] |= south(w);
+    knight_attacks[ksq] |= bitboard::north(e);
+    knight_attacks[ksq] |= bitboard::south(e);
+    knight_attacks[ksq] |= bitboard::north(w);
+    knight_attacks[ksq] |= bitboard::south(w);
 }
 
 void board::king_fill(const U64 kpos, const int ksq)
 {
-    // set mem to 0
-    king_attacks[ksq] =     east(kpos) | west(kpos) | north(kpos) | south(kpos);
-    king_attacks[ksq] |=    northeast(kpos) | northwest(kpos) | southeast(kpos) | southwest(kpos);
+    king_attacks[ksq] =     bitboard::east(kpos) | bitboard::west(kpos) | bitboard::north(kpos) | bitboard::south(kpos);
+    king_attacks[ksq] |=    bitboard::northeast(kpos) | bitboard::northwest(kpos) | bitboard::southeast(kpos) | bitboard::southwest(kpos);
 }
 
 void board::pawn_fill(const U64 ppos, const int psq)
 {
     // white pawn attacks
-    white_pawn_attacks[psq] = northeast(ppos) | northwest(ppos);
+    white_pawn_attacks[psq] = bitboard::northeast(ppos) | bitboard::northwest(ppos);
 
     // black pawns
-    black_pawn_attacks[psq] = southeast(ppos) | southwest(ppos);
-}
-
-// function to calculate the number of bits set
-// in a given board
-int board::pop_count(U64 b)
-{
-    if (b == 0)
-    {
-        return 0;
-    }
-    else if ((b & (b - 1)) == 0)
-    {
-        return 1;
-    }
-    else
-    {
-        // SWAR popcount
-        const U64 k1 = 0x5555555555555555ULL;
-        const U64 k2 = 0x3333333333333333ULL;
-        const U64 k4 = 0x0f0f0f0f0f0f0f0fULL;
-        const U64 kf = 0x0101010101010101ULL;
-
-        U64 x;
-        x = b - (b >> 1ULL) & k1;
-        x = (x & k2) + ((x >> 2ULL) & k2);
-        x = x + ((x >> 4ULL) & k4);
-        x = (x * kf) >> 56ULL;
-        return (int) x;
-
-
-    }
-
-}
-
-// returns the index of the least significant bit
-int board::bitscan_forward(U64 b)
-{
-    assert(b != 0);
-    const int debruijn_lookup[64] = {
-            0,  1, 48,  2, 57, 49, 28,  3,
-            61, 58, 50, 42, 38, 29, 17,  4,
-            62, 55, 59, 36, 53, 51, 43, 22,
-            45, 39, 33, 30, 24, 18, 12,  5,
-            63, 47, 56, 27, 60, 41, 37, 16,
-            54, 35, 52, 21, 44, 32, 23, 11,
-            46, 26, 40, 15, 34, 20, 31, 10,
-            25, 14, 19,  9, 13,  8,  7,  6
-    };
-
-    const U64 db = 0x03f79d71b4cb0a89ULL;
-    return debruijn_lookup[((b & ~b) * db) >> 58ULL];
-}
-
-// helper shift functions
-U64 board::north(const U64 b)
-{
-    unsigned int shift = Board::Direction::N;
-    return b << shift;
-}
-
-U64 board::northeast(const U64 b)
-{
-    unsigned int shift = Board::Direction::NE;
-    return (b << shift) & Board::not_a_file;
-}
-
-U64 board::east(const U64 b)
-{
-    unsigned int shift = Board::Direction::E;
-    return (b << shift) & Board::not_a_file;
-}
-
-U64 board::southeast(const U64 b)
-{
-    unsigned int shift = -Board::Direction::SE;
-    return (b >> shift) & Board::not_a_file;
-}
-
-U64 board::south(const U64 b)
-{
-    unsigned int shift = -Board::Direction::S;
-    return b >> shift;
-}
-
-U64 board::southwest(const U64 b)
-{
-    unsigned int shift = -Board::Direction::SW;
-    return (b >> shift) & Board::not_h_file;
-}
-
-U64 board::west(const U64 b)
-{
-    unsigned int shift = -Board::Direction::W;
-    return (b >> shift) & Board::not_h_file;
-}
-
-U64 board::northwest(const U64 b)
-{
-    unsigned int shift = Board::Direction::NW;
-    return (b << shift) & Board::not_h_file;
-}
-
-// converts file, rank 2D board indexing
-// to 1d index in [0, 64)
-int board::fr_to_board_index(const int file, const int rank)
-{
-    return 8 * rank + file;
+    black_pawn_attacks[psq] = bitboard::southeast(ppos) | bitboard::southwest(ppos);
 }
 
 // helper function to output text
@@ -352,7 +219,7 @@ void board::print() const
     {
         for (int file = File::A; file <= File::H; ++file)
         {
-            const int index = fr_to_board_index(file, rank);
+            const int index = util::fr_to_board_index(file, rank);
             std::cout << pieces[index] << "\t";
         }
         std::cout << std::endl;

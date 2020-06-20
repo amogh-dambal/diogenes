@@ -17,7 +17,6 @@ class board
 public:
     board();
     void print() const;
-    static void print_bitboard(U64 bb);
 
     U64 get_white_pawns() const;
     U64 get_white_knights() const;
@@ -65,22 +64,6 @@ private:
     bool is_white_in_check;
     bool can_black_castle;
     bool can_white_castle;
-
-    // helper bitboard functions
-    static int pop_count(U64 b);
-    static int bitscan_forward(U64 b);
-
-    // shifts
-    static U64 east(U64 b);
-    static U64 west(U64 b);
-    static U64 north(U64 b);
-    static U64 south(U64 b);
-    static U64 northeast(U64 b);
-    static U64 southeast(U64 b);
-    static U64 northwest(U64 b);
-    static U64 southwest(U64 b);
-
-    static int fr_to_board_index(int file, int rank);
 
     void knight_fill(U64 kpos, int sq);
     void king_fill(U64 kpos, int sq);
