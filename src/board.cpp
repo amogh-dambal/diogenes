@@ -6,6 +6,7 @@
 #include "bitboard.hpp"
 #include "utils.hpp"
 
+/* CONSTRUCTOR */
 board::board() :
 ply(0), side_to_move(Color::WHITE),
 is_black_in_check(false),
@@ -54,8 +55,7 @@ game_over(false)
 
 }
 
-
-
+/* PUBLIC FUNCTIONS */
 U64 board::get_white_pawns() const
 {
     return this->pawns[Color::WHITE];
@@ -136,46 +136,15 @@ U64 board::get_black_pawn_attacks(Board::Square sq) const
     return black_pawn_attacks[sq];
 }
 
-void board::knight_fill(const U64 kpos, const int ksq)
-{
-    // set mem to 0
-    knight_attacks[ksq] = 0;
-
-    U64 e, w;
-    e = bitboard::east(kpos);
-    w = bitboard::west(kpos);
-
-    knight_attacks[ksq] |= bitboard::north(bitboard::north(e));
-    knight_attacks[ksq] |= bitboard::south(bitboard::south(e));
-    knight_attacks[ksq] |= bitboard::north(bitboard::north(w));
-    knight_attacks[ksq] |= bitboard::south(bitboard::south(w));
-
-    e = bitboard::east(e);
-    w = bitboard::west(w);
-
-    knight_attacks[ksq] |= bitboard::north(e);
-    knight_attacks[ksq] |= bitboard::south(e);
-    knight_attacks[ksq] |= bitboard::north(w);
-    knight_attacks[ksq] |= bitboard::south(w);
-}
-
-void board::king_fill(const U64 kpos, const int ksq)
-{
-    king_attacks[ksq] =     bitboard::east(kpos) | bitboard::west(kpos) | bitboard::north(kpos) | bitboard::south(kpos);
-    king_attacks[ksq] |=    bitboard::northeast(kpos) | bitboard::northwest(kpos) | bitboard::southeast(kpos) | bitboard::southwest(kpos);
-}
-
-void board::pawn_fill(const U64 ppos, const int psq)
-{
-    // white pawn attacks
-    white_pawn_attacks[psq] = bitboard::northeast(ppos) | bitboard::northwest(ppos);
-
-    // black pawns
-    black_pawn_attacks[psq] = bitboard::southeast(ppos) | bitboard::southwest(ppos);
-}
-
-// helper function to output text
-// representation of the board
+/**
+ * function to print the chessboard in its current state
+ * each piece is represented with a unique piece char, while
+ * empty squares are represented with a unique 'empty' char
+ * the definitions of these special characters can be found
+ * in stds.hpp, board::piecechar
+ * @param: None
+ * @return: void
+ */
 void board::print() const
 {
     char pieces[Board::SQUARES];
@@ -224,4 +193,43 @@ void board::print() const
         }
         std::cout << std::endl;
     }
+}
+
+/* PRIVATE FUNCTIONS */
+void board::knight_fill(const U64 kpos, const int ksq)
+{
+    // set mem to 0
+    knight_attacks[ksq] = 0;
+
+    U64 e, w;
+    e = bitboard::east(kpos);
+    w = bitboard::west(kpos);
+
+    knight_attacks[ksq] |= bitboard::north(bitboard::north(e));
+    knight_attacks[ksq] |= bitboard::south(bitboard::south(e));
+    knight_attacks[ksq] |= bitboard::north(bitboard::north(w));
+    knight_attacks[ksq] |= bitboard::south(bitboard::south(w));
+
+    e = bitboard::east(e);
+    w = bitboard::west(w);
+
+    knight_attacks[ksq] |= bitboard::north(e);
+    knight_attacks[ksq] |= bitboard::south(e);
+    knight_attacks[ksq] |= bitboard::north(w);
+    knight_attacks[ksq] |= bitboard::south(w);
+}
+
+void board::king_fill(const U64 kpos, const int ksq)
+{
+    king_attacks[ksq] =     bitboard::east(kpos) | bitboard::west(kpos) | bitboard::north(kpos) | bitboard::south(kpos);
+    king_attacks[ksq] |=    bitboard::northeast(kpos) | bitboard::northwest(kpos) | bitboard::southeast(kpos) | bitboard::southwest(kpos);
+}
+
+void board::pawn_fill(const U64 ppos, const int psq)
+{
+    // white pawn attacks
+    white_pawn_attacks[psq] = bitboard::northeast(ppos) | bitboard::northwest(ppos);
+
+    // black pawns
+    black_pawn_attacks[psq] = bitboard::southeast(ppos) | bitboard::southwest(ppos);
 }

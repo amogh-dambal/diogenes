@@ -6,7 +6,6 @@
 
 int main()
 {
-    board bb;
 
     return 0;
 }
