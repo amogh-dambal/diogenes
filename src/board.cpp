@@ -51,6 +51,7 @@ game_over(false)
         knight_fill(piece_pos, sq);
         king_fill(piece_pos, sq);
         pawn_fill(piece_pos, sq);
+        rook_fill(piece_pos, sq);
     }
 
 }
@@ -134,6 +135,11 @@ U64 board::get_white_pawn_attacks(Board::Square sq) const
 U64 board::get_black_pawn_attacks(Board::Square sq) const
 {
     return black_pawn_attacks[sq];
+}
+
+U64 board::get_rook_attacks(Board::Square sq) const
+{
+    return rook_attacks[sq];
 }
 
 /**
@@ -232,4 +238,18 @@ void board::pawn_fill(const U64 ppos, const int psq)
 
     // black pawns
     black_pawn_attacks[psq] = bitboard::southeast(ppos) | bitboard::southwest(ppos);
+}
+
+void board::rook_fill(const U64 rpos, const int rsq)
+{
+    rook_attacks[rsq] = (
+            bitboard::fill_north(rpos)  |
+            bitboard::fill_south(rpos)  |
+            bitboard::fill_east(rpos)   |
+            bitboard::fill_west(rpos)
+    );
+
+    // exclude square piece is on
+    // from the attack set
+    rook_attacks[rsq] ^= rpos;
 }

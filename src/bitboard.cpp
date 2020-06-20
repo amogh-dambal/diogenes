@@ -53,8 +53,57 @@ U64 bitboard::northwest(const U64 b)
     return (b << shift) & Board::not_h_file;
 }
 
-// function to calculate the number of bits set
-// in a given board
+// fill algorithm functions
+U64 bitboard::fill_north(const U64 b)
+{
+    U64 filled = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        filled |= (filled << (unsigned)Board::Direction::N);
+    }
+    return filled;
+}
+
+U64 bitboard::fill_south(const U64 b)
+{
+    U64 filled = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        filled |= (filled >> (unsigned)(-1 * Board::Direction::S));
+    }
+    return filled;
+}
+
+U64 bitboard::fill_east(const U64 b)
+{
+    U64 filled = b, t = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        t = (t << (unsigned)Board::Direction::E) & Board::not_a_file;
+        filled |= t;
+    }
+    return filled;
+}
+
+U64 bitboard::fill_west(const U64 b)
+{
+    U64 filled = b, t = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        t = (t >> (unsigned)(-1 * Board::Direction::W)) & Board::not_h_file;
+        filled |= t;
+    }
+    return filled;
+}
+/**
+ * function to calculate the number of bits
+ * set in a given word (bitboard)
+ * using the divide-and-conquer SWAR algorithm
+ * for population count
+ * @param b: the U64 type representing one bitboard
+ * @return integer value from 0-64 representing the
+ * number of bits set in b
+ */
 int bitboard::pop_count(U64 b)
 {
     if (b == 0)
@@ -85,7 +134,15 @@ int bitboard::pop_count(U64 b)
 
 }
 
-// returns the index of the least significant bit
+/**
+ * function to return the index of the LS1B
+ * (least significant one bit) in a bitboard, where
+ * 0 is the LS1B (2^0) and 63 is the MS1B (2^63)
+ * @param b: the U64 type representing one bitboard
+ * @return integer value i [0, 64] representing the index of
+ * the least significant bit, where i = 0 is the LSB
+ * and i = 63 is the MSB
+ */
 int bitboard::bitscan_forward(U64 b)
 {
     const int debruijn_lookup[64] = {
@@ -103,6 +160,11 @@ int bitboard::bitscan_forward(U64 b)
     return debruijn_lookup[((b & ~b) * db) >> 58ULL];
 }
 
+/**
+ * helper function to output a bitboard to the console
+ * in an 8x8 chessboard style, viewed from White's perspective
+ * @param bb the U64 type representing the chess board
+ */
 void bitboard::print_bitboard(const U64 bb)
 {
     char pieces[Board::SQUARES];

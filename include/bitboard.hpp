@@ -24,6 +24,13 @@ namespace bitboard
     U64 northwest(U64 b);
     U64 southwest(U64 b);
 
+    // Dumb7 fill algorithms to help generate
+    // sliding piece attacks
+    U64 fill_north(U64 b);
+    U64 fill_south(U64 b);
+    U64 fill_east(U64 b);
+    U64 fill_west(U64 b);
+
     // helper functions to deal with bitboard ops
     int pop_count(U64 b);
     int bitscan_forward(U64 b);
