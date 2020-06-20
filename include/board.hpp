@@ -35,8 +35,10 @@ public:
     U64 get_white_pawn_attacks(Board::Square sq) const;
     U64 get_black_pawn_attacks(Board::Square sq) const;
     U64 get_knight_attacks(Board::Square sq) const;
-    U64 get_king_attacks(Board::Square sq) const;
+    U64 get_bishop_attacks(Board::Square sq) const;
     U64 get_rook_attacks(Board::Square sq) const;
+    U64 get_queen_attacks(Board::Square sq) const;
+    U64 get_king_attacks(Board::Square sq) const;
 
     Color::Value side_to_move;
     int ply;
@@ -58,8 +60,11 @@ private:
     U64 black_pawn_attacks[64];
     U64 white_pawn_attacks[64];
     U64 knight_attacks[64];
+    U64 bishop_attacks[64];
     U64 rook_attacks[64];
+    U64 queen_attacks[64];
     U64 king_attacks[64];
+
 
     // game state booleans
     bool is_black_in_check;
@@ -71,6 +76,7 @@ private:
     void king_fill(U64 kpos, int sq);
     void pawn_fill(U64 ppos, int sq);
     void rook_fill(U64 rpos, int sq);
+    void bishop_fill(U64 bpos, int sq);
 };
 
 #endif //DIOGENES_BOARD_HPP

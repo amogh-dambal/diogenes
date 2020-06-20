@@ -43,15 +43,24 @@ game_over(false)
     occupied_squares = pawns[Color::BOTH] | knights[Color::BOTH] | bishops[Color::BOTH] | rooks[Color::BOTH] | queens[Color::BOTH] | kings[Color::BOTH];
     empty_squares = ~occupied_squares;
 
-    // attack sets
+    // generate attack sets
     U64 piece_pos;
     for (int sq = Board::Square::a1; sq <= Board::Square::h8; ++sq)
     {
+        // shift bit to mark piece as present in that square
         piece_pos = 1ULL << sq;
+
+        // use fill algorithms to compute lookup tables
+        // for attack sets of pieces
         knight_fill(piece_pos, sq);
         king_fill(piece_pos, sq);
         pawn_fill(piece_pos, sq);
         rook_fill(piece_pos, sq);
+        bishop_fill(piece_pos, sq);
+
+        // can use union of rooks and bishops to build queen
+        // attack sets - no need to repeat fills
+        queen_attacks[sq] = rook_attacks[sq] | bishop_attacks[sq];
     }
 
 }
@@ -140,6 +149,16 @@ U64 board::get_black_pawn_attacks(Board::Square sq) const
 U64 board::get_rook_attacks(Board::Square sq) const
 {
     return rook_attacks[sq];
+}
+
+U64 board::get_bishop_attacks(Board::Square sq) const
+{
+    return bishop_attacks[sq];
+}
+
+U64 board::get_queen_attacks(Board::Square sq) const
+{
+    return queen_attacks[sq];
 }
 
 /**
@@ -252,4 +271,16 @@ void board::rook_fill(const U64 rpos, const int rsq)
     // exclude square piece is on
     // from the attack set
     rook_attacks[rsq] ^= rpos;
+}
+
+void board::bishop_fill(const U64 bpos, const int bsq)
+{
+    bishop_attacks[bsq] = (
+            bitboard::fill_northeast(bpos) |
+            bitboard::fill_southeast(bpos) |
+            bitboard::fill_northwest(bpos) |
+            bitboard::fill_southwest(bpos)
+    );
+
+    bishop_attacks[bsq] ^= bpos;
 }

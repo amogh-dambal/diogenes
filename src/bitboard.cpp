@@ -14,19 +14,19 @@ U64 bitboard::north(const U64 b)
 U64 bitboard::northeast(const U64 b)
 {
     unsigned int shift = Board::Direction::NE;
-    return (b << shift) & Board::not_a_file;
+    return (b << shift) & Board::NOT_A_FILE;
 }
 
 U64 bitboard::east(const U64 b)
 {
     unsigned int shift = Board::Direction::E;
-    return (b << shift) & Board::not_a_file;
+    return (b << shift) & Board::NOT_A_FILE;
 }
 
 U64 bitboard::southeast(const U64 b)
 {
     unsigned int shift = -Board::Direction::SE;
-    return (b >> shift) & Board::not_a_file;
+    return (b >> shift) & Board::NOT_A_FILE;
 }
 
 U64 bitboard::south(const U64 b)
@@ -38,19 +38,19 @@ U64 bitboard::south(const U64 b)
 U64 bitboard::southwest(const U64 b)
 {
     unsigned int shift = -Board::Direction::SW;
-    return (b >> shift) & Board::not_h_file;
+    return (b >> shift) & Board::NOT_H_FILE;
 }
 
 U64 bitboard::west(const U64 b)
 {
     unsigned int shift = -Board::Direction::W;
-    return (b >> shift) & Board::not_h_file;
+    return (b >> shift) & Board::NOT_H_FILE;
 }
 
 U64 bitboard::northwest(const U64 b)
 {
     unsigned int shift = Board::Direction::NW;
-    return (b << shift) & Board::not_h_file;
+    return (b << shift) & Board::NOT_H_FILE;
 }
 
 // fill algorithm functions
@@ -79,7 +79,7 @@ U64 bitboard::fill_east(const U64 b)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t << (unsigned)Board::Direction::E) & Board::not_a_file;
+        t = (t << (unsigned)Board::Direction::E) & Board::NOT_A_FILE;
         filled |= t;
     }
     return filled;
@@ -90,11 +90,56 @@ U64 bitboard::fill_west(const U64 b)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t >> (unsigned)(-1 * Board::Direction::W)) & Board::not_h_file;
+        t = (t >> (unsigned)(-1 * Board::Direction::W)) & Board::NOT_H_FILE;
         filled |= t;
     }
     return filled;
 }
+
+U64 bitboard::fill_northeast(const U64 b)
+{
+    U64 filled = b, t = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        t = (t << (unsigned)(Board::Direction::NE)) & Board::NOT_A_FILE;
+        filled |= t;
+    }
+    return filled;
+}
+
+U64 bitboard::fill_southeast(const U64 b)
+{
+    U64 filled = b, t = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        t = (t >> (unsigned)(-1 * Board::Direction::SE)) & Board::NOT_A_FILE;
+        filled |= t;
+    }
+    return filled;
+}
+
+U64 bitboard::fill_northwest(const U64 b)
+{
+    U64 filled = b, t = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        t = (t << (unsigned)(Board::Direction::NW)) & Board::NOT_H_FILE;
+        filled |= t;
+    }
+    return filled;
+}
+
+U64 bitboard::fill_southwest(const U64 b)
+{
+    U64 filled = b, t = b;
+    for (int i = 0; i < 7; ++i)
+    {
+        t = (t >> (unsigned)(-1 * Board::Direction::SW)) & Board::NOT_H_FILE;
+        filled |= t;
+    }
+    return filled;
+}
+
 /**
  * function to calculate the number of bits
  * set in a given word (bitboard)

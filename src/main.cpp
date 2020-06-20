@@ -7,13 +7,15 @@
 
 int main()
 {
-    board b;
+board b;
 
-    for (int i = Board::Square::a1; i <= Board::Square::h8; ++i)
-    {
-        bitboard::print_bitboard(b.get_rook_attacks((Board::Square)i));
-        std::cout << std::endl;
-    }
+for (int i = Board::Square::a1; i <= Board::Square::h8; ++i)
+{
+    bitboard::print_bitboard(b.get_queen_attacks((Board::Square)i));
+    std::cout << std::endl;
+}
 
-    return 0;
+
+
+return 0;
 }

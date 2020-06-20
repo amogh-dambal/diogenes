@@ -113,17 +113,17 @@ namespace Board {
         KING = 'K'
     };
 
-    const U64 a_file =          0x0101010101010101;
-    const U64 h_file =          0x8080808080808080;
-    const U64 first_rank =      0x00000000000000ff;
-    const U64 eighth_rank =     0xff00000000000000;
-    const U64 a1_h8_diagonal =  0x8040201008040201;
-    const U64 h1_a8_diagonal =  0x0102040810204080;
-    const U64 light_squares =   0x55aa55aa55aa55aa;
-    const U64 dark_squares =    0xaa55aa55aa55aa55;
+    const U64 A_FILE =          0x0101010101010101;
+    const U64 H_FILE =          0x8080808080808080;
+    const U64 FIRST_RANK =      0x00000000000000ff;
+    const U64 EIGHTH_RANK =     0xff00000000000000;
+    const U64 A1_H8_DIAGONAL =  0x8040201008040201;
+    const U64 H1_A8_DIAGONAL =  0x0102040810204080;
+    const U64 LIGHT_SQUARES =   0x55aa55aa55aa55aa;
+    const U64 DARK_SQUARES =    0xaa55aa55aa55aa55;
 
-    const U64 not_a_file =      ~a_file;
-    const U64 not_h_file =      ~h_file;
+    const U64 NOT_A_FILE =      ~A_FILE;
+    const U64 NOT_H_FILE =      ~H_FILE;
 }
 
 
