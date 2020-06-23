@@ -9,8 +9,6 @@
 /* CONSTRUCTOR */
 board::board() :
 ply(0), side_to_move(Color::WHITE),
-is_black_in_check(false),
-is_white_in_check(false),
 can_black_castle(true),
 can_white_castle(true),
 game_over(false)
@@ -159,6 +157,18 @@ U64 board::get_bishop_attacks(Board::Square sq) const
 U64 board::get_queen_attacks(Board::Square sq) const
 {
     return queen_attacks[sq];
+}
+
+const bool board::is_white_in_check() const
+{
+    U64 white_king = kings[Color::WHITE];
+
+
+}
+
+const bool board::is_black_in_check() const
+{
+    U64 black_king = kings[Color::BLACK];
 }
 
 /**

@@ -40,6 +40,9 @@ public:
     U64 get_queen_attacks(Board::Square sq) const;
     U64 get_king_attacks(Board::Square sq) const;
 
+    const bool is_white_in_check() const;
+    const bool is_black_in_check() const;
+    
     Color::Value side_to_move;
     int ply;
     bool game_over;
@@ -56,7 +59,8 @@ private:
     U64 occupied_squares;
     U64 empty_squares;
 
-    // attack sets
+    // attack set lookup tables by square
+    // based on empty board
     U64 black_pawn_attacks[64];
     U64 white_pawn_attacks[64];
     U64 knight_attacks[64];
@@ -65,10 +69,7 @@ private:
     U64 queen_attacks[64];
     U64 king_attacks[64];
 
-
     // game state booleans
-    bool is_black_in_check;
-    bool is_white_in_check;
     bool can_black_castle;
     bool can_white_castle;
 

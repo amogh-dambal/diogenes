@@ -10,6 +10,11 @@
 class move
 {
 public:
+    move(Board::Piece p, Board::Square sq_f, Board::Square sq_t);
+
+    const Board::Piece piece() const;
+    const Board::Square from() const;
+    const Board::Square to() const;
 
 private:
     // what piece is it?

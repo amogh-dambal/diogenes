@@ -5,8 +5,9 @@
 #ifndef DIOGENES_BITBOARD_HPP
 #define DIOGENES_BITBOARD_HPP
 
-
 #include <iostream>
+#include <stdexcept>
+#include <vector>
 
 #include "stds.hpp"
 #include "utils.hpp"
@@ -38,6 +39,8 @@ namespace bitboard
     // helper functions to deal with bitboard ops
     int pop_count(U64 b);
     int bitscan_forward(U64 b);
+    int bitscan_reverse(U64 b);
+    std::vector<int> serialize(U64 b);
 
     // output a given bitboard
     void print_bitboard(U64 bb);

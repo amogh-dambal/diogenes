@@ -149,7 +149,7 @@ U64 bitboard::fill_southwest(const U64 b)
  * @return integer value from 0-64 representing the
  * number of bits set in b
  */
-int bitboard::pop_count(U64 b)
+int bitboard::pop_count(const U64 b)
 {
     if (b == 0)
     {
@@ -184,25 +184,101 @@ int bitboard::pop_count(U64 b)
  * (least significant one bit) in a bitboard, where
  * 0 is the LS1B (2^0) and 63 is the MS1B (2^63)
  * @param b: the U64 type representing one bitboard
+ * @pre b != 0
  * @return integer value i [0, 64] representing the index of
- * the least significant bit, where i = 0 is the LSB
- * and i = 63 is the MSB
+ * the least significant bit
+ * @throws std::invalid_argument exception
  */
-int bitboard::bitscan_forward(U64 b)
+int bitboard::bitscan_forward(const U64 b)
 {
+    if (b == 0)
+    {
+        throw std::invalid_argument("Error! Param b cannot be equal to 0.\n");
+    }
+
     const int debruijn_lookup[64] = {
-            0,  1, 48,  2, 57, 49, 28,  3,
-            61, 58, 50, 42, 38, 29, 17,  4,
-            62, 55, 59, 36, 53, 51, 43, 22,
-            45, 39, 33, 30, 24, 18, 12,  5,
-            63, 47, 56, 27, 60, 41, 37, 16,
-            54, 35, 52, 21, 44, 32, 23, 11,
-            46, 26, 40, 15, 34, 20, 31, 10,
-            25, 14, 19,  9, 13,  8,  7,  6
+        0, 47,  1, 56, 48, 27,  2, 60,
+        57, 49, 41, 37, 28, 16,  3, 61,
+        54, 58, 35, 52, 50, 42, 21, 44,
+        38, 32, 29, 23, 17, 11,  4, 62,
+        46, 55, 26, 59, 40, 36, 15, 53,
+        34, 51, 20, 43, 31, 22, 10, 45,
+        25, 39, 14, 33, 19, 30,  9, 24,
+        13, 18,  8, 12,  7,  6,  5, 63
     };
 
     const U64 db = 0x03f79d71b4cb0a89;
-    return debruijn_lookup[((b & ~b) * db) >> 58ULL];
+    return debruijn_lookup[((b ^ (b-1)) * db) >> 58ULL];
+}
+
+/**
+ * function to return the index of the MS1B
+ * (most significant one bit) in a bitboard,
+ * where 0 is the LS1B (2^0) and 63 is the
+ * MS1B (2^63)
+ * @author Kim Walisch, Mark Dickinson
+ * @param b: U64 type representing one bitboard
+ * @pre: b != 0
+ * @return integer value i [0, 64] representing
+ * the index of the most significant bit
+ * @throws std::invalid_argument exception
+ */
+int bitboard::bitscan_reverse(const U64 b)
+{
+    if (b == 0)
+    {
+        throw std::invalid_argument("Error! Param b cannot be equal to 0.\n");
+    }
+    const int debruijn_lookup[64] = {
+        0, 47,  1, 56, 48, 27,  2, 60,
+        57, 49, 41, 37, 28, 16,  3, 61,
+        54, 58, 35, 52, 50, 42, 21, 44,
+        38, 32, 29, 23, 17, 11,  4, 62,
+        46, 55, 26, 59, 40, 36, 15, 53,
+        34, 51, 20, 43, 31, 22, 10, 45,
+        25, 39, 14, 33, 19, 30,  9, 24,
+        13, 18,  8, 12,  7,  6,  5, 63
+    };
+
+    const U64 db = 0x03f79d71b4cb0a89;
+    U64 bb = b;
+
+    bb |= bb >> 1ULL;
+    bb |= bb >> 2ULL;
+    bb |= bb >> 4ULL;
+    bb |= bb >> 8ULL;
+    bb |= bb >> 16ULL;
+    bb |= bb >> 32ULL;
+
+    return debruijn_lookup[(bb * db) >> 58ULL];
+
+}
+
+/**
+ * function to convert set-centric bitboard representation
+ * to a list of indices [0-63] that have their bits set
+ * @param b: U64 type representing one bitboard to serialize
+ * @return std::vector of ints, where each int represents an
+ * index in the original bitboard with a set bit
+ * the vector is guaranteed to be sorted in ascending order
+ */
+std::vector<int> bitboard::serialize(const U64 b)
+{
+    U64 bitboard = b;
+
+    std::vector<int> squares;
+
+    int i;
+    while (bitboard != 0)
+    {
+        i = bitscan_forward(bitboard);
+        squares.push_back(i);
+
+        // reset LS1B
+        bitboard &= bitboard-1;
+    }
+
+    return squares;
 }
 
 /**
