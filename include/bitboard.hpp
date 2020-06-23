@@ -27,14 +27,14 @@ namespace bitboard
 
     // Dumb7 fill algorithms to help generate
     // sliding piece attacks
-    U64 fill_north(U64 b);
-    U64 fill_south(U64 b);
-    U64 fill_east(U64 b);
-    U64 fill_west(U64 b);
-    U64 fill_northeast(U64 b);
-    U64 fill_southeast(U64 b);
-    U64 fill_northwest(U64 b);
-    U64 fill_southwest(U64 b);
+    U64 fill_north(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 fill_south(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 fill_east(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 fill_west(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 fill_northeast(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 fill_southeast(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 fill_northwest(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 fill_southwest(U64 b, U64 empty=Board::ALL_SQUARES);
 
     // helper functions to deal with bitboard ops
     int pop_count(U64 b);

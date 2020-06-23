@@ -32,13 +32,13 @@ public:
     U64 get_black_queens() const;
     U64 get_black_kings() const;
 
-    U64 get_white_pawn_attacks(Board::Square sq) const;
-    U64 get_black_pawn_attacks(Board::Square sq) const;
-    U64 get_knight_attacks(Board::Square sq) const;
-    U64 get_bishop_attacks(Board::Square sq) const;
-    U64 get_rook_attacks(Board::Square sq) const;
-    U64 get_queen_attacks(Board::Square sq) const;
-    U64 get_king_attacks(Board::Square sq) const;
+    U64 get_white_pawn_targets(Board::Square sq) const;
+    U64 get_black_pawn_targets(Board::Square sq) const;
+    U64 get_knight_targets(Board::Square sq) const;
+    U64 get_bishop_targets(Board::Square sq) const;
+    U64 get_rook_targets(Board::Square sq) const;
+    U64 get_queen_targets(Board::Square sq) const;
+    U64 get_king_targets(Board::Square sq) const;
 
     const bool is_white_in_check() const;
     const bool is_black_in_check() const;
@@ -61,13 +61,13 @@ private:
 
     // attack set lookup tables by square
     // based on empty board
-    U64 black_pawn_attacks[64];
-    U64 white_pawn_attacks[64];
-    U64 knight_attacks[64];
-    U64 bishop_attacks[64];
-    U64 rook_attacks[64];
-    U64 queen_attacks[64];
-    U64 king_attacks[64];
+    U64 black_pawn_targets[64];
+    U64 white_pawn_targets[64];
+    U64 knight_targets[64];
+    U64 bishop_targets[64];
+    U64 rook_targets[64];
+    U64 queen_targets[64];
+    U64 king_targets[64];
 
     // game state booleans
     bool can_black_castle;

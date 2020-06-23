@@ -58,7 +58,7 @@ game_over(false)
 
         // can use union of rooks and bishops to build queen
         // attack sets - no need to repeat fills
-        queen_attacks[sq] = rook_attacks[sq] | bishop_attacks[sq];
+        queen_targets[sq] = rook_targets[sq] | bishop_targets[sq];
     }
 
 }
@@ -124,39 +124,39 @@ U64 board::get_black_kings() const
     return this->kings[Color::BLACK];
 }
 
-U64 board::get_knight_attacks(Board::Square sq) const
+U64 board::get_knight_targets(Board::Square sq) const
 {
-    return knight_attacks[sq];
+    return knight_targets[sq];
 }
 
-U64 board::get_king_attacks(Board::Square sq) const
+U64 board::get_king_targets(Board::Square sq) const
 {
-    return king_attacks[sq];
+    return king_targets[sq];
 }
 
-U64 board::get_white_pawn_attacks(Board::Square sq) const
+U64 board::get_white_pawn_targets(Board::Square sq) const
 {
-    return white_pawn_attacks[sq];
+    return white_pawn_targets[sq];
 }
 
-U64 board::get_black_pawn_attacks(Board::Square sq) const
+U64 board::get_black_pawn_targets(Board::Square sq) const
 {
-    return black_pawn_attacks[sq];
+    return black_pawn_targets[sq];
 }
 
-U64 board::get_rook_attacks(Board::Square sq) const
+U64 board::get_rook_targets(Board::Square sq) const
 {
-    return rook_attacks[sq];
+    return rook_targets[sq];
 }
 
-U64 board::get_bishop_attacks(Board::Square sq) const
+U64 board::get_bishop_targets(Board::Square sq) const
 {
-    return bishop_attacks[sq];
+    return bishop_targets[sq];
 }
 
-U64 board::get_queen_attacks(Board::Square sq) const
+U64 board::get_queen_targets(Board::Square sq) const
 {
-    return queen_attacks[sq];
+    return queen_targets[sq];
 }
 
 const bool board::is_white_in_check() const
@@ -234,63 +234,63 @@ void board::print() const
 void board::knight_fill(const U64 kpos, const int ksq)
 {
     // set mem to 0
-    knight_attacks[ksq] = 0;
+    knight_targets[ksq] = 0;
 
     U64 e, w;
     e = bitboard::east(kpos);
     w = bitboard::west(kpos);
 
-    knight_attacks[ksq] |= bitboard::north(bitboard::north(e));
-    knight_attacks[ksq] |= bitboard::south(bitboard::south(e));
-    knight_attacks[ksq] |= bitboard::north(bitboard::north(w));
-    knight_attacks[ksq] |= bitboard::south(bitboard::south(w));
+    knight_targets[ksq] |= bitboard::north(bitboard::north(e));
+    knight_targets[ksq] |= bitboard::south(bitboard::south(e));
+    knight_targets[ksq] |= bitboard::north(bitboard::north(w));
+    knight_targets[ksq] |= bitboard::south(bitboard::south(w));
 
     e = bitboard::east(e);
     w = bitboard::west(w);
 
-    knight_attacks[ksq] |= bitboard::north(e);
-    knight_attacks[ksq] |= bitboard::south(e);
-    knight_attacks[ksq] |= bitboard::north(w);
-    knight_attacks[ksq] |= bitboard::south(w);
+    knight_targets[ksq] |= bitboard::north(e);
+    knight_targets[ksq] |= bitboard::south(e);
+    knight_targets[ksq] |= bitboard::north(w);
+    knight_targets[ksq] |= bitboard::south(w);
 }
 
 void board::king_fill(const U64 kpos, const int ksq)
 {
-    king_attacks[ksq] =     bitboard::east(kpos) | bitboard::west(kpos) | bitboard::north(kpos) | bitboard::south(kpos);
-    king_attacks[ksq] |=    bitboard::northeast(kpos) | bitboard::northwest(kpos) | bitboard::southeast(kpos) | bitboard::southwest(kpos);
+    king_targets[ksq] =     bitboard::east(kpos) | bitboard::west(kpos) | bitboard::north(kpos) | bitboard::south(kpos);
+    king_targets[ksq] |=    bitboard::northeast(kpos) | bitboard::northwest(kpos) | bitboard::southeast(kpos) | bitboard::southwest(kpos);
 }
 
 void board::pawn_fill(const U64 ppos, const int psq)
 {
     // white pawn attacks
-    white_pawn_attacks[psq] = bitboard::northeast(ppos) | bitboard::northwest(ppos);
+    white_pawn_targets[psq] = bitboard::northeast(ppos) | bitboard::northwest(ppos);
 
     // black pawns
-    black_pawn_attacks[psq] = bitboard::southeast(ppos) | bitboard::southwest(ppos);
+    black_pawn_targets[psq] = bitboard::southeast(ppos) | bitboard::southwest(ppos);
 }
 
 void board::rook_fill(const U64 rpos, const int rsq)
 {
-    rook_attacks[rsq] = (
-            bitboard::fill_north(rpos)  |
-            bitboard::fill_south(rpos)  |
-            bitboard::fill_east(rpos)   |
-            bitboard::fill_west(rpos)
+    rook_targets[rsq] = (
+            bitboard::fill_north(rpos, empty_squares)  |
+            bitboard::fill_south(rpos, empty_squares)  |
+            bitboard::fill_east(rpos, empty_squares)   |
+            bitboard::fill_west(rpos, empty_squares)
     );
 
     // exclude square piece is on
     // from the attack set
-    rook_attacks[rsq] ^= rpos;
+    rook_targets[rsq] ^= rpos;
 }
 
 void board::bishop_fill(const U64 bpos, const int bsq)
 {
-    bishop_attacks[bsq] = (
+    bishop_targets[bsq] = (
             bitboard::fill_northeast(bpos) |
             bitboard::fill_southeast(bpos) |
             bitboard::fill_northwest(bpos) |
             bitboard::fill_southwest(bpos)
     );
 
-    bishop_attacks[bsq] ^= bpos;
+    bishop_targets[bsq] ^= bpos;
 }

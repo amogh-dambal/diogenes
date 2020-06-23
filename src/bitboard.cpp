@@ -54,7 +54,7 @@ U64 bitboard::northwest(const U64 b)
 }
 
 // fill algorithm functions
-U64 bitboard::fill_north(const U64 b)
+U64 bitboard::fill_north(const U64 b, const U64 empty)
 {
     U64 filled = b;
     for (int i = 0; i < 7; ++i)
@@ -64,7 +64,7 @@ U64 bitboard::fill_north(const U64 b)
     return filled;
 }
 
-U64 bitboard::fill_south(const U64 b)
+U64 bitboard::fill_south(const U64 b, const U64 empty)
 {
     U64 filled = b;
     for (int i = 0; i < 7; ++i)
@@ -74,7 +74,7 @@ U64 bitboard::fill_south(const U64 b)
     return filled;
 }
 
-U64 bitboard::fill_east(const U64 b)
+U64 bitboard::fill_east(const U64 b, const U64 empty)
 {
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
@@ -85,7 +85,7 @@ U64 bitboard::fill_east(const U64 b)
     return filled;
 }
 
-U64 bitboard::fill_west(const U64 b)
+U64 bitboard::fill_west(const U64 b, const U64 empty)
 {
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
@@ -96,7 +96,7 @@ U64 bitboard::fill_west(const U64 b)
     return filled;
 }
 
-U64 bitboard::fill_northeast(const U64 b)
+U64 bitboard::fill_northeast(const U64 b, const U64 empty)
 {
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
@@ -107,7 +107,7 @@ U64 bitboard::fill_northeast(const U64 b)
     return filled;
 }
 
-U64 bitboard::fill_southeast(const U64 b)
+U64 bitboard::fill_southeast(const U64 b, const U64 empty)
 {
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
@@ -118,7 +118,7 @@ U64 bitboard::fill_southeast(const U64 b)
     return filled;
 }
 
-U64 bitboard::fill_northwest(const U64 b)
+U64 bitboard::fill_northwest(const U64 b, const U64 empty)
 {
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
@@ -129,7 +129,7 @@ U64 bitboard::fill_northwest(const U64 b)
     return filled;
 }
 
-U64 bitboard::fill_southwest(const U64 b)
+U64 bitboard::fill_southwest(const U64 b, const U64 empty)
 {
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
@@ -251,7 +251,6 @@ int bitboard::bitscan_reverse(const U64 b)
     bb |= bb >> 32ULL;
 
     return debruijn_lookup[(bb * db) >> 58ULL];
-
 }
 
 /**

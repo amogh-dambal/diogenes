@@ -60,7 +60,7 @@ namespace Board {
 
     // LERF
     // little-endian rank-file mapping
-    enum Square
+    enum Square : int
     {
         a1 = 0, a2, a3, a4, a5, a6, a7, a8,
         b1, b2, b3, b4, b5, b6, b7, b8,
@@ -121,6 +121,8 @@ namespace Board {
     const U64 H1_A8_DIAGONAL =  0x0102040810204080;
     const U64 LIGHT_SQUARES =   0x55aa55aa55aa55aa;
     const U64 DARK_SQUARES =    0xaa55aa55aa55aa55;
+    const U64 ALL_SQUARES =     LIGHT_SQUARES | DARK_SQUARES;
+    const U64 NO_SQUARES =      ~ALL_SQUARES;
 
     const U64 NOT_A_FILE =      ~A_FILE;
     const U64 NOT_H_FILE =      ~H_FILE;

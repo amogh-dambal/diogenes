@@ -23,10 +23,12 @@ int main()
 
     std::vector<int> v = bitboard::serialize(pcs);
 
+    U64 attacks;
     for (auto idx : v)
     {
-        std::cout << idx << " ";
-
+        attacks = b.get_knight_targets(static_cast<Board::Square>(idx));
+        bitboard::print_bitboard(attacks);
+        std::cout << "\n";
     }
     std::cout << std::endl;
 
