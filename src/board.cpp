@@ -41,7 +41,7 @@ game_over(false)
     occupied_squares = pawns[Color::BOTH] | knights[Color::BOTH] | bishops[Color::BOTH] | rooks[Color::BOTH] | queens[Color::BOTH] | kings[Color::BOTH];
     empty_squares = ~occupied_squares;
 
-    // generate attack sets
+    // generate attack set lookup tables
     U64 piece_pos;
     for (int sq = Board::Square::a1; sq <= Board::Square::h8; ++sq)
     {
@@ -49,7 +49,7 @@ game_over(false)
         piece_pos = 1ULL << sq;
 
         // use fill algorithms to compute lookup tables
-        // for attack sets of pieces
+        // for square-indexed attack tables
         knight_fill(piece_pos, sq);
         king_fill(piece_pos, sq);
         pawn_fill(piece_pos, sq);
@@ -272,10 +272,10 @@ void board::pawn_fill(const U64 ppos, const int psq)
 void board::rook_fill(const U64 rpos, const int rsq)
 {
     rook_targets[rsq] = (
-            bitboard::fill_north(rpos, empty_squares)  |
-            bitboard::fill_south(rpos, empty_squares)  |
-            bitboard::fill_east(rpos, empty_squares)   |
-            bitboard::fill_west(rpos, empty_squares)
+            bitboard::fill_north(rpos)  |
+            bitboard::fill_east(rpos)   |
+            bitboard::fill_west(rpos)   |
+            bitboard::fill_south(rpos)
     );
 
     // exclude square piece is on

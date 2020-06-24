@@ -49,25 +49,25 @@ public:
 
 private:
     // piece board sets
-    U64 pawns[3];
-    U64 bishops[3];
-    U64 knights[3];
-    U64 rooks[3];
-    U64 queens[3];
-    U64 kings[3];
+    U64 pawns[3]{};
+    U64 bishops[3]{};
+    U64 knights[3]{};
+    U64 rooks[3]{};
+    U64 queens[3]{};
+    U64 kings[3]{};
 
     U64 occupied_squares;
     U64 empty_squares;
 
     // attack set lookup tables by square
     // based on empty board
-    U64 black_pawn_targets[64];
-    U64 white_pawn_targets[64];
-    U64 knight_targets[64];
-    U64 bishop_targets[64];
-    U64 rook_targets[64];
-    U64 queen_targets[64];
-    U64 king_targets[64];
+    U64 black_pawn_targets[64]{};
+    U64 white_pawn_targets[64]{};
+    U64 knight_targets[64]{};
+    U64 bishop_targets[64]{};
+    U64 rook_targets[64]{};
+    U64 queen_targets[64]{};
+    U64 king_targets[64]{};
 
     // game state booleans
     bool can_black_castle;

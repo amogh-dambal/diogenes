@@ -59,7 +59,7 @@ U64 bitboard::fill_north(const U64 b, const U64 empty)
     U64 filled = b;
     for (int i = 0; i < 7; ++i)
     {
-        filled |= (filled << (unsigned)Board::Direction::N);
+        filled |= ((filled << (unsigned)Board::Direction::N) & empty);
     }
     return filled;
 }
@@ -69,7 +69,7 @@ U64 bitboard::fill_south(const U64 b, const U64 empty)
     U64 filled = b;
     for (int i = 0; i < 7; ++i)
     {
-        filled |= (filled >> (unsigned)(-1 * Board::Direction::S));
+        filled |= ((filled >> (unsigned)(-1 * Board::Direction::S)) & empty);
     }
     return filled;
 }
@@ -79,7 +79,7 @@ U64 bitboard::fill_east(const U64 b, const U64 empty)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t << (unsigned)Board::Direction::E) & Board::NOT_A_FILE;
+        t = ((t << (unsigned)Board::Direction::E) & Board::NOT_A_FILE) & empty;
         filled |= t;
     }
     return filled;
@@ -90,7 +90,7 @@ U64 bitboard::fill_west(const U64 b, const U64 empty)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t >> (unsigned)(-1 * Board::Direction::W)) & Board::NOT_H_FILE;
+        t = ((t >> (unsigned)(-1 * Board::Direction::W)) & Board::NOT_H_FILE) & empty;
         filled |= t;
     }
     return filled;
@@ -101,7 +101,7 @@ U64 bitboard::fill_northeast(const U64 b, const U64 empty)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t << (unsigned)(Board::Direction::NE)) & Board::NOT_A_FILE;
+        t = ((t << (unsigned)(Board::Direction::NE)) & Board::NOT_A_FILE) & empty;
         filled |= t;
     }
     return filled;
@@ -112,7 +112,7 @@ U64 bitboard::fill_southeast(const U64 b, const U64 empty)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t >> (unsigned)(-1 * Board::Direction::SE)) & Board::NOT_A_FILE;
+        t = ((t >> (unsigned)(-1 * Board::Direction::SE)) & Board::NOT_A_FILE) & empty;
         filled |= t;
     }
     return filled;
@@ -123,7 +123,7 @@ U64 bitboard::fill_northwest(const U64 b, const U64 empty)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t << (unsigned)(Board::Direction::NW)) & Board::NOT_H_FILE;
+        t = ((t << (unsigned)(Board::Direction::NW)) & Board::NOT_H_FILE) & empty;
         filled |= t;
     }
     return filled;
@@ -134,7 +134,7 @@ U64 bitboard::fill_southwest(const U64 b, const U64 empty)
     U64 filled = b, t = b;
     for (int i = 0; i < 7; ++i)
     {
-        t = (t >> (unsigned)(-1 * Board::Direction::SW)) & Board::NOT_H_FILE;
+        t = ((t >> (unsigned)(-1 * Board::Direction::SW)) & Board::NOT_H_FILE) & empty;
         filled |= t;
     }
     return filled;
