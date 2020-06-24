@@ -1,0 +1,8 @@
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/install/local.dir
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/install/strip.dir
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/install.dir
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/list_install_components.dir
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/package.dir
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/package_source.dir
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/rebuild_cache.dir
+/Users/amogh/dev/cpp/diogenes/lib/Catch2/build/CMakeFiles/edit_cache.dir
