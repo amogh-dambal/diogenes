@@ -38,4 +38,18 @@ TEST_CASE("Function to get index of LS1B", "[bitscan_forward]")
     REQUIRE(i == 1);
 }
 
+TEST_CASE("Function to get index of MS1B", "[bitscan_reverse]")
+{
+    int i;
+
+    i = bitboard::bitscan_reverse(1ULL);
+    REQUIRE(i == 0);
+
+    i = bitboard::bitscan_reverse(3ULL);
+    REQUIRE(i == 1);
+
+    i = bitboard::bitscan_reverse(~0ULL);
+    REQUIRE(i == 63);
+}
+
 
