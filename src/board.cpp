@@ -163,12 +163,15 @@ const bool board::is_white_in_check() const
 {
     U64 white_king = kings[Color::WHITE];
 
+    return false;
 
 }
 
 const bool board::is_black_in_check() const
 {
     U64 black_king = kings[Color::BLACK];
+
+    return false;
 }
 
 /**

@@ -167,10 +167,10 @@ int bitboard::pop_count(const U64 b)
         const U64 k4 = 0x0f0f0f0f0f0f0f0fULL;
         const U64 kf = 0x0101010101010101ULL;
 
-        U64 x;
-        x = b - (b >> 1ULL) & k1;
+        U64 x = b;
+        x = x - ((x >> 1ULL) & k1);
         x = (x & k2) + ((x >> 2ULL) & k2);
-        x = x + ((x >> 4ULL) & k4);
+        x = (x + (x >> 4ULL)) & k4;
         x = (x * kf) >> 56ULL;
         return (int) x;
 
