@@ -189,11 +189,7 @@ U64 board::get_empty_squares() const
     return this->empty_squares;
 }
 
-U64 board::generate_white_pawn_attacks() const
-{
-    return 0;
-}
-
+// functions to generate attacks based on empty/avaiable squares
 U64 board::generate_white_king_attacks() const
 {
     U64 w_kings = kings[Color::WHITE];
