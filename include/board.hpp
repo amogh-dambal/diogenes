@@ -66,6 +66,7 @@ public:
     Color::Value side_to_move;
     int ply;
     bool game_over;
+
     bool can_white_castle_qside;
     bool can_white_castle_kside;
     bool can_black_castle_qside;

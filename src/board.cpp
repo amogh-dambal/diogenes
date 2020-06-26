@@ -74,13 +74,33 @@ can_white_castle_qside(true)
  * from a FEN string
  * @param fen: std::string in FEN notation that represents a
  * given position on the board
+ * FEN Notation Fields:
+ * 0. Piece notation
+ * 1. Active color
+ * 2. Castling permissions
+ * 3. EP target square
+ * 4. Ply (halfmove clock)
+ * 5. Full move clock
  */
 board::board(std::string fen_str)
 {
     std::vector<std::string> fen = util::split_string(std::move(fen_str));
+    assert(fen.size() == 5);
 
     // get side-to-move
     side_to_move = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
+
+    // get castling permissions
+    std::string castling = fen.at(2);
+    if (castling == "-")
+    {
+        can_white_castle_kside = false;
+        can_white_castle_qside = false;
+        can_black_castle_kside = false;
+        can_black_castle_qside = false;
+    }
+    
+
     ply = stoi(fen.at(4));
 }
 
