@@ -84,7 +84,7 @@ can_white_castle_qside(true)
  */
 board::board(const std::string& fen_str)
 {
-    std::vector<std::string> fen = util::split_string(fen_str));
+    std::vector<std::string> fen = util::split_string(fen_str);
     assert(fen.size() == 5);
 
     // get side-to-move

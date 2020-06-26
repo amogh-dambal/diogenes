@@ -17,6 +17,13 @@ int util::fr_to_board_index(int file, int rank)
     return 8 * rank + file;
 }
 
+/**
+ * function to convert a std::string object into a list of tokens
+ * where each token in the string is space-separated
+ * @param s: std::string object to tokenize
+ * @return std::vector<std::string> containing the tokens of the string
+ * in the order they appear
+ */
 std::vector<std::string> util::split_string(const std::string& s)
 {
     std::vector<std::string> v;
@@ -31,7 +38,20 @@ std::vector<std::string> util::split_string(const std::string& s)
     return v;
 }
 
+/**
+ * wrapper function to check whether one string contains
+ * another within it
+ * @pre: o.size() <= s.size()
+ * @param s : string we are searching in
+ * @param o : string we are searching for
+ * @return boolean value that tells us whether s contains o or not
+ * @throws std::invalid_argument error
+ */
 bool util::string_contains(const std::string& s, const std::string& o)
 {
+    if (s.size() < o.size())
+    {
+        throw std::invalid_argument("ERROR! size of o must be less than size of s");
+    }
     return s.find(o) != std::string::npos;
 }
