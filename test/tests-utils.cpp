@@ -10,6 +10,7 @@ std::vector<std::string> v;
 std::vector<std::string> actual;
 std::string test;
 
+// STRING SPLIT
 TEST_CASE("Basic string split testing", "[split_string]")
 {
 
@@ -41,3 +42,17 @@ TEST_CASE("Case 2: no space delimiters", "[split_string]")
     REQUIRE(v.size() == actual.size());
     REQUIRE(v == actual);
 }
+
+// STRING_CONTAINS
+std::string big;
+std::string sm;
+TEST_CASE("Basic contains testing", "[string_contains]")
+{
+    big = "this is big string";
+    sm = "i";
+
+    REQUIRE(util::string_contains(big, sm));
+    REQUIRE(!util::string_contains(big, "k"));
+}
+
+
