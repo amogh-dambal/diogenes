@@ -66,6 +66,10 @@ public:
     Color::Value side_to_move;
     int ply;
     bool game_over;
+    bool can_white_castle_qside;
+    bool can_white_castle_kside;
+    bool can_black_castle_qside;
+    bool can_black_castle_kside;
 
 private:
     // piece board sets
@@ -88,10 +92,6 @@ private:
     U64 rook_targets[64]{};
     U64 queen_targets[64]{};
     U64 king_targets[64]{};
-
-    // game state booleans
-    bool can_black_castle;
-    bool can_white_castle;
 
     void knight_fill(U64 kpos, int sq);
     void king_fill(U64 kpos, int sq);

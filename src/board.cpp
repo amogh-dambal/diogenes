@@ -3,6 +3,8 @@
 //
 
 #include "board.hpp"
+
+#include <utility>
 #include "bitboard.hpp"
 #include "utils.hpp"
 
@@ -11,9 +13,11 @@
  */
 board::board() :
 ply(0), side_to_move(Color::WHITE),
-can_black_castle(true),
-can_white_castle(true),
-game_over(false)
+game_over(false),
+can_black_castle_kside(true),
+can_black_castle_qside(true),
+can_white_castle_kside(true),
+can_white_castle_qside(true)
 {
     // white pieces
     pawns[Color::WHITE] = 0xff00;
@@ -68,11 +72,17 @@ game_over(false)
 /**
  * constructor to generate board position
  * from a FEN string
- * @param fen
+ * @param fen: std::string in FEN notation that represents a
+ * given position on the board
  */
-board::board(std::string fen)
+board::board(std::string fen_str)
 {
+    std::vector<std::string> fen = util::split_string(std::move(fen_str));
 
+    // get side-to-move
+    side_to_move = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
+
+    ply = stoi(fen.at(4));
 }
 
 /* PUBLIC FUNCTIONS */
