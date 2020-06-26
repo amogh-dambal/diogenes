@@ -64,6 +64,26 @@ game_over(false)
 }
 
 /* PUBLIC FUNCTIONS */
+U64 board::get_white_pieces() const
+{
+    return pawns[Color::WHITE] |
+    knights[Color::WHITE] |
+    bishops[Color::WHITE] |
+    rooks[Color::WHITE] |
+    queens[Color::WHITE] |
+    kings[Color::WHITE];
+}
+
+U64 board::get_black_pieces() const
+{
+    return pawns[Color::BLACK] |
+           knights[Color::BLACK] |
+           bishops[Color::BLACK] |
+           rooks[Color::BLACK] |
+           queens[Color::BLACK] |
+           kings[Color::WHITE];
+}
+
 U64 board::get_white_pawns() const
 {
     return this->pawns[Color::WHITE];
@@ -159,19 +179,87 @@ U64 board::get_queen_targets(Board::Square sq) const
     return queen_targets[sq];
 }
 
-const bool board::is_white_in_check() const
+U64 board::get_occupied_squares() const
 {
-    U64 white_king = kings[Color::WHITE];
-
-    return false;
-
+    return this->occupied_squares;
 }
 
-const bool board::is_black_in_check() const
+U64 board::get_empty_squares() const
 {
-    U64 black_king = kings[Color::BLACK];
+    return this->empty_squares;
+}
 
-    return false;
+U64 board::generate_white_pawn_attacks() const
+{
+    return 0;
+}
+
+U64 board::generate_white_king_attacks() const
+{
+    U64 w_kings = kings[Color::WHITE];
+    U64 attacks = 0;
+
+    if (bitboard::pop_count(w_kings) != 1)
+    {
+        throw std::logic_error("can only have one king on the board!");
+    }
+    std::vector<int> king_sqs = bitboard::serialize(kings[Color::WHITE]);
+
+    auto king_sq = (Board::Square)king_sqs.at(0);
+    U64 possible_mvs = get_black_pieces() | empty_squares;
+    attacks |= (get_king_targets(king_sq) & possible_mvs);
+    return attacks;
+}
+
+U64 board::generate_white_knight_attacks() const
+{
+    U64 attacks = 0;
+    U64 w_knights = knights[Color::WHITE];
+
+    std::vector<int> knight_sqs = bitboard::serialize(w_knights);
+
+    Board::Square sq;
+    const U64 possible_mvs = get_black_pieces() | empty_squares;
+    for (int ksq : knight_sqs)
+    {
+        sq = (Board::Square) ksq;
+        attacks |= (get_knight_targets(sq) & possible_mvs);
+    }
+    return attacks;
+}
+
+U64 board::generate_black_king_attacks() const
+{
+    U64 b_kings = kings[Color::BLACK];
+    U64 attacks = 0;
+
+    if (bitboard::pop_count(b_kings) != 1)
+    {
+        throw std::logic_error("can only have one king on the board!");
+    }
+    std::vector<int> king_sqs = bitboard::serialize(kings[Color::BLACK]);
+
+    auto king_sq = (Board::Square)king_sqs.at(0);
+    U64 possible_mvs = get_white_pieces() | empty_squares;
+    attacks |= (get_king_targets(king_sq) & possible_mvs);
+    return attacks;
+}
+
+U64 board::generate_black_knight_attacks() const
+{
+    U64 attacks = 0;
+    U64 b_knights = knights[Color::BLACK];
+
+    std::vector<int> knight_sqs = bitboard::serialize(b_knights);
+
+    Board::Square sq;
+    const U64 possible_mvs = get_white_pieces() | empty_squares;
+    for (int ksq : knight_sqs)
+    {
+        sq = (Board::Square) ksq;
+        attacks |= (get_knight_targets(sq) & possible_mvs);
+    }
+    return attacks;
 }
 
 /**

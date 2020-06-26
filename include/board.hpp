@@ -18,6 +18,7 @@ public:
     board();
     void print() const;
 
+    U64 get_white_pieces() const;
     U64 get_white_pawns() const;
     U64 get_white_knights() const;
     U64 get_white_bishops() const;
@@ -25,12 +26,16 @@ public:
     U64 get_white_queens() const;
     U64 get_white_kings() const;
 
+    U64 get_black_pieces() const;
     U64 get_black_pawns() const;
     U64 get_black_knights() const;
     U64 get_black_bishops() const;
     U64 get_black_rooks() const;
     U64 get_black_queens() const;
     U64 get_black_kings() const;
+
+    U64 get_occupied_squares() const;
+    U64 get_empty_squares() const;
 
     U64 get_white_pawn_targets(Board::Square sq) const;
     U64 get_black_pawn_targets(Board::Square sq) const;
@@ -40,8 +45,19 @@ public:
     U64 get_queen_targets(Board::Square sq) const;
     U64 get_king_targets(Board::Square sq) const;
 
-    const bool is_white_in_check() const;
-    const bool is_black_in_check() const;
+    U64 generate_white_pawn_attacks() const;
+    U64 generate_white_knight_attacks() const;
+    U64 generate_white_bishop_attacks() const;
+    U64 generate_white_rook_attacks() const;
+    U64 generate_white_queen_attacks() const;
+    U64 generate_white_king_attacks() const;
+    
+    U64 generate_black_pawn_attacks() const;
+    U64 generate_black_knight_attacks() const;
+    U64 generate_black_bishop_attacks() const;
+    U64 generate_black_rook_attacks() const;
+    U64 generate_black_queen_attacks() const;
+    U64 generate_black_king_attacks() const;
     
     Color::Value side_to_move;
     int ply;
