@@ -82,9 +82,9 @@ can_white_castle_qside(true)
  * 4. Ply (halfmove clock)
  * 5. Full move clock
  */
-board::board(std::string fen_str)
+board::board(const std::string& fen_str)
 {
-    std::vector<std::string> fen = util::split_string(std::move(fen_str));
+    std::vector<std::string> fen = util::split_string(fen_str));
     assert(fen.size() == 5);
 
     // get side-to-move
@@ -92,14 +92,11 @@ board::board(std::string fen_str)
 
     // get castling permissions
     std::string castling = fen.at(2);
-    if (castling == "-")
-    {
-        can_white_castle_kside = false;
-        can_white_castle_qside = false;
-        can_black_castle_kside = false;
-        can_black_castle_qside = false;
-    }
-    
+    can_white_castle_qside = util::string_contains(castling, "Q");
+    can_white_castle_kside = util::string_contains(castling, "K");
+    can_black_castle_qside = util::string_contains(castling, "q");
+    can_black_castle_kside = util::string_contains(castling, "k");
+
 
     ply = stoi(fen.at(4));
 }

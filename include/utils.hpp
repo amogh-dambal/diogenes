@@ -14,7 +14,8 @@
 namespace util
 {
     int fr_to_board_index(int file, int rank);
-    std::vector<std::string> split_string(std::string s);
+    std::vector<std::string> split_string(const std::string& s);
+    bool string_contains(const std::string& s, const std::string& o);
 }
 
 #endif //DIOGENES_UTILS_HPP

@@ -17,7 +17,7 @@ int util::fr_to_board_index(int file, int rank)
     return 8 * rank + file;
 }
 
-std::vector<std::string> util::split_string(std::string s)
+std::vector<std::string> util::split_string(const std::string& s)
 {
     std::vector<std::string> v;
     std::istringstream iss(s);
@@ -29,4 +29,9 @@ std::vector<std::string> util::split_string(std::string s)
             );
 
     return v;
+}
+
+bool util::string_contains(const std::string& s, const std::string& o)
+{
+    return s.find(o) != std::string::npos;
 }

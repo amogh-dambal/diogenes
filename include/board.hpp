@@ -18,7 +18,7 @@ class board
 public:
     board();
 
-    board(std::string fen);
+    board(const std::string& fen);
 
     void print() const;
 
