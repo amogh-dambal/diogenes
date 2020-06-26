@@ -81,7 +81,6 @@ board::board(std::string fen_str)
 
     // get side-to-move
     side_to_move = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
-
     ply = stoi(fen.at(4));
 }
 
