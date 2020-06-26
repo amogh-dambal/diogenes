@@ -16,3 +16,17 @@ int util::fr_to_board_index(int file, int rank)
 {
     return 8 * rank + file;
 }
+
+std::vector<std::string> util::split_string(std::string s)
+{
+    std::vector<std::string> v;
+    std::istringstream iss(s);
+
+    std::copy(
+            std::istream_iterator<std::string>(iss),
+                    std::istream_iterator<std::string>(),
+                            std::back_inserter(v)
+            );
+
+    return v;
+}

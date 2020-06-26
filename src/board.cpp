@@ -6,7 +6,9 @@
 #include "bitboard.hpp"
 #include "utils.hpp"
 
-/* CONSTRUCTOR */
+/**
+ * default constructor
+ */
 board::board() :
 ply(0), side_to_move(Color::WHITE),
 can_black_castle(true),
@@ -60,6 +62,16 @@ game_over(false)
         // attack sets - no need to repeat fills
         queen_targets[sq] = rook_targets[sq] | bishop_targets[sq];
     }
+
+}
+
+/**
+ * constructor to generate board position
+ * from a FEN string
+ * @param fen
+ */
+board::board(std::string fen)
+{
 
 }
 

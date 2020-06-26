@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <string>
 
 #include "stds.hpp"
 
@@ -16,6 +17,9 @@ class board
 {
 public:
     board();
+
+    board(std::string fen);
+
     void print() const;
 
     U64 get_white_pieces() const;
