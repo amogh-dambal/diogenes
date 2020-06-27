@@ -11,9 +11,9 @@ TEST_CASE("initialized properly", "[constructor]") {
     board b;
 
     // initialization post-conditions
-    REQUIRE(b.ply == 0);
-    REQUIRE(b.side_to_move == Color::WHITE);
-    REQUIRE(!b.game_over);
+    REQUIRE(b.ply() == 0);
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(!b.game_over());
 
     // check whether pieces are set correctly
     U64 all_pcs = 0xffff00000000ffff;
@@ -44,6 +44,6 @@ TEST_CASE("initialize from FEN string - starting position", "[constructor]")
     std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     board b(fen);
 
-    REQUIRE(b.ep_target_sq == Board::Square::NONE);
-    REQUIRE(b.ply == 0);
+    REQUIRE(b.ep_target_square() == Board::Square::NONE);
+    REQUIRE(b.ply() == 0);
 }

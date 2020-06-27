@@ -63,17 +63,16 @@ public:
     U64 generate_black_rook_attacks() const;
     U64 generate_black_queen_attacks() const;
     U64 generate_black_king_attacks() const;
-    
-    Color::Value side_to_move;
-    int ply;
-    bool game_over;
 
-    bool can_white_castle_qside;
-    bool can_white_castle_kside;
-    bool can_black_castle_qside;
-    bool can_black_castle_kside;
+    Color::Value side_to_move() const;
+    int ply() const;
+    bool game_over() const;
+    Board::Square ep_target_square() const;
 
-    Board::Square ep_target_sq;
+    bool can_white_castle_qside() const;
+    bool can_white_castle_kside() const;
+    bool can_black_castle_qside() const;
+    bool can_black_castle_kside() const;
 
 private:
     // piece board sets
@@ -105,6 +104,17 @@ private:
 
     square_parser& get_parser();
     Board::Square parse_square(const std::string& sq);
+
+    Color::Value side_to_move_;
+    int ply_;
+    bool game_over_;
+
+    bool can_white_castle_qside_;
+    bool can_white_castle_kside_;
+    bool can_black_castle_qside_;
+    bool can_black_castle_kside_;
+
+    Board::Square ep_target_sq_;
 
 };
 

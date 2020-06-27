@@ -12,12 +12,12 @@
  * default constructor
  */
 board::board() :
-ply(0), side_to_move(Color::WHITE),
-game_over(false),
-can_black_castle_kside(true),
-can_black_castle_qside(true),
-can_white_castle_kside(true),
-can_white_castle_qside(true)
+ply_(0), side_to_move_(Color::WHITE),
+game_over_(false),
+can_black_castle_kside_(true),
+can_black_castle_qside_(true),
+can_white_castle_kside_(true),
+can_white_castle_qside_(true)
 {
     // white pieces
     pawns[Color::WHITE] = 0xff00;
@@ -82,35 +82,36 @@ can_white_castle_qside(true)
  * 4. Ply (halfmove clock)
  * 5. Full move clock
  */
-board::board(const std::string& fen_str) : game_over(false)
+board::board(const std::string& fen_str) :
+game_over_(false)
 {
     std::vector<std::string> fen = util::split_string(fen_str);
     assert(fen.size() == 6);
 
     // get side-to-move
-    side_to_move = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
+    side_to_move_ = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
 
     // get castling permissions
     std::string castling = fen.at(2);
-    can_white_castle_qside = util::string_contains(castling, "Q");
-    can_white_castle_kside = util::string_contains(castling, "K");
-    can_black_castle_qside = util::string_contains(castling, "q");
-    can_black_castle_kside = util::string_contains(castling, "k");
+    can_white_castle_qside_ = util::string_contains(castling, "Q");
+    can_white_castle_kside_ = util::string_contains(castling, "K");
+    can_black_castle_qside_ = util::string_contains(castling, "q");
+    can_black_castle_kside_ = util::string_contains(castling, "k");
 
     // get eq target square
     std::string ep = fen.at(3);
     if (ep == "-")
     {
-        ep_target_sq = Board::Square::NONE;
+        ep_target_sq_ = Board::Square::NONE;
 
     }
     else
     {
-        ep_target_sq = parse_square(ep);
+        ep_target_sq_ = parse_square(ep);
     }
 
     // get half-move clock
-    ply = stoi(fen.at(4));
+    ply_ = stoi(fen.at(4));
 
     // build position and place pieces
     std::string pos = fen.at(0);
@@ -319,6 +320,46 @@ U64 board::get_occupied_squares() const
 U64 board::get_empty_squares() const
 {
     return this->empty_squares;
+}
+
+Color::Value board::side_to_move() const
+{
+    return side_to_move_;
+}
+
+int board::ply() const
+{
+    return ply_;
+}
+
+bool board::game_over() const
+{
+    return game_over_;
+}
+
+Board::Square board::ep_target_square() const
+{
+    return ep_target_sq_;
+}
+
+bool board::can_white_castle_qside() const
+{
+    return can_white_castle_qside_;
+}
+
+bool board::can_white_castle_kside() const
+{
+    return can_white_castle_kside_;
+}
+
+bool board::can_black_castle_qside() const
+{
+    return can_black_castle_qside_;
+}
+
+bool board::can_black_castle_kside() const
+{
+    return can_black_castle_kside_;
 }
 
 // functions to generate attacks based on empty/avaiable squares
