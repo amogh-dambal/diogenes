@@ -132,7 +132,6 @@ game_over_(false)
         else
         {
             sq = (rank * 8) + i;
-            std::cout << sq << std::endl;
             // WHITE piece
             if (isupper(piece))
             {

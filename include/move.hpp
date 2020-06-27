@@ -10,7 +10,7 @@
 class move
 {
 public:
-    move(Board::Piece p, Board::Square sq_f, Board::Square sq_t);
+    move(Board::Piece pc, Board::Square from, Board::Square to);
 
     const Board::Piece piece() const;
     const Board::Square from() const;
@@ -18,10 +18,10 @@ public:
 
 private:
     // what piece is it?
-    Board::Piece p;
+    Board::Piece piece_;
 
-    Board::Square sq_from;
-    Board::Square sq_to;
+    Board::Square from_;
+    Board::Square to_;
 };
 
 #endif //DIOGENES_MOVE_HPP

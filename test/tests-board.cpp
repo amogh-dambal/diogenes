@@ -39,12 +39,22 @@ TEST_CASE("initialized properly", "[constructor]") {
 
 }
 
+std::string fen;
 TEST_CASE("initialize from FEN string - starting position", "[constructor]")
 {
     // starting position
-    std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     board fen_start(fen);
     board start;
-
     REQUIRE(start == fen_start);
+}
+
+TEST_CASE("initialize from FEN string after 1.e4", "[constructor]")
+{
+    fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
+    board pos(fen);
+
+    REQUIRE(pos.ply() == 0);
+    REQUIRE(pos.side_to_move() == Color::BLACK);
+    std::cout << pos << std::endl;
 }
