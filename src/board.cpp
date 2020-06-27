@@ -97,6 +97,9 @@ board::board(const std::string& fen_str)
     can_black_castle_qside = util::string_contains(castling, "q");
     can_black_castle_kside = util::string_contains(castling, "k");
 
+    // get eq target square
+    std::string ep = fen.at(3);
+    ep_target_sq = Board::parse_square(ep);
 
     ply = stoi(fen.at(4));
 }

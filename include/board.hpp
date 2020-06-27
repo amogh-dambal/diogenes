@@ -17,7 +17,6 @@ class board
 {
 public:
     board();
-
     board(const std::string& fen);
 
     void print() const;
@@ -71,6 +70,8 @@ public:
     bool can_white_castle_kside;
     bool can_black_castle_qside;
     bool can_black_castle_kside;
+
+    Board::Square ep_target_sq;
 
 private:
     // piece board sets
