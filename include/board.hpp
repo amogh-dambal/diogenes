@@ -9,9 +9,11 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <map>
 
 #include "stds.hpp"
 
+typedef std::map<std::string, Board::Square> square_parser;
 
 class board
 {
@@ -100,6 +102,10 @@ private:
     void pawn_fill(U64 ppos, int sq);
     void rook_fill(U64 rpos, int sq);
     void bishop_fill(U64 bpos, int sq);
+
+    square_parser& get_parser();
+    Board::Square parse_square(const std::string& sq);
+
 };
 
 #endif //DIOGENES_BOARD_HPP

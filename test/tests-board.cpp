@@ -37,3 +37,13 @@ TEST_CASE("initialized properly", "[constructor]") {
 
 
 }
+
+TEST_CASE("initialize from FEN string - starting position", "[constructor]")
+{
+    // starting position
+    std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    board b(fen);
+
+    REQUIRE(b.ep_target_sq == Board::Square::NONE);
+    REQUIRE(b.ply == 0);
+}

@@ -82,10 +82,10 @@ can_white_castle_qside(true)
  * 4. Ply (halfmove clock)
  * 5. Full move clock
  */
-board::board(const std::string& fen_str)
+board::board(const std::string& fen_str) : game_over(false)
 {
     std::vector<std::string> fen = util::split_string(fen_str);
-    assert(fen.size() == 5);
+    assert(fen.size() == 6);
 
     // get side-to-move
     side_to_move = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
@@ -99,7 +99,15 @@ board::board(const std::string& fen_str)
 
     // get eq target square
     std::string ep = fen.at(3);
-    ep_target_sq = Board::parse_square(ep);
+    if (ep == "-")
+    {
+        ep_target_sq = Board::Square::NONE;
+
+    }
+    else
+    {
+        ep_target_sq = parse_square(ep);
+    }
 
     // get half-move clock
     ply = stoi(fen.at(4));
@@ -182,6 +190,9 @@ board::board(const std::string& fen_str)
             i++;
         }
     }
+
+    occupied_squares = get_white_pieces() | get_black_pieces();
+    empty_squares = ~occupied_squares;
 }
 
 /* PUBLIC FUNCTIONS */
@@ -501,4 +512,25 @@ void board::bishop_fill(const U64 bpos, const int bsq)
     );
 
     bishop_targets[bsq] ^= bpos;
+}
+
+std::map<std::string, Board::Square>& board::get_parser()
+{
+    static square_parser sqp = {
+            {"a1", Board:: a1}, {"a2", Board:: a2}, {"a3",  Board::a3}, {"a4", Board:: a4}, {"a5", Board:: a5}, {"a6", Board:: a6}, {"a7", Board:: a7}, {"a8", Board:: a8},
+            {"b1", Board:: b1}, {"b2", Board:: b2}, {"b3", Board:: b3}, {"b4", Board:: b4}, {"b5", Board:: b5}, {"b6", Board:: b6}, {"b7", Board:: b7}, {"b8", Board:: b8},
+            {"c1", Board:: c1}, {"c2", Board:: c2}, {"c3", Board:: c3}, {"c4", Board:: c4}, {"c5", Board:: c5}, {"c6", Board:: c6}, {"c7", Board:: c7}, {"c8", Board:: c8},
+            {"d1", Board:: d1}, {"d2", Board:: d2}, {"d3", Board:: d3}, {"d4", Board:: d4}, {"d5", Board:: d5}, {"d6", Board:: d6}, {"d7", Board:: d7}, {"d8", Board:: d8},
+            {"e1", Board:: e1}, {"e2", Board:: e2}, {"e3", Board:: e3}, {"e4", Board:: e4}, {"e5", Board:: e5}, {"e6", Board:: e6}, {"e7", Board:: e7}, {"e8", Board:: e8},
+            {"f1", Board:: f1}, {"f2", Board:: f2}, {"f3", Board:: f3}, {"f4", Board:: f4}, {"f5", Board:: f5}, {"f6", Board:: f6}, {"f7", Board:: f7}, {"f8", Board:: f8},
+            {"g1", Board:: g1}, {"g2", Board:: g2}, {"g3", Board:: g3}, {"g4", Board:: g4}, {"g5", Board:: g5}, {"g6", Board:: g6}, {"g7", Board:: g7}, {"g8", Board:: g8},
+            {"h1", Board:: h1}, {"h2", Board:: h2}, {"h3", Board:: h3}, {"h4", Board:: h4}, {"h5", Board:: h5}, {"h6", Board:: h6}, {"h7", Board:: h7}, {"h8", Board:: h8},
+    };
+    return sqp;
+}
+
+Board::Square board::parse_square(const std::string& sq)
+{
+    square_parser p = get_parser();
+    return p[sq];
 }
