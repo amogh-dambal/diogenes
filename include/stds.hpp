@@ -95,7 +95,6 @@ namespace Board {
         return sp[sq];
     }
 
-
     enum Direction
     {
         N = 8,
@@ -150,6 +149,8 @@ namespace Board {
 
     const U64 NOT_A_FILE =      ~A_FILE;
     const U64 NOT_H_FILE =      ~H_FILE;
+
+    const char FEN_RANK_DELIMITER = '/';
 }
 
 

@@ -101,7 +101,87 @@ board::board(const std::string& fen_str)
     std::string ep = fen.at(3);
     ep_target_sq = Board::parse_square(ep);
 
+    // get half-move clock
     ply = stoi(fen.at(4));
+
+    // build position and place pieces
+    std::string pos = fen.at(0);
+    int sq = 0;
+    int rank = 0, i = 0;
+    for (char piece : pos)
+    {
+        // skip rank delimiters/EMPTY SQUARES in FEN notation
+        if (piece == Board::FEN_RANK_DELIMITER)
+        {
+            rank++;
+            i = 0;
+        }
+        else if (isnumber(piece))
+        {
+            i += (piece - '0');
+        }
+        else
+        {
+            sq = (rank * 8) + (7 - i);
+            // WHITE piece
+            if (isupper(piece))
+            {
+                switch (piece)
+                {
+                    case 'P':
+                        pawns[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'N':
+                        knights[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'B':
+                        bishops[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'R':
+                        rooks[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'Q':
+                        queens[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'K':
+                        kings[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // BLACK piece
+            else
+            {
+                switch (piece)
+                {
+                    case 'p':
+                        pawns[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'n':
+                        knights[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'b':
+                        bishops[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'r':
+                        rooks[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'q':
+                        queens[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'k':
+                        kings[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // increment square counter to
+            // keep mapping consistent
+            i++;
+        }
+    }
 }
 
 /* PUBLIC FUNCTIONS */
