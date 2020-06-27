@@ -205,6 +205,29 @@ game_over_(false)
 
 }
 
+bool board::operator==(const board& rhs)
+{
+    return
+    this->ply_ == rhs.ply_ &&
+    this->side_to_move_ == rhs.side_to_move_ &&
+    this->ep_target_sq_ == rhs.ep_target_sq_ &&
+    this->can_black_castle_qside_ == rhs.can_black_castle_qside_ &&
+    this->can_black_castle_kside_ == rhs.can_black_castle_kside_ &&
+    this->can_white_castle_kside_ == rhs.can_black_castle_kside_ &&
+    this->can_white_castle_qside_ == rhs.can_white_castle_qside_ &&
+    this->pawns[Color::WHITE] == rhs.pawns[Color::WHITE] &&
+    this->knights[Color::WHITE] == rhs.knights[Color::WHITE] &&
+    this->bishops[Color::WHITE] == rhs.bishops[Color::WHITE] &&
+    this->queens[Color::WHITE] == rhs.queens[Color::WHITE] &&
+    this->kings[Color::WHITE] == rhs.kings[Color::WHITE] &&
+    this->pawns[Color::BLACK] == rhs.pawns[Color::BLACK] &&
+    this->knights[Color::BLACK] == rhs.knights[Color::BLACK] &&
+    this->bishops[Color::BLACK] == rhs.bishops[Color::BLACK] &&
+    this->queens[Color::BLACK] == rhs.queens[Color::BLACK] &&
+    this->kings[Color::BLACK] == rhs.kings[Color::BLACK];
+
+}
+
 /* PUBLIC FUNCTIONS */
 U64 board::get_white_pieces() const
 {

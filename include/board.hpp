@@ -21,6 +21,8 @@ public:
     board();
     board(const std::string& fen);
 
+    bool operator==(const board& rhs);
+
     void print() const;
 
     U64 get_white_pieces() const;
