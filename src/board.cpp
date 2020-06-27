@@ -116,13 +116,13 @@ game_over_(false)
     // build position and place pieces
     std::string pos = fen.at(0);
     int sq = 0;
-    int rank = 0, i = 0;
+    int rank = 7, i = 0;
     for (char piece : pos)
     {
         // skip rank delimiters/EMPTY SQUARES in FEN notation
         if (piece == Board::FEN_RANK_DELIMITER)
         {
-            rank++;
+            rank--;
             i = 0;
         }
         else if (isnumber(piece))
@@ -194,6 +194,15 @@ game_over_(false)
 
     occupied_squares = get_white_pieces() | get_black_pieces();
     empty_squares = ~occupied_squares;
+
+    // both pieces
+    pawns[Color::BOTH] = pawns[Color::WHITE] | pawns[Color::BLACK];
+    knights[Color::BOTH] = knights[Color::WHITE] | knights[Color::BLACK];
+    bishops[Color::BOTH] = bishops[Color::WHITE] | bishops[Color::BLACK];
+    rooks[Color::BOTH] = rooks[Color::WHITE] | rooks[Color::BLACK];
+    queens[Color::BOTH] = queens[Color::WHITE] | queens[Color::BLACK];
+    kings[Color::BOTH] = kings[Color::WHITE] | kings[Color::BLACK];
+
 }
 
 /* PUBLIC FUNCTIONS */
@@ -214,7 +223,7 @@ U64 board::get_black_pieces() const
            bishops[Color::BLACK] |
            rooks[Color::BLACK] |
            queens[Color::BLACK] |
-           kings[Color::WHITE];
+           kings[Color::BLACK];
 }
 
 U64 board::get_white_pawns() const
@@ -488,6 +497,48 @@ void board::print() const
         }
         std::cout << std::endl;
     }
+}
+
+std::string board::to_string() const
+{
+    char pieces[Board::SQUARES];
+
+    // build CLI text representation
+    for (unsigned int i = 0; i < Board::SQUARES; ++i)
+    {
+        U64 k = 1ULL << i;
+        if (k & pawns[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::PAWN;
+        }
+        else if (k & knights[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::KNIGHT;
+        }
+        else if (k & bishops[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::BISHOP;
+        }
+        else if (k & rooks[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::ROOK;
+        }
+        else if (k & queens[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::QUEEN;
+        }
+        else if (k & kings[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::KING;
+        }
+        else
+        {
+            pieces[i] = Board::PieceChar::EMPTY;
+        }
+    }
+
+    std::string s(pieces);
+    return s;
 }
 
 /* PRIVATE FUNCTIONS */

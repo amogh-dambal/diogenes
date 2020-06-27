@@ -74,6 +74,8 @@ public:
     bool can_black_castle_qside() const;
     bool can_black_castle_kside() const;
 
+    std::string to_string() const;
+
 private:
     // piece board sets
     U64 pawns[3]{};

@@ -5,6 +5,7 @@
 #include <catch2/catch.hpp>
 
 #include "board.hpp"
+#include "bitboard.hpp"
 #include "stds.hpp"
 
 TEST_CASE("initialized properly", "[constructor]") {
@@ -42,8 +43,11 @@ TEST_CASE("initialize from FEN string - starting position", "[constructor]")
 {
     // starting position
     std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    board b(fen);
+    board fen_start(fen);
+    board start;
 
-    REQUIRE(b.ep_target_square() == Board::Square::NONE);
-    REQUIRE(b.ply() == 0);
+    REQUIRE(start.get_occupied_squares() == fen_start.get_occupied_squares());
+    REQUIRE(start.get_white_pieces() == fen_start.get_white_pieces());
+    REQUIRE(start.get_black_pieces() == fen_start.get_black_pieces());
+    
 }
