@@ -131,7 +131,8 @@ game_over_(false)
         }
         else
         {
-            sq = (rank * 8) + (7 - i);
+            sq = (rank * 8) + i;
+            std::cout << sq << std::endl;
             // WHITE piece
             if (isupper(piece))
             {
@@ -205,27 +206,80 @@ game_over_(false)
 
 }
 
-bool board::operator==(const board& rhs)
+bool board::operator==(const board& rhs) const
 {
     return
     this->ply_ == rhs.ply_ &&
-    this->side_to_move_ == rhs.side_to_move_ &&
-    this->ep_target_sq_ == rhs.ep_target_sq_ &&
     this->can_black_castle_qside_ == rhs.can_black_castle_qside_ &&
     this->can_black_castle_kside_ == rhs.can_black_castle_kside_ &&
     this->can_white_castle_kside_ == rhs.can_black_castle_kside_ &&
     this->can_white_castle_qside_ == rhs.can_white_castle_qside_ &&
+
     this->pawns[Color::WHITE] == rhs.pawns[Color::WHITE] &&
     this->knights[Color::WHITE] == rhs.knights[Color::WHITE] &&
     this->bishops[Color::WHITE] == rhs.bishops[Color::WHITE] &&
+    this->rooks[Color::WHITE] == rhs.rooks[Color::WHITE] &&
     this->queens[Color::WHITE] == rhs.queens[Color::WHITE] &&
     this->kings[Color::WHITE] == rhs.kings[Color::WHITE] &&
+
     this->pawns[Color::BLACK] == rhs.pawns[Color::BLACK] &&
     this->knights[Color::BLACK] == rhs.knights[Color::BLACK] &&
     this->bishops[Color::BLACK] == rhs.bishops[Color::BLACK] &&
+    this->rooks[Color::WHITE] == rhs.rooks[Color::WHITE] &&
     this->queens[Color::BLACK] == rhs.queens[Color::BLACK] &&
     this->kings[Color::BLACK] == rhs.kings[Color::BLACK];
 
+}
+
+std::ostream& operator<<(std::ostream& out, const board& b)
+{
+    char pieces[Board::SQUARES];
+
+    // build CLI text representation
+    for (unsigned int i = 0; i < Board::SQUARES; ++i)
+    {
+        U64 k = 1ULL << i;
+        if (k & b.pawns[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::PAWN;
+        }
+        else if (k & b.knights[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::KNIGHT;
+        }
+        else if (k & b.bishops[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::BISHOP;
+        }
+        else if (k & b.rooks[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::ROOK;
+        }
+        else if (k & b.queens[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::QUEEN;
+        }
+        else if (k & b.kings[Color::BOTH])
+        {
+            pieces[i] = Board::PieceChar::KING;
+        }
+        else
+        {
+            pieces[i] = Board::PieceChar::EMPTY;
+        }
+    }
+
+    // output it in the correct format
+    for (int rank = Rank::EIGHT; rank >= Rank::ONE; --rank)
+    {
+        for (int file = File::A; file <= File::H; ++file)
+        {
+            const int index = util::fr_to_board_index(file, rank);
+            out << pieces[index] << "\t";
+        }
+        out << std::endl;
+    }
+    return out;
 }
 
 /* PUBLIC FUNCTIONS */
@@ -474,52 +528,7 @@ U64 board::generate_black_knight_attacks() const
  */
 void board::print() const
 {
-    char pieces[Board::SQUARES];
 
-    // build CLI text representation
-    for (unsigned int i = 0; i < Board::SQUARES; ++i)
-    {
-        U64 k = 1ULL << i;
-        if (k & pawns[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::PAWN;
-        }
-        else if (k & knights[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::KNIGHT;
-        }
-        else if (k & bishops[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::BISHOP;
-        }
-        else if (k & rooks[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::ROOK;
-        }
-        else if (k & queens[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::QUEEN;
-        }
-        else if (k & kings[Color::BOTH])
-        {
-            pieces[i] = Board::PieceChar::KING;
-        }
-        else
-        {
-            pieces[i] = Board::PieceChar::EMPTY;
-        }
-    }
-
-    // output it in the correct format
-    for (int rank = Rank::EIGHT; rank >= Rank::ONE; --rank)
-    {
-        for (int file = File::A; file <= File::H; ++file)
-        {
-            const int index = util::fr_to_board_index(file, rank);
-            std::cout << pieces[index] << "\t";
-        }
-        std::cout << std::endl;
-    }
 }
 
 std::string board::to_string() const

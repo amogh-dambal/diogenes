@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <fstream>
 
 #include "stds.hpp"
 
@@ -21,8 +22,9 @@ public:
     board();
     board(const std::string& fen);
 
-    bool operator==(const board& rhs);
+    bool operator==(const board& rhs) const;
 
+    friend std::ostream& operator<<(std::ostream& out, const board& b);
     void print() const;
 
     U64 get_white_pieces() const;

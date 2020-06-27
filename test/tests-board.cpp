@@ -46,8 +46,5 @@ TEST_CASE("initialize from FEN string - starting position", "[constructor]")
     board fen_start(fen);
     board start;
 
-    REQUIRE(start.get_occupied_squares() == fen_start.get_occupied_squares());
-    REQUIRE(start.get_white_pieces() == fen_start.get_white_pieces());
-    REQUIRE(start.get_black_pieces() == fen_start.get_black_pieces());
-
+    REQUIRE(start == fen_start);
 }
