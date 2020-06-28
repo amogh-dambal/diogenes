@@ -25,7 +25,6 @@ public:
     bool operator==(const board& rhs) const;
 
     friend std::ostream& operator<<(std::ostream& out, const board& b);
-    void print() const;
 
     U64 get_white_pieces() const;
     U64 get_white_pawns() const;

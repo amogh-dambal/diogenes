@@ -205,6 +205,13 @@ game_over_(false)
 
 }
 
+/**
+ * overload operator== to make it easy to check if
+ * one board is equal to another board if all members
+ * are equal (i.e. game state is equal)
+ * @param rhs: reference to other board obj (right hand side) to compare this with
+ * @return boolean value that represents if all fields are equal
+ */
 bool board::operator==(const board& rhs) const
 {
     return
@@ -230,6 +237,16 @@ bool board::operator==(const board& rhs) const
 
 }
 
+/**
+ * output operator to print a board object
+ * pieces are printed using algebraic notation
+ * empty squares are dots
+ * printed from white's perspective (i.e. 8th rank
+ * on the top, 1st rank on the bottom)
+ * @param out: reference to the ostream
+ * @param b : reference to the board object
+ * @return reference to the out stream
+ */
 std::ostream& operator<<(std::ostream& out, const board& b)
 {
     char pieces[Board::SQUARES];
@@ -517,19 +534,14 @@ U64 board::generate_black_knight_attacks() const
 }
 
 /**
- * function to print the chessboard in its current state
- * each piece is represented with a unique piece char, while
- * empty squares are represented with a unique 'empty' char
- * the definitions of these special characters can be found
- * in stds.hpp, board::piecechar
- * @param: None
- * @return: void
+ * get the string representation of this board object
+ * pieces are represented using algebraic notation with
+ * empty squares represented as dots
+ * the pieces are returned in the same order used by
+ * FEN notation
+ * @return std::string that represents the board's current
+ * position of pieces
  */
-void board::print() const
-{
-
-}
-
 std::string board::to_string() const
 {
     char pieces[Board::SQUARES];
