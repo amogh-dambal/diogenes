@@ -3,8 +3,6 @@
 //
 
 #include "board.hpp"
-
-#include <utility>
 #include "bitboard.hpp"
 #include "utils.hpp"
 
