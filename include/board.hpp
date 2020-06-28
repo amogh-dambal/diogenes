@@ -88,6 +88,10 @@ private:
     U64 queens[3]{};
     U64 kings[3]{};
 
+    /// if we keep these as member fields instead
+    /// of computed functions every time they're
+    /// needed, we have to update them in the
+    /// make and unmake routine
     U64 occupied_squares;
     U64 empty_squares;
 

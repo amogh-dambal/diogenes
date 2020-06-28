@@ -52,4 +52,7 @@ TEST_CASE("Function to get index of MS1B", "[bitscan_reverse]")
     REQUIRE(i == 63);
 }
 
+TEST_CASE("Occluded fills")
+{
 
+}

@@ -35,8 +35,6 @@ TEST_CASE("initialized properly", "[constructor]") {
     REQUIRE(b.get_black_rooks() ==   0x8100000000000000);
     REQUIRE(b.get_black_queens() ==  0x0800000000000000);
     REQUIRE(b.get_black_kings() ==   0x1000000000000000);
-
-
 }
 
 std::string fen;
@@ -56,5 +54,4 @@ TEST_CASE("initialize from FEN string after 1.e4", "[constructor]")
 
     REQUIRE(pos.ply() == 0);
     REQUIRE(pos.side_to_move() == Color::BLACK);
-    std::cout << pos << std::endl;
 }

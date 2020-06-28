@@ -462,7 +462,7 @@ bool board::can_black_castle_kside() const
     return can_black_castle_kside_;
 }
 
-// functions to generate attacks based on empty/avaiable squares
+// functions to generate attacks based on empty/available squares
 U64 board::generate_white_king_attacks() const
 {
     U64 w_kings = kings[Color::WHITE];
@@ -495,6 +495,81 @@ U64 board::generate_white_knight_attacks() const
         attacks |= (get_knight_targets(sq) & possible_mvs);
     }
     return attacks;
+}
+
+U64 board::generate_white_bishop_attacks() const
+{
+    U64 attacks = 0;
+    U64 w_bishops = bishops[Color::WHITE];
+    std::vector<int> bishop_sqs = bitboard::serialize(w_bishops);
+
+    assert(bishop_sqs.size() == 2);
+
+    const U64 possible_mvs = get_black_pieces() | empty_squares;
+
+    U64 bpos;
+    for (int bsq : bishop_sqs)
+    {
+        bpos = 1ULL << bsq;
+        attacks |= (
+                bitboard::fill_northeast(bpos, possible_mvs) |
+                bitboard::fill_northwest(bpos, possible_mvs) |
+                bitboard::fill_southeast(bpos, possible_mvs) |
+                bitboard::fill_southwest(bpos, possible_mvs)
+        );
+    }
+    attacks ^= w_bishops;
+    return attacks;
+}
+
+U64 board::generate_white_rook_attacks() const
+{
+    U64 attacks = 0;
+    U64 w_rooks = rooks[Color::WHITE];
+    std::vector<int> rook_sqs = bitboard::serialize(w_rooks);
+
+    const U64 possible_mvs = get_black_pieces() | empty_squares;
+
+    U64 rpos;
+    for (int rsq : rook_sqs)
+    {
+        rpos = 1ULL << rsq;
+        attacks |= (
+                bitboard::fill_north(rpos, possible_mvs) |
+                bitboard::fill_south(rpos, possible_mvs) |
+                bitboard::fill_east(rpos, possible_mvs) |
+                bitboard::fill_west(rpos, possible_mvs));
+    }
+    attacks ^= w_rooks;
+    return attacks;
+}
+
+U64 board::generate_white_queen_attacks() const
+{
+    U64 attacks = 0;
+    U64 w_queens = queens[Color::WHITE];
+    std::vector<int> queen_sqs = bitboard::serialize(w_queens);
+
+    const U64 possible_mvs = get_black_pieces() | empty_squares;
+
+    U64 qpos;
+    for (int qsq : queen_sqs)
+    {
+        qpos = 1ULL << qsq;
+        attacks |= (
+                bitboard::fill_north(qpos, possible_mvs) |
+                bitboard::fill_south(qpos, possible_mvs) |
+                bitboard::fill_east(qpos, possible_mvs) |
+                bitboard::fill_west(qpos, possible_mvs) |
+                bitboard::fill_northeast(qpos, possible_mvs) |
+                bitboard::fill_northwest(qpos, possible_mvs) |
+                bitboard::fill_southeast(qpos, possible_mvs) |
+                bitboard::fill_southwest(qpos, possible_mvs)
+                );
+    }
+    attacks ^= w_queens;
+    return attacks;
+
 }
 
 U64 board::generate_black_king_attacks() const
@@ -531,6 +606,78 @@ U64 board::generate_black_knight_attacks() const
     return attacks;
 }
 
+U64 board::generate_black_bishop_attacks() const
+{
+    U64 attacks = 0;
+    U64 b_bishops = bishops[Color::BLACK];
+    std::vector<int> bishop_sqs = bitboard::serialize(b_bishops);
+
+    assert(bishop_sqs.size() == 2);
+
+    const U64 possible_mvs = get_white_pieces() | empty_squares;
+    U64 bpos;
+    for (int bsq : bishop_sqs)
+    {
+        bpos = 1ULL << bsq;
+        attacks |= (
+                bitboard::fill_northeast(bpos, possible_mvs) |
+                bitboard::fill_northwest(bpos, possible_mvs) |
+                bitboard::fill_southeast(bpos, possible_mvs) |
+                bitboard::fill_southwest(bpos, possible_mvs)
+        );
+    }
+    attacks ^= b_bishops;
+    return attacks;
+}
+
+U64 board::generate_black_rook_attacks() const
+{
+    U64 attacks = 0;
+    U64 b_rooks = rooks[Color::BLACK];
+    std::vector<int> rook_sqs = bitboard::serialize(b_rooks);
+
+    const U64 possible_mvs = get_white_pieces() | empty_squares;
+
+    U64 rpos;
+    for (int rsq : rook_sqs)
+    {
+        rpos = 1ULL << rsq;
+        attacks |= (
+                bitboard::fill_north(rpos, possible_mvs) |
+                bitboard::fill_south(rpos, possible_mvs) |
+                bitboard::fill_east(rpos, possible_mvs) |
+                bitboard::fill_west(rpos, possible_mvs));
+    }
+    attacks ^= b_rooks;
+    return attacks;
+}
+
+U64 board::generate_black_queen_attacks() const
+{
+    U64 attacks = 0;
+    U64 b_queens = queens[Color::BLACK];
+    std::vector<int> queen_sqs = bitboard::serialize(b_queens);
+
+    const U64 possible_mvs = get_white_pieces() | empty_squares;
+
+    U64 qpos;
+    for (int qsq : queen_sqs)
+    {
+        qpos = 1ULL << qsq;
+        attacks |= (
+                bitboard::fill_north(qpos, possible_mvs) |
+                bitboard::fill_south(qpos, possible_mvs) |
+                bitboard::fill_east(qpos, possible_mvs) |
+                bitboard::fill_west(qpos, possible_mvs) |
+                bitboard::fill_northeast(qpos, possible_mvs) |
+                bitboard::fill_northwest(qpos, possible_mvs) |
+                bitboard::fill_southeast(qpos, possible_mvs) |
+                bitboard::fill_southwest(qpos, possible_mvs)
+        );
+    }
+    attacks ^= b_queens;
+    return attacks;
+}
 /**
  * get the string representation of this board object
  * pieces are represented using algebraic notation with
