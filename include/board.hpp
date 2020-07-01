@@ -23,8 +23,8 @@ public:
     board(const std::string& fen);
 
     bool operator==(const board& rhs) const;
-
     friend std::ostream& operator<<(std::ostream& out, const board& b);
+    std::string to_string() const;
 
     U64 get_pieces(Color::Value color) const;
     U64 get_pawns(Color::Value color) const;
@@ -61,6 +61,7 @@ public:
     U64 generate_black_queen_attacks() const;
     U64 generate_black_king_attacks() const;
 
+    // functions to return elements of the position
     Color::Value side_to_move() const;
     int ply() const;
     bool game_over() const;
@@ -70,8 +71,6 @@ public:
     bool can_white_castle_kside() const;
     bool can_black_castle_qside() const;
     bool can_black_castle_kside() const;
-
-    std::string to_string() const;
 
 private:
     // piece board sets
