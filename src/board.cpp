@@ -190,7 +190,7 @@ game_over_(false)
         }
     }
 
-    occupied_squares = get_white_pieces() | get_black_pieces();
+    occupied_squares = get_pieces(Color::WHITE) | get_pieces(Color::BLACK);
     empty_squares = ~occupied_squares;
 
     // both pieces
@@ -297,84 +297,45 @@ std::ostream& operator<<(std::ostream& out, const board& b)
 }
 
 /* PUBLIC FUNCTIONS */
-U64 board::get_white_pieces() const
+U64 board::get_pieces(Color::Value color) const 
 {
-    return pawns[Color::WHITE] |
-    knights[Color::WHITE] |
-    bishops[Color::WHITE] |
-    rooks[Color::WHITE] |
-    queens[Color::WHITE] |
-    kings[Color::WHITE];
+    return
+    pawns[color]    |
+    knights[color]  |
+    bishops[color]  |
+    rooks[color]    |
+    queens[color]   |
+    kings[color];
 }
 
-U64 board::get_black_pieces() const
+U64 board::get_pawns(Color::Value color) const
 {
-    return pawns[Color::BLACK] |
-           knights[Color::BLACK] |
-           bishops[Color::BLACK] |
-           rooks[Color::BLACK] |
-           queens[Color::BLACK] |
-           kings[Color::BLACK];
+    return pawns[color];
 }
 
-U64 board::get_white_pawns() const
+U64 board::get_knights(Color::Value color) const 
 {
-    return this->pawns[Color::WHITE];
+    return knights[color];
 }
 
-U64 board::get_white_knights() const
+U64 board::get_bishops(Color::Value color) const
 {
-    return this->knights[Color::WHITE];
+    return bishops[color];
 }
 
-U64 board::get_white_bishops() const
+U64 board::get_rooks(Color::Value color) const 
 {
-    return this->bishops[Color::WHITE];
+    return rooks[color];
 }
 
-U64 board::get_white_rooks() const
+U64 board::get_queens(Color::Value color) const 
 {
-    return this->rooks[Color::WHITE];
+    return queens[color];
 }
 
-U64 board::get_white_queens() const
+U64 board::get_kings(Color::Value color) const 
 {
-    return this->queens[Color::WHITE];
-}
-
-U64 board::get_white_kings() const
-{
-    return this->kings[Color::WHITE];
-}
-
-U64 board::get_black_pawns() const
-{
-    return this->pawns[Color::BLACK];
-}
-
-U64 board::get_black_knights() const
-{
-    return this->knights[Color::BLACK];
-}
-
-U64 board::get_black_bishops() const
-{
-    return this->bishops[Color::BLACK];
-}
-
-U64 board::get_black_rooks() const
-{
-    return this->rooks[Color::BLACK];
-}
-
-U64 board::get_black_queens() const
-{
-    return this->queens[Color::BLACK];
-}
-
-U64 board::get_black_kings() const
-{
-    return this->kings[Color::BLACK];
+    return kings[color];
 }
 
 U64 board::get_knight_targets(Board::Square sq) const
@@ -469,7 +430,7 @@ U64 board::generate_white_pawn_attacks() const
     U64 w_pawns = pawns[Color::WHITE];
     U64 attacks = 0;
 
-    const U64 possible_mvs = get_black_pieces();
+    const U64 possible_mvs = get_pieces(Color::BLACK);
 
     attacks |= bitboard::northeast(w_pawns) | bitboard::northwest(w_pawns);
     attacks &= possible_mvs;
@@ -504,7 +465,7 @@ U64 board::generate_white_king_attacks() const
     std::vector<int> king_sqs = bitboard::serialize(kings[Color::WHITE]);
 
     auto king_sq = (Board::Square)king_sqs.at(0);
-    U64 possible_mvs = get_black_pieces() | empty_squares;
+    U64 possible_mvs = get_pieces(Color::BLACK) | empty_squares;
     attacks |= (get_king_targets(king_sq) & possible_mvs);
     return attacks;
 }
@@ -517,7 +478,7 @@ U64 board::generate_white_knight_attacks() const
     std::vector<int> knight_sqs = bitboard::serialize(w_knights);
 
     Board::Square sq;
-    const U64 possible_mvs = get_black_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::BLACK) | empty_squares;
     for (int ksq : knight_sqs)
     {
         sq = (Board::Square) ksq;
@@ -534,7 +495,7 @@ U64 board::generate_white_bishop_attacks() const
 
     assert(bishop_sqs.size() == 2);
 
-    const U64 possible_mvs = get_black_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::BLACK) | empty_squares;
 
     U64 bpos;
     for (int bsq : bishop_sqs)
@@ -557,7 +518,7 @@ U64 board::generate_white_rook_attacks() const
     U64 w_rooks = rooks[Color::WHITE];
     std::vector<int> rook_sqs = bitboard::serialize(w_rooks);
 
-    const U64 possible_mvs = get_black_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::BLACK) | empty_squares;
 
     U64 rpos;
     for (int rsq : rook_sqs)
@@ -579,7 +540,7 @@ U64 board::generate_white_queen_attacks() const
     U64 w_queens = queens[Color::WHITE];
     std::vector<int> queen_sqs = bitboard::serialize(w_queens);
 
-    const U64 possible_mvs = get_black_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::BLACK) | empty_squares;
 
     U64 qpos;
     for (int qsq : queen_sqs)
@@ -621,7 +582,7 @@ U64 board::generate_black_pawn_attacks() const
     U64 attacks = 0;
     U64 b_pawns = pawns[Color::BLACK];
 
-    const U64 possible_mvs = get_white_pieces();
+    const U64 possible_mvs = get_pieces(Color::WHITE);
 
     attacks |= bitboard::southwest(b_pawns) | bitboard::southeast(b_pawns);
     attacks &= possible_mvs;
@@ -641,7 +602,7 @@ U64 board::generate_black_king_attacks() const
     std::vector<int> king_sqs = bitboard::serialize(kings[Color::BLACK]);
 
     auto king_sq = (Board::Square)king_sqs.at(0);
-    U64 possible_mvs = get_white_pieces() | empty_squares;
+    U64 possible_mvs = get_pieces(Color::WHITE) | empty_squares;
     attacks |= (get_king_targets(king_sq) & possible_mvs);
     return attacks;
 }
@@ -654,7 +615,7 @@ U64 board::generate_black_knight_attacks() const
     std::vector<int> knight_sqs = bitboard::serialize(b_knights);
 
     Board::Square sq;
-    const U64 possible_mvs = get_white_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::WHITE) | empty_squares;
     for (int ksq : knight_sqs)
     {
         sq = (Board::Square) ksq;
@@ -671,7 +632,7 @@ U64 board::generate_black_bishop_attacks() const
 
     assert(bishop_sqs.size() == 2);
 
-    const U64 possible_mvs = get_white_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::WHITE) | empty_squares;
     U64 bpos;
     for (int bsq : bishop_sqs)
     {
@@ -693,7 +654,7 @@ U64 board::generate_black_rook_attacks() const
     U64 b_rooks = rooks[Color::BLACK];
     std::vector<int> rook_sqs = bitboard::serialize(b_rooks);
 
-    const U64 possible_mvs = get_white_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::WHITE) | empty_squares;
 
     U64 rpos;
     for (int rsq : rook_sqs)
@@ -715,7 +676,7 @@ U64 board::generate_black_queen_attacks() const
     U64 b_queens = queens[Color::BLACK];
     std::vector<int> queen_sqs = bitboard::serialize(b_queens);
 
-    const U64 possible_mvs = get_white_pieces() | empty_squares;
+    const U64 possible_mvs = get_pieces(Color::WHITE) | empty_squares;
 
     U64 qpos;
     for (int qsq : queen_sqs)

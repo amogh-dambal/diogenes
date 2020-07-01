@@ -26,21 +26,13 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const board& b);
 
-    U64 get_white_pieces() const;
-    U64 get_white_pawns() const;
-    U64 get_white_knights() const;
-    U64 get_white_bishops() const;
-    U64 get_white_rooks() const;
-    U64 get_white_queens() const;
-    U64 get_white_kings() const;
-
-    U64 get_black_pieces() const;
-    U64 get_black_pawns() const;
-    U64 get_black_knights() const;
-    U64 get_black_bishops() const;
-    U64 get_black_rooks() const;
-    U64 get_black_queens() const;
-    U64 get_black_kings() const;
+    U64 get_pieces(Color::Value color) const;
+    U64 get_pawns(Color::Value color) const;
+    U64 get_knights(Color::Value color) const;
+    U64 get_bishops(Color::Value color) const;
+    U64 get_rooks(Color::Value color) const;
+    U64 get_queens(Color::Value color) const;
+    U64 get_kings(Color::Value color) const;
 
     U64 get_occupied_squares() const;
     U64 get_empty_squares() const;

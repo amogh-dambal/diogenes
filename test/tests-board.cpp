@@ -22,19 +22,19 @@ TEST_CASE("initialized properly", "[constructor]") {
     REQUIRE(b.get_occupied_squares() == all_pcs);
     REQUIRE(b.get_empty_squares() == ~all_pcs);
 
-    REQUIRE(b.get_white_pawns() == 0xff00);
-    REQUIRE(b.get_white_knights() == 0x42);
-    REQUIRE(b.get_white_bishops() == 0x24);
-    REQUIRE(b.get_white_rooks() == 0x81);
-    REQUIRE(b.get_white_queens() == 0x8);
-    REQUIRE(b.get_white_kings() == 0x10);
+    REQUIRE(b.get_pawns(Color::WHITE) == 0xff00);
+    REQUIRE(b.get_knights(Color::WHITE) == 0x42);
+    REQUIRE(b.get_bishops(Color::WHITE) == 0x24);
+    REQUIRE(b.get_rooks(Color::WHITE) == 0x81);
+    REQUIRE(b.get_queens(Color::WHITE) == 0x8);
+    REQUIRE(b.get_kings(Color::WHITE) == 0x10);
 
-    REQUIRE(b.get_black_pawns() ==   0x00ff000000000000);
-    REQUIRE(b.get_black_knights() == 0x4200000000000000);
-    REQUIRE(b.get_black_bishops() == 0x2400000000000000);
-    REQUIRE(b.get_black_rooks() ==   0x8100000000000000);
-    REQUIRE(b.get_black_queens() ==  0x0800000000000000);
-    REQUIRE(b.get_black_kings() ==   0x1000000000000000);
+    REQUIRE(b.get_pawns(Color::BLACK) ==   0x00ff000000000000);
+    REQUIRE(b.get_knights(Color::BLACK) == 0x4200000000000000);
+    REQUIRE(b.get_bishops(Color::BLACK) == 0x2400000000000000);
+    REQUIRE(b.get_rooks(Color::BLACK) ==   0x8100000000000000);
+    REQUIRE(b.get_queens(Color::BLACK) ==  0x0800000000000000);
+    REQUIRE(b.get_kings(Color::BLACK) ==   0x1000000000000000);
 }
 
 std::string fen;
