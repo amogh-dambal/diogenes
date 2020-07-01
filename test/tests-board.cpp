@@ -55,3 +55,10 @@ TEST_CASE("initialize from FEN string after 1.e4", "[constructor]")
     REQUIRE(pos.ply() == 0);
     REQUIRE(pos.side_to_move() == Color::BLACK);
 }
+
+TEST_CASE("initialize from random FEN string", "[constructor]")
+{
+    fen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+    board b(fen);
+
+}

@@ -53,13 +53,15 @@ public:
     U64 get_queen_targets(Board::Square sq) const;
     U64 get_king_targets(Board::Square sq) const;
 
+    U64 generate_white_pawn_push_targets(bool single) const;
     U64 generate_white_pawn_attacks() const;
     U64 generate_white_knight_attacks() const;
     U64 generate_white_bishop_attacks() const;
     U64 generate_white_rook_attacks() const;
     U64 generate_white_queen_attacks() const;
     U64 generate_white_king_attacks() const;
-    
+
+    U64 generate_black_pawn_push_targets(bool single) const;
     U64 generate_black_pawn_attacks() const;
     U64 generate_black_knight_attacks() const;
     U64 generate_black_bishop_attacks() const;

@@ -463,6 +463,35 @@ bool board::can_black_castle_kside() const
 }
 
 // functions to generate attacks based on empty/available squares
+
+U64 board::generate_white_pawn_attacks() const
+{
+    U64 w_pawns = pawns[Color::WHITE];
+    U64 attacks = 0;
+
+    const U64 possible_mvs = get_black_pieces();
+
+    attacks |= bitboard::northeast(w_pawns) | bitboard::northwest(w_pawns);
+    attacks &= possible_mvs;
+    return attacks;
+}
+
+U64 board::generate_white_pawn_push_targets(bool single = true) const
+{
+    U64 attacks = 0;
+    U64 w_pawns = pawns[Color::WHITE];
+
+    if (single)
+    {
+        attacks |= bitboard::north(w_pawns) & empty_squares;
+    }
+    else
+    {
+        attacks |= (bitboard::north(bitboard::north(w_pawns)) & empty_squares);
+    }
+    return attacks;
+}
+
 U64 board::generate_white_king_attacks() const
 {
     U64 w_kings = kings[Color::WHITE];
@@ -570,6 +599,34 @@ U64 board::generate_white_queen_attacks() const
     attacks ^= w_queens;
     return attacks;
 
+}
+
+U64 board::generate_black_pawn_push_targets(bool single = true) const
+{
+    U64 attacks = 0;
+    U64 b_pawns = pawns[Color::BLACK];
+    if (single)
+    {
+        attacks |= bitboard::north(b_pawns) & empty_squares;
+    }
+    else
+    {
+        attacks |= bitboard::north(bitboard::north(b_pawns)) & empty_squares;
+    }
+    return attacks;
+}
+
+U64 board::generate_black_pawn_attacks() const
+{
+    U64 attacks = 0;
+    U64 b_pawns = pawns[Color::BLACK];
+
+    const U64 possible_mvs = get_white_pieces();
+
+    attacks |= bitboard::southwest(b_pawns) | bitboard::southeast(b_pawns);
+    attacks &= possible_mvs;
+
+    return attacks;
 }
 
 U64 board::generate_black_king_attacks() const

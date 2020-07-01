@@ -15,14 +15,14 @@ TEST_CASE("testing bishop attacks from starting position", "[generate_white_bish
 
     b_attacks = b.generate_black_bishop_attacks();
     REQUIRE(b_attacks == 0);
-
 }
 
-TEST_CASE("testing bishop attacks after 1.e4")
+TEST_CASE("testing rook attacks from starting position", "[generate_rook_attacks]")
 {
-    std::string fen_record = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
-    board b(fen_record);
+    board b;
+    U64 r_attacks = b.generate_black_rook_attacks();
+    REQUIRE(r_attacks == 0);
 
-    U64 b_attacks = b.generate_white_bishop_attacks();
-    bitboard::print_bitboard(b_attacks);
+    r_attacks = b.generate_white_rook_attacks();
+    REQUIRE(r_attacks == 0);
 }
