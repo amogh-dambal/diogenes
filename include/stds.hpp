@@ -94,16 +94,6 @@ namespace Board {
         NW = 7
     };
 
-    enum class Piece
-    {
-        PAWN,
-        KNIGHT,
-        BISHOP,
-        ROOK,
-        QUEEN,
-        KING
-    };
-
     enum PieceChar
     {
         EMPTY = '.',
@@ -132,5 +122,26 @@ namespace Board {
     const char FEN_RANK_DELIMITER = '/';
 }
 
+namespace Move
+{
+    enum PieceEncoding
+    {
+        PAWN,
+        KNIGHT,
+        BISHOP,
+        ROOK,
+        QUEEN,
+        KING,
+        QUEENSIDE_CASTLE,
+        KINGSIDE_CASTLE
+    };
 
+    const U32 FROM_FLAG = 0x3fULL;
+    const U32 TO_FLAG = 0xfa0ULL;
+    const U32 PIECE_FLAG = 0x7000ULL;
+    const U32 EN_PASSANT_FLAG = 0x50000ULL;
+    const U32 CAPTURE_FLAG = 0x40000ULL;
+    const U32 CASTLE_FLAG = 0x20000ULL;
+    const U32 PROMOTION_FLAG = 0x80000ULL;
+}
 #endif //DIOGENES_STDS_HPP

@@ -10,18 +10,41 @@
 class move
 {
 public:
-    move(Board::Piece pc, Board::Square from, Board::Square to);
+    move(U32 move);
 
-    const Board::Piece piece() const;
     const Board::Square from() const;
     const Board::Square to() const;
+    const bool is_castle() const;
+    const bool is_capture() const;
+    const bool is_ep() const;
+    const bool is_promotion() const;
 
 private:
-    // what piece is it?
-    Board::Piece piece_;
+    // 32 bit integer encoding move information
+    U32 mv;
 
+    // various states of the board
+    bool is_ep_;
+    bool is_capture_;
+    bool is_castle_;
+    bool is_promotion_;
+    Move::PieceEncoding piece_encoding;
     Board::Square from_;
     Board::Square to_;
 };
+
+/**
+ * MOVE ENCODING
+ * 6 bits: from
+ * 6 bits: to
+ * 4 bits: special flags
+ * 3 bits: piece
+ * P - 000  Q - 100
+ * N - 001  K - 101
+ * B - 010  QC - 110
+ * R - 011  KC - 111
+ * other 13 bits can be used for
+ * more advanced things
+ */
 
 #endif //DIOGENES_MOVE_HPP
