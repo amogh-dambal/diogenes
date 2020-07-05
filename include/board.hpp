@@ -13,6 +13,7 @@
 #include <fstream>
 
 #include "stds.hpp"
+#include "move.hpp"
 
 typedef std::map<std::string, Board::Square> square_parser;
 
@@ -45,21 +46,7 @@ public:
     U64 get_queen_targets(Board::Square sq) const;
     U64 get_king_targets(Board::Square sq) const;
 
-    U64 generate_white_pawn_push_targets(bool single) const;
-    U64 generate_white_pawn_attacks() const;
-    U64 generate_white_knight_attacks() const;
-    U64 generate_white_bishop_attacks() const;
-    U64 generate_white_rook_attacks() const;
-    U64 generate_white_queen_attacks() const;
-    U64 generate_white_king_attacks() const;
 
-    U64 generate_black_pawn_push_targets(bool single) const;
-    U64 generate_black_pawn_attacks() const;
-    U64 generate_black_knight_attacks() const;
-    U64 generate_black_bishop_attacks() const;
-    U64 generate_black_rook_attacks() const;
-    U64 generate_black_queen_attacks() const;
-    U64 generate_black_king_attacks() const;
 
     // functions to return elements of the position
     Color::Value side_to_move() const;
@@ -117,6 +104,8 @@ private:
     bool can_black_castle_kside_;
 
     Board::Square ep_target_sq_;
+
+
 
 };
 
