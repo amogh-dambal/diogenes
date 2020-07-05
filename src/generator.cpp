@@ -11,7 +11,17 @@
 generator::generator(const board& bd) :
 b(bd)
 {
-    
+    // set active player
+    active = b.side_to_move();
+}
+
+movelist generator::moves() const
+{
+    movelist mvs;
+
+
+
+    return mvs;
 }
 
 U64 generator::generate_white_pawn_attacks() const

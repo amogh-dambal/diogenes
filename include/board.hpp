@@ -46,8 +46,6 @@ public:
     U64 get_queen_targets(Board::Square sq) const;
     U64 get_king_targets(Board::Square sq) const;
 
-
-
     // functions to return elements of the position
     Color::Value side_to_move() const;
     int ply() const;

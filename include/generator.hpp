@@ -44,6 +44,8 @@ private:
     const board& b;
     movelist ml;
 
+    Color::Value active;
+
 };
 
 
