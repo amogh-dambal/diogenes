@@ -15,6 +15,10 @@ TEST_CASE("initialized properly", "[constructor]") {
     REQUIRE(b.ply() == 0);
     REQUIRE(b.side_to_move() == Color::WHITE);
     REQUIRE(!b.game_over());
+    REQUIRE(b.can_white_castle_kside());
+    REQUIRE(b.can_white_castle_qside());
+    REQUIRE(b.can_black_castle_kside());
+    REQUIRE(b.can_black_castle_qside());
 
     // check whether pieces are set correctly
     U64 all_pcs = 0xffff00000000ffff;
@@ -60,5 +64,6 @@ TEST_CASE("initialize from random FEN string", "[constructor]")
 {
     fen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
     board b(fen);
-
 }
+
+// TODO: write tests for lookup tables
