@@ -7,15 +7,15 @@
 move::move(const U32 move)
 : mv(move)
 {
-    // set square flags
-    from_ = (Board::Square)(move & Move::FROM_FLAG);
-    to_ = (Board::Square)(move & Move::TO_FLAG);
-    piece_encoding = (Move::PieceEncoding)(move & Move::PIECE_FLAG);
+    // set square variables
+    from_ = (Board::Square)(move & Move::FROM_MASK);
+    to_ = (Board::Square)(move & Move::TO_MASK);
+    piece_encoding = (Move::PieceEncoding)(move & Move::PIECE_MASK);
 
-    is_ep_ = move & Move::EN_PASSANT_FLAG;
-    is_capture_ = move & Move::CAPTURE_FLAG;
-    is_castle_ = move & Move::CASTLE_FLAG;
-    is_promotion_ = move & Move::PROMOTION_FLAG;
+    is_ep_ = move & Move::EN_PASSANT_MASK;
+    is_capture_ = move & Move::CAPTURE_MASK;
+    is_castle_ = move & Move::CASTLE_MASK;
+    is_promotion_ = move & Move::PROMOTION_MASK;
 }
 
 move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const U32 flags)
@@ -27,14 +27,16 @@ move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const 
     mv = 0;
     mv |= (from & 0x3f);
     mv |= ((to & 0x3f) << 6);
-    mv |= (flags << 12);
-    mv |= (((U8)piece) << 16);
+    mv |= ((flags & 0xf) << 12);
+    mv |= (((U8)piece & 0x7) << 16);
 
-    is_ep_ = mv & Move::EN_PASSANT_FLAG;
-    is_capture_ = mv & Move::CAPTURE_FLAG;
-    is_castle_ = mv & Move::CASTLE_FLAG;
-    is_promotion_ = mv & Move::PROMOTION_FLAG;
+    std::cout << mv << std::endl;
 
+    // prevents captures from being flagged as EP moves
+    is_ep_ = ((mv & Move::EN_PASSANT_MASK) == Move::EN_PASSANT_MASK);
+    is_capture_ = mv & Move::CAPTURE_MASK;
+    is_castle_ = mv & Move::CASTLE_MASK;
+    is_promotion_ = mv & Move::PROMOTION_MASK;
 }
 
 /**
@@ -61,7 +63,7 @@ std::ostream& operator<<(std::ostream& out, const move& m)
     // TODO: write promotion logic
     else if (m.is_promotion_)
     {
-
+        out << "promotion";
     }
     // simple case (most quiet moves)
     else
@@ -114,8 +116,8 @@ std::string move::get_square_as_string(Board::Square sq)
     }
 
     // sq is guaranteed to be [0, 64)
-    std::string s = "";
-    char file = (sq % 8) + 'a';
-    char rank = (sq / 8) + '1';
+    std::string s;
+    char file = ((sq & 0xff) % 8) + 'a';
+    char rank = ((sq & 0xff) / 8) + '1';
     return s + file + rank;
 }

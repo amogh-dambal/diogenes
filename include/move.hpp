@@ -7,9 +7,9 @@
 
 #include <fstream>
 #include <map>
+#include <iostream>
 
 #include "stds.hpp"
-
 
 class move
 {
@@ -48,6 +48,7 @@ private:
  * 6 bits: from
  * 6 bits: to
  * 4 bits: special flags
+ *
  * 3 bits: piece
  * P - 000  Q - 100
  * N - 001  K - 101

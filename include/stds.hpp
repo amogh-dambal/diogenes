@@ -124,22 +124,29 @@ namespace Move
 {
     enum PieceEncoding
     {
-        PAWN = 'P',
-        KNIGHT = 'N',
-        BISHOP = 'B',
-        ROOK = 'R',
-        QUEEN = 'Q',
-        KING = 'K',
-        QUEENSIDE_CASTLE = 'U',
-        KINGSIDE_CASTLE = 'V'
+        PAWN,
+        KNIGHT,
+        BISHOP,
+        ROOK,
+        QUEEN,
+        KING,
+        QUEENSIDE_CASTLE,
+        KINGSIDE_CASTLE
     };
 
-    const U32 FROM_FLAG = 0x3fULL;
-    const U32 TO_FLAG = 0xfa0ULL;
-    const U32 PIECE_FLAG = 0x7000ULL;
-    const U32 EN_PASSANT_FLAG = 0x50000ULL;
-    const U32 CAPTURE_FLAG = 0x40000ULL;
-    const U32 CASTLE_FLAG = 0x20000ULL;
-    const U32 PROMOTION_FLAG = 0x80000ULL;
+    const U8 QUIET_FLAG = 0x0;
+    const U8 EN_PASSANT_FLAG = 0x5;
+    const U8 CAPTURE_FLAG = 0x4;
+    const U8 CASTLE_FLAG = 0x2;
+    const U8 PROMOTION_FLAG = 0x8;
+    const U8 DOUBLE_PUSH_FLAG = 0x1;
+
+    const U32 FROM_MASK = 0x3f;
+    const U32 TO_MASK = 0xfa0;
+    const U32 PIECE_MASK = 0x70000;
+    const U32 EN_PASSANT_MASK = EN_PASSANT_FLAG << 12;
+    const U32 CAPTURE_MASK = CAPTURE_FLAG << 12;
+    const U32 CASTLE_MASK = CASTLE_FLAG << 12;
+    const U32 PROMOTION_MASK = PROMOTION_FLAG << 12;
 }
 #endif //DIOGENES_STDS_HPP
