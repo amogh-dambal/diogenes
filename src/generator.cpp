@@ -15,14 +15,25 @@ b(bd)
     active = b.side_to_move();
 }
 
+/**
 movelist generator::moves() const
 {
     movelist mvs;
 
+    // white pawn moves
+    U64 flags = 0;
+    U64 w_pawns = b.get_pawns(Color::WHITE);
+    U64 w_pawn_single_push = generate_white_pawn_push_targets();
 
+    std::vector<int> single_push_targets = bitboard::serialize(w_pawn_single_push);
+    for (int tgt_sq : single_push_targets)
+    {
+        mvs.push_back(move(tgt_sq-8, tgt_sq, Move::PieceEncoding::PAWN, flags));
+    }
 
     return mvs;
 }
+*/
 
 U64 generator::generate_white_pawn_attacks() const
 {
@@ -36,7 +47,7 @@ U64 generator::generate_white_pawn_attacks() const
     return attacks;
 }
 
-U64 generator::generate_white_pawn_push_targets(bool single = true) const
+U64 generator::generate_white_pawn_push_targets(bool single) const
 {
     U64 attacks = 0;
     U64 w_pawns = b.get_pawns(Color::WHITE); 
@@ -161,7 +172,7 @@ U64 generator::generate_white_queen_attacks() const
 
 }
 
-U64 generator::generate_black_pawn_push_targets(bool single = true) const
+U64 generator::generate_black_pawn_push_targets(bool single) const
 {
     U64 attacks = 0;
     U64 b_pawns = b.get_pawns(Color::BLACK);

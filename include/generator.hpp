@@ -24,7 +24,7 @@ public:
 
     movelist moves() const;
 
-    U64 generate_white_pawn_push_targets(bool single) const;
+    U64 generate_white_pawn_push_targets(bool single=true) const;
     U64 generate_white_pawn_attacks() const;
     U64 generate_white_knight_attacks() const;
     U64 generate_white_bishop_attacks() const;
@@ -32,7 +32,7 @@ public:
     U64 generate_white_queen_attacks() const;
     U64 generate_white_king_attacks() const;
 
-    U64 generate_black_pawn_push_targets(bool single) const;
+    U64 generate_black_pawn_push_targets(bool single=true) const;
     U64 generate_black_pawn_attacks() const;
     U64 generate_black_knight_attacks() const;
     U64 generate_black_bishop_attacks() const;

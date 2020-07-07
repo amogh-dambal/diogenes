@@ -7,8 +7,6 @@
 
 // #define C64(x) x##ULL
 
-#include <map>
-
 typedef u_int64_t   U64;
 typedef u_int8_t    U8;
 typedef u_int16_t   U16;
@@ -126,14 +124,14 @@ namespace Move
 {
     enum PieceEncoding
     {
-        PAWN,
-        KNIGHT,
-        BISHOP,
-        ROOK,
-        QUEEN,
-        KING,
-        QUEENSIDE_CASTLE,
-        KINGSIDE_CASTLE
+        PAWN = 'P',
+        KNIGHT = 'N',
+        BISHOP = 'B',
+        ROOK = 'R',
+        QUEEN = 'Q',
+        KING = 'K',
+        QUEENSIDE_CASTLE = 'U',
+        KINGSIDE_CASTLE = 'V'
     };
 
     const U32 FROM_FLAG = 0x3fULL;

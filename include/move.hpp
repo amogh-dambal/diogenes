@@ -5,12 +5,19 @@
 #ifndef DIOGENES_MOVE_HPP
 #define DIOGENES_MOVE_HPP
 
+#include <fstream>
+#include <map>
+
 #include "stds.hpp"
+
 
 class move
 {
 public:
     move(U32 move);
+    move(U32 from, U32 to, Move::PieceEncoding piece, U32 flags);
+
+    friend std::ostream& operator<<(std::ostream& out, const move& m);
 
     const Board::Square from() const;
     const Board::Square to() const;
@@ -31,6 +38,9 @@ private:
     Move::PieceEncoding piece_encoding;
     Board::Square from_;
     Board::Square to_;
+
+    static std::string get_square_as_string(Board::Square sq);
+
 };
 
 /**
