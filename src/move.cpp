@@ -30,8 +30,6 @@ move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const 
     mv |= ((flags & 0xf) << 12);
     mv |= (((U8)piece & 0x7) << 16);
 
-    std::cout << mv << std::endl;
-
     // prevents captures from being flagged as EP moves
     is_ep_ = ((mv & Move::EN_PASSANT_MASK) == Move::EN_PASSANT_MASK);
     is_capture_ = mv & Move::CAPTURE_MASK;
@@ -68,7 +66,30 @@ std::ostream& operator<<(std::ostream& out, const move& m)
     // simple case (most quiet moves)
     else
     {
-        out << (char)(m.piece_encoding);
+        switch (m.piece_encoding)
+        {
+            case Move::PieceEncoding::PAWN:
+                out << "";
+                break;
+            case Move::PieceEncoding::KNIGHT:
+                out << "N";
+                break;
+            case Move::PieceEncoding::BISHOP:
+                out << "B";
+                break;
+            case Move::PieceEncoding::ROOK:
+                out << "R";
+                break;
+            case Move::PieceEncoding::QUEEN:
+                out << "Q";
+                break;
+            case Move::PieceEncoding::KING:
+                out << "K";
+                break;
+            default:
+                out << "";
+                break;
+        }
         if (m.is_capture_)
         {
             out << "x";
