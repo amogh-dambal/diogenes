@@ -45,3 +45,20 @@ TEST_CASE("testing simple move constructor with Nxc3")
     std::cout << m << std::endl;
 
 }
+
+TEST_CASE("testing simple move constructor with castling")
+{
+    Board::Square from = Board::Square::e1;
+    Board::Square to = Board::Square::g1;
+
+    U64 flags = Move::CASTLE_FLAG;
+
+    move m(from, to, Move::PieceEncoding::KINGSIDE_CASTLE, flags);
+
+    REQUIRE(m.from() == Board::Square::e1);
+    REQUIRE(m.to() == Board::Square::g1);
+    REQUIRE(!m.is_capture());
+    REQUIRE(m.is_castle());
+    REQUIRE(!m.is_ep());
+    REQUIRE(!m.is_promotion()); 
+}

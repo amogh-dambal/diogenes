@@ -30,11 +30,12 @@ move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const 
     mv |= ((flags & 0xf) << 12);
     mv |= (((U8)piece & 0x7) << 16);
 
-    // prevents captures from being flagged as EP moves
-    is_ep_ = ((mv & Move::EN_PASSANT_MASK) == Move::EN_PASSANT_MASK);
+
     is_capture_ = mv & Move::CAPTURE_MASK;
     is_castle_ = mv & Move::CASTLE_MASK;
     is_promotion_ = mv & Move::PROMOTION_MASK;
+    // prevents captures from being flagged as EP moves
+    is_ep_ = ((mv & Move::EN_PASSANT_MASK) == Move::EN_PASSANT_MASK);
 }
 
 /**
