@@ -19,12 +19,12 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const move& m);
 
-    const Board::Square from() const;
-    const Board::Square to() const;
-    const bool is_castle() const;
-    const bool is_capture() const;
-    const bool is_ep() const;
-    const bool is_promotion() const;
+    Board::Square from() const;
+    Board::Square to() const;
+    bool is_castle() const;
+    bool is_capture() const;
+    bool is_ep() const;
+    bool is_promotion() const;
 
 private:
     // 32 bit integer encoding move information

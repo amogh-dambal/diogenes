@@ -100,32 +100,32 @@ std::ostream& operator<<(std::ostream& out, const move& m)
     return out;
 }
 
-const Board::Square move::from() const
+Board::Square move::from() const
 {
     return from_;
 }
 
-const Board::Square move::to() const
+Board::Square move::to() const
 {
     return to_;
 }
 
-const bool move::is_castle() const
+bool move::is_castle() const
 {
     return is_castle_;
 }
 
-const bool move::is_capture() const
+bool move::is_capture() const
 {
     return is_capture_;
 }
 
-const bool move::is_ep() const
+bool move::is_ep() const
 {
     return is_ep_;
 }
 
-const bool move::is_promotion() const
+bool move::is_promotion() const
 {
     return is_promotion_;
 }

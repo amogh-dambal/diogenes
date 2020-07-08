@@ -24,7 +24,6 @@ TEST_CASE("testing simple move constructor with e4", "move()")
     REQUIRE(!m.is_ep());
     REQUIRE(!m.is_promotion());
 
-    std::cout << m << std::endl;
 }
 
 TEST_CASE("testing simple move constructor with Nxc3")
@@ -41,9 +40,6 @@ TEST_CASE("testing simple move constructor with Nxc3")
     REQUIRE(!m.is_castle());
     REQUIRE(!m.is_ep());
     REQUIRE(!m.is_promotion());
-
-    std::cout << m << std::endl;
-
 }
 
 TEST_CASE("testing simple move constructor with castling")
@@ -61,6 +57,4 @@ TEST_CASE("testing simple move constructor with castling")
     REQUIRE(m.is_castle());
     REQUIRE(!m.is_ep());
     REQUIRE(!m.is_promotion());
-
-    std::cout << m << std::endl;
 }

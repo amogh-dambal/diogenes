@@ -22,7 +22,21 @@ public:
     generator(const board& b);
     generator(const board&&) = delete; // prevents rvalue binding
 
-    movelist moves() const;
+    movelist get_moves();
+
+    void generate_moves();
+    void generate_white_pawn_moves();
+    void generate_white_knight_moves();
+    void generate_white_bishop_moves();
+    void generate_white_rook_moves();
+    void generate_white_queen_moves();
+    void generate_white_king_moves();
+    void generate_black_pawn_moves();
+    void generate_black_knight_moves();
+    void generate_black_bishop_moves();
+    void generate_black_rook_moves();
+    void generate_black_queen_moves();
+    void generate_black_king_moves();
 
     U64 generate_white_pawn_push_targets(bool single=true) const;
     U64 generate_white_pawn_attacks() const;

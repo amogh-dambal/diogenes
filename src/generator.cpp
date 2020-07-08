@@ -11,29 +11,65 @@
 generator::generator(const board& bd) :
 b(bd)
 {
-    // set active player
-    active = b.side_to_move();
 }
 
-/**
-movelist generator::moves() const
+movelist generator::get_moves()
 {
-    movelist mvs;
+    active = b.side_to_move();
+    generate_moves();
+    return ml;
+}
 
-    // white pawn moves
-    U64 flags = 0;
+void generator::generate_moves()
+{
+    if (active == Color::WHITE)
+    {
+        generate_white_pawn_moves();
+        /*
+        generate_white_knight_moves();
+        generate_white_bishop_moves();
+        generate_white_rook_moves();
+        generate_white_queen_moves();
+        generate_white_king_moves();
+         */
+    }
+    else
+    {
+        /*
+        generate_black_pawn_moves();
+        generate_black_knight_moves();
+        generate_black_bishop_moves();
+        generate_black_rook_moves();
+        generate_black_queen_moves();
+        generate_black_king_moves();
+         */
+    }
+}
+
+void generator::generate_white_pawn_moves()
+{
+    // white pawn single push moves
+    U64 flags = Move::QUIET_FLAG;
     U64 w_pawns = b.get_pawns(Color::WHITE);
     U64 w_pawn_single_push = generate_white_pawn_push_targets();
 
     std::vector<int> single_push_targets = bitboard::serialize(w_pawn_single_push);
     for (int tgt_sq : single_push_targets)
     {
-        mvs.push_back(move(tgt_sq-8, tgt_sq, Move::PieceEncoding::PAWN, flags));
+        ml.push_back(move(tgt_sq-8, tgt_sq, Move::PieceEncoding::PAWN, flags));
     }
 
-    return mvs;
+    // white pawn double push moves
+    flags = Move::DOUBLE_PUSH_FLAG;
+    U64 w_pawn_double_push = generate_white_pawn_push_targets(false);
+
+    std::vector<int> dbl_push_targets = bitboard::serialize(w_pawn_double_push);
+    for (int tgt_sq : dbl_push_targets)
+    {
+        ml.push_back(move(tgt_sq - 16, tgt_sq, Move::PieceEncoding::PAWN, flags));
+    }
+
 }
-*/
 
 U64 generator::generate_white_pawn_attacks() const
 {
