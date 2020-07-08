@@ -51,6 +51,7 @@ void generator::generate_white_pawn_moves()
     U64 flags;
     U64 targets;
     std::vector<int> target_squares;
+    std::vector<int> attack_squares;
     // white pawn single push moves
     flags = Move::QUIET_FLAG;
     targets = generate_white_pawn_push_targets(true);
@@ -71,13 +72,33 @@ void generator::generate_white_pawn_moves()
         ml.push_back(move(tgt_sq - 16, tgt_sq, Move::PieceEncoding::PAWN, flags));
     }
 
+    // white pawn attacks
+    U64 w_pawn_attacks = generate_white_pawn_attacks();
+    attack_squares = bitboard::serialize(w_pawn_attacks);
+    flags = Move::CAPTURE_FLAG;
+    unsigned int from;
+    for (int asq : attack_squares)
+    {
+        if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SW)))
+        {
+            from = asq + Board::SW;
+            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+        }
+        if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SE)))
+        {
+            from = asq + Board::SE;
+            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+        }
+    }
 }
 
 void generator::generate_black_pawn_moves()
 {
     U64 flags;
     U64 targets;
+    U64 attacks;
     std::vector<int> target_squares;
+    std::vector<int> attack_squares;
 
     // black pawn single push moves
     flags = Move::QUIET_FLAG;
@@ -95,6 +116,25 @@ void generator::generate_black_pawn_moves()
     {
         ml.push_back(move(tsq + 16, tsq, Move::PieceEncoding::PAWN, flags));
     }
+    // black pawn attacks
+    flags = Move::CAPTURE_FLAG;
+    attacks = generate_black_pawn_attacks();
+    attack_squares = bitboard::serialize(attacks);
+    unsigned int from;
+    for (int asq : attack_squares)
+    {
+        if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NW)))
+        {
+            from = asq + Board::Direction::NW;
+            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+        }
+        if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NE)))
+        {
+            from = asq + Board::Direction::NE;
+            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+        }
+    }
+
 }
 
 U64 generator::generate_white_pawn_attacks() const
