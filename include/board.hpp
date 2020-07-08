@@ -57,6 +57,10 @@ public:
     bool can_black_castle_qside() const;
     bool can_black_castle_kside() const;
 
+    // function to test move generation - remove once
+    // make/unmake routines are written
+    void set_side_to_move(Color::Value);
+
 private:
     // piece board sets
     U64 pawns[3]{};

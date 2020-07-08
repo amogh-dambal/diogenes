@@ -423,8 +423,6 @@ bool board::can_black_castle_kside() const
     return can_black_castle_kside_;
 }
 
-// functions to generate attacks based on empty/available squares
-
 
 /**
  * get the string representation of this board object
@@ -561,4 +559,10 @@ Board::Square board::parse_square(const std::string& sq)
 {
     square_parser p = get_parser();
     return p[sq];
+}
+
+// test function - remove when make/unmake is written
+void board::set_side_to_move(Color::Value value)
+{
+    this->side_to_move_ = value;
 }

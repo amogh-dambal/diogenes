@@ -16,11 +16,11 @@ b(bd)
 movelist generator::get_moves()
 {
     active = b.side_to_move();
-    generate_moves();
+    run();
     return ml;
 }
 
-void generator::generate_moves()
+void generator::run()
 {
     if (active == Color::WHITE)
     {
@@ -35,8 +35,8 @@ void generator::generate_moves()
     }
     else
     {
-        /*
         generate_black_pawn_moves();
+        /*
         generate_black_knight_moves();
         generate_black_bishop_moves();
         generate_black_rook_moves();
@@ -48,27 +48,52 @@ void generator::generate_moves()
 
 void generator::generate_white_pawn_moves()
 {
+    U64 flags;
+    U64 targets;
+    std::vector<int> target_squares;
     // white pawn single push moves
-    U64 flags = Move::QUIET_FLAG;
-    U64 w_pawns = b.get_pawns(Color::WHITE);
-    U64 w_pawn_single_push = generate_white_pawn_push_targets();
+    flags = Move::QUIET_FLAG;
+    targets = generate_white_pawn_push_targets(true);
 
-    std::vector<int> single_push_targets = bitboard::serialize(w_pawn_single_push);
-    for (int tgt_sq : single_push_targets)
+    target_squares = bitboard::serialize(targets);
+    for (int tgt_sq : target_squares)
     {
         ml.push_back(move(tgt_sq-8, tgt_sq, Move::PieceEncoding::PAWN, flags));
     }
 
     // white pawn double push moves
     flags = Move::DOUBLE_PUSH_FLAG;
-    U64 w_pawn_double_push = generate_white_pawn_push_targets(false);
+    targets = generate_white_pawn_push_targets(false);
 
-    std::vector<int> dbl_push_targets = bitboard::serialize(w_pawn_double_push);
-    for (int tgt_sq : dbl_push_targets)
+    target_squares = bitboard::serialize(targets);
+    for (int tgt_sq : target_squares)
     {
         ml.push_back(move(tgt_sq - 16, tgt_sq, Move::PieceEncoding::PAWN, flags));
     }
+}
 
+void generator::generate_black_pawn_moves()
+{
+    U64 flags;
+    U64 targets;
+    std::vector<int> target_squares;
+
+    // black pawn single push moves
+    flags = Move::QUIET_FLAG;
+    targets = generate_black_pawn_push_targets(true);
+    target_squares = bitboard::serialize(targets);
+    for (int tsq : target_squares)
+    {
+        ml.push_back(move(tsq + 8, tsq, Move::PieceEncoding::PAWN, flags));
+    }
+    // black pawn double push moves
+    flags = Move::DOUBLE_PUSH_FLAG;
+    targets = generate_black_pawn_push_targets(false);
+    target_squares = bitboard::serialize(targets);
+    for (int tsq : target_squares)
+    {
+        ml.push_back(move(tsq + 16, tsq, Move::PieceEncoding::PAWN, flags));
+    }
 }
 
 U64 generator::generate_white_pawn_attacks() const
@@ -214,11 +239,11 @@ U64 generator::generate_black_pawn_push_targets(bool single) const
     U64 b_pawns = b.get_pawns(Color::BLACK);
     if (single)
     {
-        attacks |= bitboard::north(b_pawns) & b.get_empty_squares();
+        attacks |= bitboard::south(b_pawns) & b.get_empty_squares();
     }
     else
     {
-        attacks |= bitboard::north(bitboard::north(b_pawns)) & b.get_empty_squares();
+        attacks |= bitboard::south(bitboard::south(b_pawns)) & b.get_empty_squares();
     }
     return attacks;
 }
