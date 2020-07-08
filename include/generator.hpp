@@ -24,7 +24,6 @@ public:
 
     movelist get_moves();
 
-
     void generate_white_pawn_moves();
     void generate_white_knight_moves();
     void generate_white_bishop_moves();
@@ -57,7 +56,6 @@ public:
 private:
     const board& b;
     movelist ml;
-
     Color::Value active;
 
     void run();

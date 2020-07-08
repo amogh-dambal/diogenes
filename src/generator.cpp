@@ -25,8 +25,8 @@ void generator::run()
     if (active == Color::WHITE)
     {
         generate_white_pawn_moves();
-        /*
         generate_white_knight_moves();
+        /*
         generate_white_bishop_moves();
         generate_white_rook_moves();
         generate_white_queen_moves();
@@ -36,8 +36,8 @@ void generator::run()
     else
     {
         generate_black_pawn_moves();
-        /*
         generate_black_knight_moves();
+        /*
         generate_black_bishop_moves();
         generate_black_rook_moves();
         generate_black_queen_moves();
@@ -92,6 +92,31 @@ void generator::generate_white_pawn_moves()
     }
 }
 
+void generator::generate_white_knight_moves()
+{
+    U64 w_knights = b.get_knights(Color::WHITE);
+    U64 all_attacked_squares = generate_white_knight_attacks();
+
+    std::vector<int> w_knight_squares = bitboard::serialize(w_knights);
+
+    U64 possible_moves;
+    U64 flags;
+    bool is_capture;
+    for (int ksq : w_knight_squares)
+    {
+        possible_moves = all_attacked_squares & b.get_knight_targets((Board::Square)ksq);
+        for (int to : bitboard::serialize(possible_moves))
+        {
+            is_capture = (1ULL << to) & b.get_pieces(Color::BLACK);
+            flags = is_capture ?
+                    Move::CAPTURE_FLAG :
+                    Move::QUIET_FLAG;
+            ml.push_back(move(ksq, to, Move::PieceEncoding::KNIGHT, flags));
+        }
+    }
+
+}
+
 void generator::generate_black_pawn_moves()
 {
     U64 flags;
@@ -135,6 +160,30 @@ void generator::generate_black_pawn_moves()
         }
     }
 
+}
+
+void generator::generate_black_knight_moves() 
+{
+    U64 b_knights = b.get_knights(Color::BLACK);
+    U64 all_attacked_squares = generate_black_knight_attacks();
+
+    std::vector<int> b_knight_squares = bitboard::serialize(b_knights);
+
+    U64 possible_moves;
+    U64 flags;
+    bool is_capture;
+    for (int ksq : b_knight_squares)
+    {
+        possible_moves = all_attacked_squares & b.get_knight_targets((Board::Square)ksq);
+        for (int to : bitboard::serialize(possible_moves))
+        {
+            is_capture = (1ULL << to) & b.get_pieces(Color::WHITE);
+            flags = is_capture ?
+                    Move::CAPTURE_FLAG :
+                    Move::QUIET_FLAG;
+            ml.push_back(move(ksq, to, Move::PieceEncoding::KNIGHT, flags));
+        }
+    }
 }
 
 U64 generator::generate_white_pawn_attacks() const
