@@ -70,6 +70,7 @@ void generator::generate_white_pawn_moves()
     {
         ml.push_back(move(tgt_sq - 16, tgt_sq, Move::PieceEncoding::PAWN, flags));
     }
+
 }
 
 void generator::generate_black_pawn_moves()

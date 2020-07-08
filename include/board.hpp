@@ -51,6 +51,7 @@ public:
     int ply() const;
     bool game_over() const;
     Board::Square ep_target_square() const;
+    bool exists(Color::Value color, Move::PieceEncoding piece, Board::Square) const;
 
     bool can_white_castle_qside() const;
     bool can_white_castle_kside() const;

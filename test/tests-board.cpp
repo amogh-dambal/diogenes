@@ -66,4 +66,12 @@ TEST_CASE("initialize from random FEN string", "[constructor]")
     board b(fen);
 }
 
+TEST_CASE("test existence function", "[exists]")
+{
+    board b;
+
+    REQUIRE(!b.exists(Color::WHITE, Move::PAWN, Board::a3));
+    REQUIRE(b.exists(Color::BLACK, Move::KNIGHT, Board::b8));
+}
+
 // TODO: write tests for lookup tables

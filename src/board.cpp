@@ -403,6 +403,37 @@ Board::Square board::ep_target_square() const
     return ep_target_sq_;
 }
 
+bool board::exists(Color::Value color, Move::PieceEncoding piece, Board::Square sq) const
+{
+    bool r;
+    U64 pos = 1ULL << sq;
+    switch (piece)
+    {
+        case Move::PAWN:
+            r = pawns[color] & pos;
+            break;
+        case Move::KNIGHT:
+            r = knights[color] & pos;
+            break;
+        case Move::BISHOP:
+            r = bishops[color] & pos;
+            break;
+        case Move::ROOK:
+            r = rooks[color] & pos;
+            break;
+        case Move::QUEEN:
+            r = queens[color] & pos;
+            break;
+        case Move::KING:
+            r = kings[color] & pos;
+            break;
+        default:
+            r = false;
+            break;
+    }
+    return r;
+}
+
 bool board::can_white_castle_qside() const
 {
     return can_white_castle_qside_;
