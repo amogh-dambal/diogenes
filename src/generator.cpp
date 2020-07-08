@@ -26,22 +26,22 @@ void generator::run()
     {
         generate_white_pawn_moves();
         generate_white_knight_moves();
+        generate_white_king_moves();
         /*
         generate_white_bishop_moves();
         generate_white_rook_moves();
         generate_white_queen_moves();
-        generate_white_king_moves();
          */
     }
     else
     {
         generate_black_pawn_moves();
         generate_black_knight_moves();
+        generate_black_king_moves();
         /*
         generate_black_bishop_moves();
         generate_black_rook_moves();
         generate_black_queen_moves();
-        generate_black_king_moves();
          */
     }
 }
@@ -117,6 +117,48 @@ void generator::generate_white_knight_moves()
 
 }
 
+void generator::generate_white_king_moves()
+{
+    // non-special king moves
+    U64 flags = Move::QUIET_FLAG;
+    U64 w_king = b.get_kings(Color::WHITE);
+    int ksq = bitboard::serialize(w_king).at(0);
+    U64 king_targets = b.get_king_targets((Board::Square)ksq);
+
+    // quiet moves
+    U64 quiet_squares = b.get_empty_squares() & king_targets;
+    for (int sq : bitboard::serialize(quiet_squares))
+    {
+        ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
+    }
+
+    // captures
+    U64 capture_squares = b.get_pieces(Color::BLACK) & king_targets;
+    for (int sq : bitboard::serialize(capture_squares))
+    {
+        ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
+    }
+
+    // castles
+    flags = Move::CASTLE_FLAG;
+    if (
+            b.can_white_castle_kside() &
+            !(b.get_occupied_squares() & Move::KINGSIDE_CASTLE_FREE)
+    )
+    {
+        ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
+    }
+    if (
+            b.can_white_castle_qside() &
+            !(b.get_occupied_squares() & Move::QUEENSIDE_CASTLE_FREE)
+    )
+    {
+        // mark flag as queenside castle
+        flags |= 0x1ULL; 
+        ml.push_back(move(ksq, ksq-2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
+    }
+}
+
 void generator::generate_black_pawn_moves()
 {
     U64 flags;
@@ -183,6 +225,48 @@ void generator::generate_black_knight_moves()
                     Move::QUIET_FLAG;
             ml.push_back(move(ksq, to, Move::PieceEncoding::KNIGHT, flags));
         }
+    }
+}
+
+void generator::generate_black_king_moves()
+{
+    // non-special king moves
+    U64 flags = Move::QUIET_FLAG;
+    U64 b_king = b.get_kings(Color::BLACK);
+    int ksq = bitboard::serialize(b_king).at(0);
+    U64 king_targets = b.get_king_targets((Board::Square)ksq);
+
+    // quiet moves
+    U64 quiet_squares = b.get_empty_squares() & king_targets;
+    for (int sq : bitboard::serialize(quiet_squares))
+    {
+        ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
+    }
+
+    // captures
+    U64 capture_squares = b.get_pieces(Color::WHITE) & king_targets;
+    for (int sq : bitboard::serialize(capture_squares))
+    {
+        ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
+    }
+
+    // castles
+    flags = Move::CASTLE_FLAG;
+    if (
+            b.can_black_castle_kside() &
+            !(b.get_occupied_squares() & Move::KINGSIDE_CASTLE_FREE)
+            )
+    {
+        ml.push_back(move(ksq, ksq+2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
+    }
+    if (
+            b.can_black_castle_qside() &
+            !(b.get_occupied_squares() & Move::QUEENSIDE_CASTLE_FREE)
+            )
+    {
+        // mark flag as queenside castle
+        flags |= 0x1ULL;
+        ml.push_back(move(ksq, ksq-2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
     }
 }
 

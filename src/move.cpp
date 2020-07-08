@@ -100,6 +100,11 @@ std::ostream& operator<<(std::ostream& out, const move& m)
     return out;
 }
 
+Move::PieceEncoding move::piece() const
+{
+    return piece_encoding;
+}
+
 Board::Square move::from() const
 {
     return from_;

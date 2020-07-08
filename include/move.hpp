@@ -19,6 +19,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const move& m);
 
+    Move::PieceEncoding piece() const;
     Board::Square from() const;
     Board::Square to() const;
     bool is_castle() const;

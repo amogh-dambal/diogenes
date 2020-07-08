@@ -37,5 +37,4 @@ TEST_CASE("move generation, starting position (black)", "black pawns")
         std::cout << mv << " ";
     }
     std::cout << std::endl;
-
 }

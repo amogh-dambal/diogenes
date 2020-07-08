@@ -33,17 +33,7 @@ can_white_castle_qside_(true)
     queens[Color::BLACK] = queens[Color::WHITE] << 56ULL;
     kings[Color::BLACK] = kings[Color::WHITE] << 56ULL;
 
-    // both pieces
-    pawns[Color::BOTH] = pawns[Color::WHITE] | pawns[Color::BLACK];
-    knights[Color::BOTH] = knights[Color::WHITE] | knights[Color::BLACK];
-    bishops[Color::BOTH] = bishops[Color::WHITE] | bishops[Color::BLACK];
-    rooks[Color::BOTH] = rooks[Color::WHITE] | rooks[Color::BLACK];
-    queens[Color::BOTH] = queens[Color::WHITE] | queens[Color::BLACK];
-    kings[Color::BOTH] = kings[Color::WHITE] | kings[Color::BLACK];
-
-    // game state sets
-    occupied_squares = pawns[Color::BOTH] | knights[Color::BOTH] | bishops[Color::BOTH] | rooks[Color::BOTH] | queens[Color::BOTH] | kings[Color::BOTH];
-    empty_squares = ~occupied_squares;
+    update_board();
 
     // generate attack set lookup tables
     U64 piece_pos;
@@ -297,6 +287,67 @@ std::ostream& operator<<(std::ostream& out, const board& b)
 }
 
 /* PUBLIC FUNCTIONS */
+
+/**
+ * function to make a move on the board
+ * and update the board representation
+ * based on the move parameters
+ * @pre move is valid, not necessarily legal
+ * @param m : reference to the move object
+ */
+bool board::make(const move& m)
+{
+    U64 from, to;
+    U64 move = 0;
+    if (m.is_capture())
+    {
+    }
+    else if (m.is_promotion())
+    {
+    }
+    else if (m.is_castle())
+    {
+    }
+    // quiet moves
+    else
+    {
+        from = m.from();
+        to = m.to();
+        move |= (1ULL << from) | (1ULL << to);
+        switch (m.piece())
+        {
+            case Move::PieceEncoding::PAWN:
+                pawns[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::KNIGHT:
+                knights[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::BISHOP:
+                bishops[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::ROOK:
+                rooks[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::QUEEN:
+                queens[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::KING:
+                kings[side_to_move_] ^= move;
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    update_board();
+    ply_++;
+    side_to_move_ = (Color::Value) !side_to_move_;
+
+    // set ep target square 
+}
+
+// getter functions
 U64 board::get_pieces(Color::Value color) const 
 {
     return
@@ -590,6 +641,21 @@ Board::Square board::parse_square(const std::string& sq)
 {
     square_parser p = get_parser();
     return p[sq];
+}
+
+void board::update_board()
+{
+    // both pieces
+    pawns[Color::BOTH] = pawns[Color::WHITE] | pawns[Color::BLACK];
+    knights[Color::BOTH] = knights[Color::WHITE] | knights[Color::BLACK];
+    bishops[Color::BOTH] = bishops[Color::WHITE] | bishops[Color::BLACK];
+    rooks[Color::BOTH] = rooks[Color::WHITE] | rooks[Color::BLACK];
+    queens[Color::BOTH] = queens[Color::WHITE] | queens[Color::BLACK];
+    kings[Color::BOTH] = kings[Color::WHITE] | kings[Color::BLACK];
+
+    // game state sets
+    occupied_squares = pawns[Color::BOTH] | knights[Color::BOTH] | bishops[Color::BOTH] | rooks[Color::BOTH] | queens[Color::BOTH] | kings[Color::BOTH];
+    empty_squares = ~occupied_squares;
 }
 
 // test function - remove when make/unmake is written

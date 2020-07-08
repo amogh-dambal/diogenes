@@ -148,5 +148,8 @@ namespace Move
     const U32 CAPTURE_MASK = CAPTURE_FLAG << 12;
     const U32 CASTLE_MASK = CASTLE_FLAG << 12;
     const U32 PROMOTION_MASK = PROMOTION_FLAG << 12;
+
+    const U8 KINGSIDE_CASTLE_FREE = 0x60;
+    const U8 QUEENSIDE_CASTLE_FREE = 0xe;
 }
 #endif //DIOGENES_STDS_HPP

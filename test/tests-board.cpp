@@ -7,6 +7,7 @@
 #include "board.hpp"
 #include "bitboard.hpp"
 #include "stds.hpp"
+#include "generator.hpp"
 
 TEST_CASE("initialized properly", "[constructor]") {
     board b;
@@ -72,6 +73,21 @@ TEST_CASE("test existence function", "[exists]")
 
     REQUIRE(!b.exists(Color::WHITE, Move::PAWN, Board::a3));
     REQUIRE(b.exists(Color::BLACK, Move::KNIGHT, Board::b8));
+}
+
+TEST_CASE("make move", "[make]")
+{
+    board b;
+    generator g(b);
+
+    auto moves = g.get_moves();
+
+    std::cout << "before: " << std::endl;
+    std::cout << b << std::endl;
+    b.make(moves.at(0));
+    std::cout << "after: " << std::endl;
+    std::cout << b << std::endl;
+    std::cout << "move: " << moves.at(0) << std::endl;
 }
 
 // TODO: write tests for lookup tables
