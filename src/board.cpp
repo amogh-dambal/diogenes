@@ -12,6 +12,7 @@
 board::board() :
 ply_(0), side_to_move_(Color::WHITE),
 game_over_(false),
+ep_target_sq_(Board::Square::NONE),
 can_black_castle_kside_(true),
 can_black_castle_qside_(true),
 can_white_castle_kside_(true),
@@ -91,7 +92,6 @@ game_over_(false)
     if (ep == "-")
     {
         ep_target_sq_ = Board::Square::NONE;
-
     }
     else
     {
@@ -295,9 +295,10 @@ std::ostream& operator<<(std::ostream& out, const board& b)
  * @pre move is valid, not necessarily legal
  * @param m : reference to the move object
  */
-bool board::make(const move& m)
+void board::make(const move& m)
 {
-    U64 from, to;
+    U64 from = m.from();
+    U64 to = m.to();
     U64 move = 0;
     if (m.is_capture())
     {
@@ -311,8 +312,6 @@ bool board::make(const move& m)
     // quiet moves
     else
     {
-        from = m.from();
-        to = m.to();
         move |= (1ULL << from) | (1ULL << to);
         switch (m.piece())
         {

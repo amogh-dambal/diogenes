@@ -27,7 +27,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const board& b);
     std::string to_string() const;
 
-    bool make(const move& m);
+    void make(const move& m);
     void unmake(const move& m);
 
     // getter functions
@@ -49,7 +49,6 @@ public:
     U64 get_rook_targets(Board::Square sq) const;
     U64 get_queen_targets(Board::Square sq) const;
     U64 get_king_targets(Board::Square sq) const;
-
 
     // functions to return elements of the position
     Color::Value side_to_move() const;
