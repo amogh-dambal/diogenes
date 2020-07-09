@@ -300,14 +300,60 @@ void board::make(const move& m)
     U64 from = m.from();
     U64 to = m.to();
     U64 move = 0;
+    auto active = side_to_move_;
+    auto inactive = (Color::Value) !side_to_move_;
+
     if (m.is_capture())
     {
+        U64 capture_mask = ~(1ULL << to);
+
+        // remove captured piece
+        pawns[inactive] &= capture_mask;
+        knights[inactive] &= capture_mask;
+        bishops[inactive] &= capture_mask;
+        rooks[inactive] &= capture_mask;
+        queens[inactive] &= capture_mask;
+        kings[inactive] &= capture_mask;
+
+        // update moved piece
+        move |= (1ULL << from) | (1ULL << to);
+        switch (m.piece())
+        {
+            case Move::PieceEncoding::PAWN:
+                pawns[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::KNIGHT:
+                knights[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::BISHOP:
+                bishops[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::ROOK:
+                rooks[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::QUEEN:
+                queens[side_to_move_] ^= move;
+                break;
+            case Move::PieceEncoding::KING:
+                kings[side_to_move_] ^= move;
+                break;
+            default:
+                break;
+        }
     }
     else if (m.is_promotion())
     {
     }
     else if (m.is_castle())
     {
+        if (m.piece() == Move::QUEENSIDE_CASTLE)
+        {
+            kings[active] <<= 2ULL;
+        }
+        else
+        {
+            kings[active] >>= 2ULL;
+        }
     }
     // quiet moves
     else
@@ -336,7 +382,6 @@ void board::make(const move& m)
             default:
                 break;
         }
-
     }
 
     update_board();
