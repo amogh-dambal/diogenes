@@ -344,7 +344,11 @@ bool board::make(const move& m)
     ply_++;
     side_to_move_ = (Color::Value) !side_to_move_;
 
-    // set ep target square 
+    // set ep target square if necessary
+    if (m.is_double_push())
+    {
+        ep_target_sq_ = (Board::Square) (to - 8);
+    }
 }
 
 // getter functions

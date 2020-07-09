@@ -22,6 +22,7 @@ public:
     Move::PieceEncoding piece() const;
     Board::Square from() const;
     Board::Square to() const;
+    bool is_double_push() const;
     bool is_castle() const;
     bool is_capture() const;
     bool is_ep() const;
@@ -31,7 +32,8 @@ private:
     // 32 bit integer encoding move information
     U32 mv;
 
-    // various states of the board
+    // various states of the move
+    bool is_double_push_;
     bool is_ep_;
     bool is_capture_;
     bool is_castle_;

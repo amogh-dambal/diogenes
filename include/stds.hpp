@@ -144,6 +144,8 @@ namespace Move
     const U32 FROM_MASK = 0x3f;
     const U32 TO_MASK = 0xfa0;
     const U32 PIECE_MASK = 0x70000;
+
+    const U32 DOUBLE_PUSH_MASK = DOUBLE_PUSH_FLAG << 12;
     const U32 EN_PASSANT_MASK = EN_PASSANT_FLAG << 12;
     const U32 CAPTURE_MASK = CAPTURE_FLAG << 12;
     const U32 CASTLE_MASK = CASTLE_FLAG << 12;
