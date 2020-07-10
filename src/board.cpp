@@ -346,14 +346,16 @@ void board::make(const move& m)
     }
     else if (m.is_castle())
     {
+        unsigned int rook_sq = (active == Color::WHITE) ? Board::Square::a1 : Board::Square::a8;
         if (m.piece() == Move::QUEENSIDE_CASTLE)
         {
-            kings[active] <<= 2ULL;
+            rooks[active] ^= (1ULL << rook_sq) | (1ULL << (rook_sq + 3));
         }
         else
         {
-            kings[active] >>= 2ULL;
+            rooks[active] ^= (1ULL << rook_sq) | (1ULL << (rook_sq - 2));
         }
+        kings[active] <<= 2ULL;
     }
     // quiet moves
     else
