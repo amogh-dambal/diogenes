@@ -82,9 +82,6 @@ TEST_CASE("make move", "[make]")
 
     auto moves = g.get_moves();
 
-    std::cout << "before: " << std::endl;
-    std::cout << b << std::endl;
-
     REQUIRE(b.side_to_move() == Color::WHITE);
     REQUIRE(b.ply() == 0);
     REQUIRE(b.ep_target_square() == Board::Square::NONE);
@@ -94,23 +91,16 @@ TEST_CASE("make move", "[make]")
     // make move a3
     b.make(moves.at(0));
 
-    std::cout << "after: " << std::endl;
-    std::cout << b << std::endl;
     REQUIRE(b.side_to_move() == Color::BLACK);
     REQUIRE(b.ply() == 1);
     REQUIRE(b.ep_target_square() == Board::Square::NONE);
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::a3));
-    std::cout << "move: " << moves.at(0) << std::endl;
 }
 
 TEST_CASE("make move - double push", "[make]")
 {
     board b;
-
-    std::cout << "before: " << std::endl;
-    std::cout << b << std::endl;
-
     REQUIRE(b.side_to_move() == Color::WHITE);
     REQUIRE(b.ply() == 0);
     REQUIRE(b.ep_target_square() == Board::Square::NONE);
@@ -126,7 +116,39 @@ TEST_CASE("make move - double push", "[make]")
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
 
-    std::cout << "after: " << std::endl;
+}
+
+TEST_CASE("series of moves", "[make]")
+{
+    board b;
+
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(b.ply() == 0);
+    REQUIRE(b.ep_target_square() == Board::Square::NONE);
+    REQUIRE(!b.game_over());
+
+    move w_e4(Board::Square::e2, Board::Square::e4, Move::PieceEncoding::PAWN, Move::DOUBLE_PUSH_FLAG);
+    move b_e5(Board::Square::e7, Board::Square::e5, Move::PieceEncoding::PAWN, Move::DOUBLE_PUSH_FLAG);
+
+    INFO(b.ep_target_square());
+    b.make(w_e4);
+
+    REQUIRE(b.side_to_move() == Color::BLACK);
+    REQUIRE(b.ply() == 1);
+    INFO(b.ep_target_square());
+    REQUIRE(b.ep_target_square() == Board::Square::e3);
+    REQUIRE(!b.game_over());
+    REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
+
+    b.make(b_e5);
+
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(b.ply() == 2);
+    REQUIRE(b.ep_target_square() == Board::Square::e6);
+    REQUIRE(!b.game_over());
+    REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
+    REQUIRE(b.exists(Color::BLACK, Move::PieceEncoding::PAWN, Board::Square::e5));
+
     std::cout << b << std::endl;
 }
 

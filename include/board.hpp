@@ -112,8 +112,13 @@ private:
 
     Board::Square ep_target_sq_;
 
-    // have to call after make/unmake move
+    // function that does bitboard ops
+    // to keep track of pieces
+    void update_bitboards(const move& m, U64 move);
+
+    // have to call after make/unmake move to set game state
     void update_board();
+
 
 };
 

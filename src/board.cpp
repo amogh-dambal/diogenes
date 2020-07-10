@@ -299,7 +299,8 @@ void board::make(const move& m)
 {
     U64 from = m.from();
     U64 to = m.to();
-    U64 move = 0;
+    U64 bitboard_move = 0;
+
     auto active = side_to_move_;
     auto inactive = (Color::Value) !side_to_move_;
 
@@ -316,30 +317,8 @@ void board::make(const move& m)
         kings[inactive] &= capture_mask;
 
         // update moved piece
-        move |= (1ULL << from) | (1ULL << to);
-        switch (m.piece())
-        {
-            case Move::PieceEncoding::PAWN:
-                pawns[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::KNIGHT:
-                knights[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::BISHOP:
-                bishops[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::ROOK:
-                rooks[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::QUEEN:
-                queens[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::KING:
-                kings[side_to_move_] ^= move;
-                break;
-            default:
-                break;
-        }
+        bitboard_move |= (1ULL << from) | (1ULL << to);
+        update_bitboards(m, bitboard_move);
     }
     else if (m.is_promotion())
     {
@@ -360,41 +339,28 @@ void board::make(const move& m)
     // quiet moves
     else
     {
-        move |= (1ULL << from) | (1ULL << to);
-        switch (m.piece())
-        {
-            case Move::PieceEncoding::PAWN:
-                pawns[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::KNIGHT:
-                knights[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::BISHOP:
-                bishops[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::ROOK:
-                rooks[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::QUEEN:
-                queens[side_to_move_] ^= move;
-                break;
-            case Move::PieceEncoding::KING:
-                kings[side_to_move_] ^= move;
-                break;
-            default:
-                break;
-        }
+        bitboard_move |= (1ULL << from) | (1ULL << to);
+        update_bitboards(m, bitboard_move);
+    }
+
+    // set ep target square if necessary
+    if (m.is_double_push())
+    {
+        std::cout << "is double push" << std::endl;
+        ep_target_sq_ = (side_to_move_ == Color::WHITE) ?
+                (Board::Square) (to - 8) :
+                (Board::Square)(to + 8);
+
+        std::cout << ep_target_sq_ << std::endl;
     }
 
     update_board();
     ply_++;
     side_to_move_ = (Color::Value) !side_to_move_;
 
-    // set ep target square if necessary
-    if (m.is_double_push())
-    {
-        ep_target_sq_ = (Board::Square) (to - 8);
-    }
+    std::cout << m << std::endl;
+    std::cout << ep_target_sq_ << std::endl;
+    std::cout << "------------" << std::endl;
 }
 
 // getter functions
@@ -555,7 +521,6 @@ bool board::can_black_castle_kside() const
     return can_black_castle_kside_;
 }
 
-
 /**
  * get the string representation of this board object
  * pieces are represented using algebraic notation with
@@ -706,6 +671,33 @@ void board::update_board()
     // game state sets
     occupied_squares = pawns[Color::BOTH] | knights[Color::BOTH] | bishops[Color::BOTH] | rooks[Color::BOTH] | queens[Color::BOTH] | kings[Color::BOTH];
     empty_squares = ~occupied_squares;
+}
+
+void board::update_bitboards(const move& m, const U64 move)
+{
+    switch (m.piece())
+    {
+        case Move::PieceEncoding::PAWN:
+            pawns[side_to_move_] ^= move;
+            break;
+        case Move::PieceEncoding::KNIGHT:
+            knights[side_to_move_] ^= move;
+            break;
+        case Move::PieceEncoding::BISHOP:
+            bishops[side_to_move_] ^= move;
+            break;
+        case Move::PieceEncoding::ROOK:
+            rooks[side_to_move_] ^= move;
+            break;
+        case Move::PieceEncoding::QUEEN:
+            queens[side_to_move_] ^= move;
+            break;
+        case Move::PieceEncoding::KING:
+            kings[side_to_move_] ^= move;
+            break;
+        default:
+            break;
+    }
 }
 
 // test function - remove when make/unmake is written
