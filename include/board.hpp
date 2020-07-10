@@ -112,6 +112,9 @@ private:
 
     Board::Square ep_target_sq_;
 
+    // function that initializes lookup tables
+    void populate_lookup_tables();
+
     // function that does bitboard ops
     // to keep track of pieces
     void update_bitboards(const move& m, U64 move);

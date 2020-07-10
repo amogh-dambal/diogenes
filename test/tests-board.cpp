@@ -133,13 +133,10 @@ TEST_CASE("series of moves", "[make]")
     move b_d5(Board::Square::d7, Board::Square::d5, Move::PieceEncoding::PAWN, Move::DOUBLE_PUSH_FLAG);
     move w_nxe5(Board::Square::f3, Board::Square::e5, Move::PieceEncoding::KNIGHT, Move::CAPTURE_FLAG);
 
-
-    INFO(b.ep_target_square());
     b.make(w_e4);
 
     REQUIRE(b.side_to_move() == Color::BLACK);
     REQUIRE(b.ply() == 1);
-    INFO(b.ep_target_square());
     REQUIRE(b.ep_target_square() == Board::Square::e3);
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
@@ -153,14 +150,6 @@ TEST_CASE("series of moves", "[make]")
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
     REQUIRE(b.exists(Color::BLACK, Move::PieceEncoding::PAWN, Board::Square::e5));
 
-    std::cout << b << std::endl;
-    b.make(w_nf3);
-    std::cout << b << std::endl;
-    b.make(b_d5);
-    std::cout << b << std::endl;
-    b.make(w_nxe5);
-
-    std::cout << b << std::endl;
 }
 
 // TODO: write tests for lookup tables

@@ -23,7 +23,17 @@ public:
     generator(const board&&) = delete; // prevents rvalue binding
 
     movelist get_moves();
+    const move& next_move();
+    Color::Value side_to_move() const;
 
+private:
+    const board& b;
+    movelist ml;
+    Color::Value active;
+
+    void run();
+
+    // helper functions
     void generate_white_pawn_moves();
     void generate_white_knight_moves();
     void generate_white_bishop_moves();
@@ -52,13 +62,6 @@ public:
     U64 generate_black_rook_attacks() const;
     U64 generate_black_queen_attacks() const;
     U64 generate_black_king_attacks() const;
-
-private:
-    const board& b;
-    movelist ml;
-    Color::Value active;
-
-    void run();
 
 };
 

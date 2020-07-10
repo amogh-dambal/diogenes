@@ -35,27 +35,7 @@ can_white_castle_qside_(true)
     kings[Color::BLACK] = kings[Color::WHITE] << 56ULL;
 
     update_board();
-
-    // generate attack set lookup tables
-    U64 piece_pos;
-    for (int sq = Board::Square::a1; sq <= Board::Square::h8; ++sq)
-    {
-        // shift bit to mark piece as present in that square
-        piece_pos = 1ULL << sq;
-
-        // use fill algorithms to compute lookup tables
-        // for square-indexed attack tables
-        knight_fill(piece_pos, sq);
-        king_fill(piece_pos, sq);
-        pawn_fill(piece_pos, sq);
-        rook_fill(piece_pos, sq);
-        bishop_fill(piece_pos, sq);
-
-        // can use union of rooks and bishops to build queen
-        // attack sets - no need to repeat fills
-        queen_targets[sq] = rook_targets[sq] | bishop_targets[sq];
-    }
-
+    populate_lookup_tables();
 }
 
 /**
@@ -180,17 +160,8 @@ game_over_(false)
         }
     }
 
-    occupied_squares = get_pieces(Color::WHITE) | get_pieces(Color::BLACK);
-    empty_squares = ~occupied_squares;
-
-    // both pieces
-    pawns[Color::BOTH] = pawns[Color::WHITE] | pawns[Color::BLACK];
-    knights[Color::BOTH] = knights[Color::WHITE] | knights[Color::BLACK];
-    bishops[Color::BOTH] = bishops[Color::WHITE] | bishops[Color::BLACK];
-    rooks[Color::BOTH] = rooks[Color::WHITE] | rooks[Color::BLACK];
-    queens[Color::BOTH] = queens[Color::WHITE] | queens[Color::BLACK];
-    kings[Color::BOTH] = kings[Color::WHITE] | kings[Color::BLACK];
-
+    update_board();
+    populate_lookup_tables();
 }
 
 /**
@@ -346,21 +317,14 @@ void board::make(const move& m)
     // set ep target square if necessary
     if (m.is_double_push())
     {
-        std::cout << "is double push" << std::endl;
         ep_target_sq_ = (side_to_move_ == Color::WHITE) ?
                 (Board::Square) (to - 8) :
                 (Board::Square)(to + 8);
-
-        std::cout << ep_target_sq_ << std::endl;
     }
 
     update_board();
     ply_++;
     side_to_move_ = (Color::Value) !side_to_move_;
-
-    std::cout << m << std::endl;
-    std::cout << ep_target_sq_ << std::endl;
-    std::cout << "------------" << std::endl;
 }
 
 // getter functions
@@ -697,6 +661,29 @@ void board::update_bitboards(const move& m, const U64 move)
             break;
         default:
             break;
+    }
+}
+
+void board::populate_lookup_tables()
+{
+    // generate attack set lookup tables
+    U64 piece_pos;
+    for (int sq = Board::Square::a1; sq <= Board::Square::h8; ++sq)
+    {
+        // shift bit to mark piece as present in that square
+        piece_pos = 1ULL << sq;
+
+        // use fill algorithms to compute lookup tables
+        // for square-indexed attack tables
+        knight_fill(piece_pos, sq);
+        king_fill(piece_pos, sq);
+        pawn_fill(piece_pos, sq);
+        rook_fill(piece_pos, sq);
+        bishop_fill(piece_pos, sq);
+
+        // can use union of rooks and bishops to build queen
+        // attack sets - no need to repeat fills
+        queen_targets[sq] = rook_targets[sq] | bishop_targets[sq];
     }
 }
 
