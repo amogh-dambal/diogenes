@@ -35,6 +35,14 @@ namespace bitboard
     U64 fill_southeast(U64 b, U64 empty=Board::ALL_SQUARES);
     U64 fill_northwest(U64 b, U64 empty=Board::ALL_SQUARES);
     U64 fill_southwest(U64 b, U64 empty=Board::ALL_SQUARES);
+    U64 occ_fill_north(U64 b, U64 blockers);
+    U64 occ_fill_south(U64 b, U64 blockers);
+    U64 occ_fill_east(U64 b, U64 blockers);
+    U64 occ_fill_west(U64 b, U64 blockers);
+    U64 occ_fill_northeast(U64 b, U64 blockers);
+    U64 occ_fill_southeast(U64 b, U64 blockers);
+    U64 occ_fill_northwest(U64 b, U64 blockers);
+    U64 occ_fill_southwest(U64 b, U64 blockers);
 
     // helper functions to deal with bitboard ops
     int pop_count(U64 b);

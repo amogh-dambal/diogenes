@@ -140,6 +140,124 @@ U64 bitboard::fill_southwest(const U64 b, const U64 empty)
     return filled;
 }
 
+U64 bitboard::occ_fill_north(const U64 b, const U64 blockers)
+{
+    U64 filled = b;
+    bool hit_blocker = false;
+    int it = 0;
+    while (!hit_blocker && it < 7)
+    {
+        filled |= (filled << (unsigned)(Board::Direction::N));
+        hit_blocker = filled & blockers;
+        it++;
+    }
+    return filled;
+}
+
+U64 bitboard::occ_fill_south(const U64 b, const U64 blockers)
+{
+    U64 filled = b;
+    bool hit_blocker = false;
+    int it = 0;
+    while (!hit_blocker && it < 7)
+    {
+        filled |= (filled >> (unsigned)(-1 * Board::Direction::S));
+        hit_blocker = filled & blockers;
+        it++;
+    }
+    return filled;
+}
+
+U64 bitboard::occ_fill_east(const U64 b, const U64 blockers)
+{
+    U64 filled = b, t = b;
+    bool hit_blocker = false;
+    int it = 0;
+    while (!hit_blocker && it < 7)
+    {
+        t = (t << (unsigned)(Board::Direction::E)) & Board::NOT_A_FILE;
+        filled |= t;
+        it++;
+        hit_blocker = filled & blockers;
+    }
+    return filled;
+}
+
+U64 bitboard::occ_fill_west(const U64 b, const U64 blockers)
+{
+    U64 filled = b, t =b;
+    bool hit_blocker = false;
+    int it = 0;
+    while (!hit_blocker && it < 7)
+    {
+        t = (t >> (unsigned)(-1 * Board::Direction::W)) & Board::NOT_H_FILE;
+        filled |= t;
+        it++;
+        hit_blocker = filled & blockers;
+    }
+    return filled;
+}
+
+U64 bitboard::occ_fill_northeast(const U64 b, const U64 blockers)
+{
+    U64 filled = b, t = b;
+    bool hit_blockers = false;
+    int it = 0;
+    while (!hit_blockers && it < 7)
+    {
+        t = (t << (unsigned)(Board::Direction::NE)) & Board::NOT_A_FILE;
+        filled |= t;
+        it++;
+        hit_blockers = filled & blockers;
+    }
+    return filled;
+}
+
+U64 bitboard::occ_fill_northwest(const U64 b, const U64 blockers)
+{
+    U64 filled = b, t = b;
+    bool hit_blockers = false;
+    int it = 0;
+    while (!hit_blockers && it < 7)
+    {
+        t = (t << (unsigned)(Board::Direction::NW)) & Board::NOT_H_FILE;
+        filled |= t;
+        it++;
+        hit_blockers = filled & blockers;
+    }
+    return filled;
+}
+
+U64 bitboard::occ_fill_southeast(const U64 b, const U64 blockers)
+{
+    U64 filled = b, t = b;
+    bool hit_blockers = false;
+    int it = 0;
+    while (!hit_blockers && it < 7)
+    {
+        t = (t >> (unsigned)(-1 * Board::Direction::SE)) & Board::NOT_A_FILE;
+        filled |= t;
+        it++;
+        hit_blockers = filled & blockers;
+    }
+    return filled;
+}
+
+U64 bitboard::occ_fill_southwest(const U64 b, const U64 blockers)
+{
+    U64 filled = b, t = b;
+    bool hit_blockers = false;
+    int it = 0;
+    while (!hit_blockers && it < 7)
+    {
+        t = (t >> (unsigned)(-1 * Board::Direction::SW)) & Board::NOT_H_FILE;
+        filled |= t;
+        it++;
+        hit_blockers = filled & blockers;
+    }
+    return filled;
+}
+
 /**
  * function to calculate the number of bits
  * set in a given word (bitboard)

@@ -152,4 +152,16 @@ TEST_CASE("series of moves", "[make]")
 
 }
 
+TEST_CASE("FEN string", "[integration]")
+{
+    std::string fen = "rnbqkbnr/1ppppppp/p7/8/8/PP6/2PPPPPP/RNBQKBNR w KQkq - 0 1";
+    board b(fen);
+
+    generator gen(b);
+
+    std::cout << "===========================\n";
+    bitboard::print_bitboard(b.get_pieces(Color::WHITE));
+    std::cout << "===========================\n";
+}
+
 // TODO: write tests for lookup tables

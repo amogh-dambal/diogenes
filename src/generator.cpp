@@ -21,8 +21,14 @@ Color::Value generator::side_to_move() const
 movelist generator::get_moves()
 {
     active = b.side_to_move();
+    ml.clear();
     run();
     return ml;
+}
+
+const move& generator::next_move() const
+{
+    return ml.front();
 }
 
 void generator::run()
@@ -139,7 +145,7 @@ void generator::generate_white_bishop_moves()
         for (int bsq : w_bishop_pos_squares)
         {
             sq = (Board::Square) bsq;
-            possible_squares = (w_bishop_attacks | b.get_pieces(Color::BLACK)) & b.get_bishop_targets(sq);
+            possible_squares = w_bishop_attacks & b.get_bishop_targets(sq);
             for (int to : bitboard::serialize(possible_squares))
             {
                 flags = ((1ULL << to) & b.get_pieces(Color::BLACK)) ?
@@ -358,20 +364,19 @@ U64 generator::generate_white_bishop_attacks() const
     U64 w_bishops = b.get_bishops(Color::WHITE);
     std::vector<int> bishop_sqs = bitboard::serialize(w_bishops);
 
-    const U64 possible_mvs = b.get_empty_squares();
+    const U64 blockers = b.get_pieces(Color::WHITE) ^ b.get_bishops(Color::WHITE);
+    bitboard::print_bitboard(blockers);
 
     U64 bpos;
     for (int bsq : bishop_sqs)
     {
         bpos = 1ULL << bsq;
-        attacks |= (
-                bitboard::fill_northeast(bpos, possible_mvs) |
-                bitboard::fill_northwest(bpos, possible_mvs) |
-                bitboard::fill_southeast(bpos, possible_mvs) |
-                bitboard::fill_southwest(bpos, possible_mvs)
-        );
+        attacks |= bitboard::occ_fill_northeast(bpos, blockers);
+        attacks |= bitboard::occ_fill_northwest(bpos, blockers);
+        attacks |= bitboard::occ_fill_southeast(bpos, blockers);
+        attacks |= bitboard::occ_fill_southwest(bpos, blockers);
     }
-    attacks ^= w_bishops;
+    attacks &= ~(b.get_pieces(Color::WHITE));
     return attacks;
 }
 
@@ -381,7 +386,7 @@ U64 generator::generate_white_rook_attacks() const
     U64 w_rooks = b.get_rooks(Color::WHITE);
     std::vector<int> rook_sqs = bitboard::serialize(w_rooks);
 
-    const U64 possible_mvs = b.get_empty_squares();
+    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::BLACK);
 
     U64 rpos;
     for (int rsq : rook_sqs)
@@ -403,7 +408,7 @@ U64 generator::generate_white_queen_attacks() const
     U64 w_queens = b.get_queens(Color::WHITE);
     std::vector<int> queen_sqs = bitboard::serialize(w_queens);
 
-    const U64 possible_mvs = b.get_empty_squares();
+    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::BLACK);
 
     U64 qpos;
     for (int qsq : queen_sqs)
@@ -476,7 +481,7 @@ U64 generator::generate_black_bishop_attacks() const
     U64 b_bishops = b.get_bishops(Color::BLACK);
     std::vector<int> bishop_sqs = bitboard::serialize(b_bishops);
 
-    const U64 possible_mvs = b.get_empty_squares();
+    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::WHITE);
     U64 bpos;
     for (int bsq : bishop_sqs)
     {
@@ -498,7 +503,7 @@ U64 generator::generate_black_rook_attacks() const
     U64 b_rooks = b.get_rooks(Color::BLACK);
     std::vector<int> rook_sqs = bitboard::serialize(b_rooks);
 
-    const U64 possible_mvs = b.get_empty_squares();
+    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::WHITE);
 
     U64 rpos;
     for (int rsq : rook_sqs)
@@ -520,7 +525,7 @@ U64 generator::generate_black_queen_attacks() const
     U64 b_queens = b.get_queens(Color::BLACK);
     std::vector<int> queen_sqs = bitboard::serialize(b_queens);
 
-    const U64 possible_mvs = b.get_empty_squares();
+    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::WHITE);
 
     U64 qpos;
     for (int qsq : queen_sqs)

@@ -23,7 +23,7 @@ public:
     generator(const board&&) = delete; // prevents rvalue binding
 
     movelist get_moves();
-    const move& next_move();
+    const move& next_move() const;
     Color::Value side_to_move() const;
 
 private:
