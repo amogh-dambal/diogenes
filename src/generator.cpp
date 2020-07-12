@@ -365,7 +365,6 @@ U64 generator::generate_white_bishop_attacks() const
     std::vector<int> bishop_sqs = bitboard::serialize(w_bishops);
 
     const U64 blockers = b.get_pieces(Color::WHITE) ^ b.get_bishops(Color::WHITE);
-    bitboard::print_bitboard(blockers);
 
     U64 bpos;
     for (int bsq : bishop_sqs)
@@ -385,20 +384,19 @@ U64 generator::generate_white_rook_attacks() const
     U64 attacks = 0;
     U64 w_rooks = b.get_rooks(Color::WHITE);
     std::vector<int> rook_sqs = bitboard::serialize(w_rooks);
-
-    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::BLACK);
-
+    
+    const U64 blockers = b.get_pieces(Color::WHITE) ^ b.get_rooks(Color::WHITE); 
+    
     U64 rpos;
     for (int rsq : rook_sqs)
     {
         rpos = 1ULL << rsq;
-        attacks |= (
-                bitboard::fill_north(rpos, possible_mvs) |
-                bitboard::fill_south(rpos, possible_mvs) |
-                bitboard::fill_east(rpos, possible_mvs) |
-                bitboard::fill_west(rpos, possible_mvs));
+        attacks |= bitboard::occ_fill_north(rpos, blockers);
+        attacks |= bitboard::occ_fill_south(rpos, blockers);
+        attacks |= bitboard::occ_fill_east(rpos, blockers);
+        attacks |= bitboard::occ_fill_west(rpos, blockers);
     }
-    attacks ^= w_rooks;
+    attacks &= ~(b.get_pieces(Color::WHITE)); 
     return attacks;
 }
 
@@ -407,25 +405,22 @@ U64 generator::generate_white_queen_attacks() const
     U64 attacks = 0;
     U64 w_queens = b.get_queens(Color::WHITE);
     std::vector<int> queen_sqs = bitboard::serialize(w_queens);
-
-    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::BLACK);
-
+    
+    const U64 blockers = b.get_pieces(Color::WHITE) ^ b.get_bishops(Color::WHITE); 
     U64 qpos;
     for (int qsq : queen_sqs)
     {
         qpos = 1ULL << qsq;
-        attacks |= (
-                bitboard::fill_north(qpos, possible_mvs) |
-                bitboard::fill_south(qpos, possible_mvs) |
-                bitboard::fill_east(qpos, possible_mvs) |
-                bitboard::fill_west(qpos, possible_mvs) |
-                bitboard::fill_northeast(qpos, possible_mvs) |
-                bitboard::fill_northwest(qpos, possible_mvs) |
-                bitboard::fill_southeast(qpos, possible_mvs) |
-                bitboard::fill_southwest(qpos, possible_mvs)
-        );
+        attacks |= bitboard::occ_fill_north(qpos, blockers);
+        attacks |= bitboard::occ_fill_south(qpos, blockers);
+        attacks |= bitboard::occ_fill_east(qpos, blockers);
+        attacks |= bitboard::occ_fill_west(qpos, blockers);
+        attacks |= bitboard::occ_fill_northeast(qpos, blockers);
+        attacks |= bitboard::occ_fill_northwest(qpos, blockers);
+        attacks |= bitboard::occ_fill_southeast(qpos, blockers);
+        attacks |= bitboard::occ_fill_southwest(qpos, blockers);
     }
-    attacks ^= w_queens;
+    attacks &= ~(b.get_pieces(Color::WHITE)); 
     return attacks;
 
 }
@@ -481,19 +476,18 @@ U64 generator::generate_black_bishop_attacks() const
     U64 b_bishops = b.get_bishops(Color::BLACK);
     std::vector<int> bishop_sqs = bitboard::serialize(b_bishops);
 
-    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::WHITE);
+    const U64 blockers = b.get_pieces(Color::BLACK) ^ b.get_bishops(Color::BLACK);
+
     U64 bpos;
     for (int bsq : bishop_sqs)
     {
         bpos = 1ULL << bsq;
-        attacks |= (
-                bitboard::fill_northeast(bpos, possible_mvs) |
-                bitboard::fill_northwest(bpos, possible_mvs) |
-                bitboard::fill_southeast(bpos, possible_mvs) |
-                bitboard::fill_southwest(bpos, possible_mvs)
-        );
+        attacks |= bitboard::occ_fill_northeast(bpos, blockers);
+        attacks |= bitboard::occ_fill_northwest(bpos, blockers);
+        attacks |= bitboard::occ_fill_southeast(bpos, blockers);
+        attacks |= bitboard::occ_fill_southwest(bpos, blockers);
     }
-    attacks ^= b_bishops;
+    attacks &= ~(b.get_pieces(Color::BLACK));
     return attacks;
 }
 
@@ -503,19 +497,18 @@ U64 generator::generate_black_rook_attacks() const
     U64 b_rooks = b.get_rooks(Color::BLACK);
     std::vector<int> rook_sqs = bitboard::serialize(b_rooks);
 
-    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::WHITE);
+    const U64 blockers = b.get_pieces(Color::BLACK) ^ b.get_rooks(Color::BLACK);
 
     U64 rpos;
     for (int rsq : rook_sqs)
     {
         rpos = 1ULL << rsq;
-        attacks |= (
-                bitboard::fill_north(rpos, possible_mvs) |
-                bitboard::fill_south(rpos, possible_mvs) |
-                bitboard::fill_east(rpos, possible_mvs) |
-                bitboard::fill_west(rpos, possible_mvs));
+        attacks |= bitboard::occ_fill_north(rpos, blockers);
+        attacks |= bitboard::occ_fill_south(rpos, blockers);
+        attacks |= bitboard::occ_fill_east(rpos, blockers);
+        attacks |= bitboard::occ_fill_west(rpos, blockers);
     }
-    attacks ^= b_rooks;
+    attacks &= ~(b.get_pieces(Color::BLACK));
     return attacks;
 }
 
@@ -525,24 +518,23 @@ U64 generator::generate_black_queen_attacks() const
     U64 b_queens = b.get_queens(Color::BLACK);
     std::vector<int> queen_sqs = bitboard::serialize(b_queens);
 
-    const U64 possible_mvs = b.get_empty_squares() | b.get_pieces(Color::WHITE);
-
+    const U64 blockers = b.get_pieces(Color::BLACK) ^ b.get_queens(Color::BLACK);
     U64 qpos;
     for (int qsq : queen_sqs)
     {
         qpos = 1ULL << qsq;
-        attacks |= (
-                bitboard::fill_north(qpos, possible_mvs) |
-                bitboard::fill_south(qpos, possible_mvs) |
-                bitboard::fill_east(qpos, possible_mvs) |
-                bitboard::fill_west(qpos, possible_mvs) |
-                bitboard::fill_northeast(qpos, possible_mvs) |
-                bitboard::fill_northwest(qpos, possible_mvs) |
-                bitboard::fill_southeast(qpos, possible_mvs) |
-                bitboard::fill_southwest(qpos, possible_mvs)
-        );
+        attacks |= bitboard::occ_fill_north(qpos, blockers);
+        attacks |= bitboard::occ_fill_south(qpos, blockers);
+        attacks |= bitboard::occ_fill_east(qpos, blockers);
+        attacks |= bitboard::occ_fill_west(qpos, blockers);
+        attacks |= bitboard::occ_fill_northeast(qpos, blockers);
+        attacks |= bitboard::occ_fill_northwest(qpos, blockers);
+        attacks |= bitboard::occ_fill_southeast(qpos, blockers);
+        attacks |= bitboard::occ_fill_southwest(qpos, blockers);
     }
-    attacks ^= b_queens;
+    attacks &= ~(b.get_pieces(Color::BLACK));
     return attacks;
+
 }
+
 
