@@ -327,6 +327,19 @@ void board::make(const move& m)
     side_to_move_ = (Color::Value) !side_to_move_;
 }
 
+/**
+ * function to undo the effects of the given
+ * move based on the move parameters
+ * @pre m has been made, i.e. m is the most
+ * recent object pushed into the movelist
+ * @param m : reference to the move object that has just
+ * been made
+ */
+void board::unmake(const move& m)
+{
+
+}
+
 // getter functions
 U64 board::get_pieces(Color::Value color) const 
 {
@@ -404,36 +417,87 @@ U64 board::get_queen_targets(Board::Square sq) const
     return queen_targets[sq];
 }
 
+/**
+ * getter function, returns a bitboard where
+ * each set bit represents a square that holds a piece
+ * equivalent to the bitwise negation of the
+ * empty squares returned by the get_empty_squares()
+ * method
+ * @return U64 bitboard where all set bits are
+ * representing squares with something on them
+ */
 U64 board::get_occupied_squares() const
 {
     return this->occupied_squares;
 }
 
+/**
+ * getter function, returns a bitboard where
+ * each set bit represents an empty square
+ * equivalent to the bitwise negation of
+ * the occupied squares returned by the
+ * get_occupied_squares() method
+ * @return U64 bitboard
+ */
 U64 board::get_empty_squares() const
 {
     return this->empty_squares;
 }
 
+/**
+ * getter function to return the currently active side
+ * @return Color::Value enum type (either WHITE or BLACK)
+ * representing whose move it currently is
+ */
 Color::Value board::side_to_move() const
 {
     return side_to_move_;
 }
 
+/**
+ * function to return the current half-move clock of the position
+ * (i.e. how many half-moves have been made, where 1.e4 e5 2. Nf3 is 3
+ * half-moves)
+ * @return integer value which represents the number of half moves made
+ */
 int board::ply() const
 {
     return ply_;
 }
 
+/**
+ * check whether both sides have legal moves - if one side does not,
+ * the game is over
+ * @return true if one side does not have any legal moves to play,
+ * false otherwise
+ */
 bool board::game_over() const
 {
     return game_over_;
 }
 
+/**
+ * function that returns the square, if any,
+ * where an en passant capture can be made
+ * @return Board::Square enum type - either in the
+ * range [0, 64) if a double pawn push has just been made,
+ * Board::Square::NONE (64) otherwise
+ */
 Board::Square board::ep_target_square() const
 {
     return ep_target_sq_;
 }
 
+/**
+ * function that simulates mailbox functionality
+ * by checking whether a particular piece of a given color
+ * exists on the board at a given square
+ * @param color : a Color::Value enum type, either WHITE or BLACK
+ * @param piece : a Move::PieceEncoding type, representing the piece to search for
+ * @param sq : a Board::Square enum type, representing the square to check on
+ * @return boolean value - true if the piece of the given color exists at that
+ * square, false otherwise
+ */
 bool board::exists(Color::Value color, Move::PieceEncoding piece, Board::Square sq) const
 {
     bool r;
@@ -465,21 +529,49 @@ bool board::exists(Color::Value color, Move::PieceEncoding piece, Board::Square 
     return r;
 }
 
+/**
+ * getter function that returns if it is legally possible
+ * for white to make a queenside castle in the future
+ * blockers/attack rays do not affect this function
+ * @return true if white can legally castle on the queenside
+ * at some point in the game, false otherwise
+ */
 bool board::can_white_castle_qside() const
 {
     return can_white_castle_qside_;
 }
 
+/**
+ * getter function that returns if it is legally possible
+ * for white to make a kingside castle in the future
+ * blockers/attack rays do not affect this function
+ * @return true if white can legally castle on the kingside
+ * at some point in the game, false otherwise
+ */
 bool board::can_white_castle_kside() const
 {
     return can_white_castle_kside_;
 }
 
+/**
+ * getter function that returns if it is legally possible
+ * for black to make a queenside castle in the future
+ * blockers/attack rays do not affect this function
+ * @return true if black can legally castle on the queenside
+ * at some point in the game, false otherwise
+ */
 bool board::can_black_castle_qside() const
 {
     return can_black_castle_qside_;
 }
 
+/**
+ * getter function that returns if it is legally possible
+ * for black to make a kingside castle in the future
+ * blockers/attack rays do not affect this function
+ * @return true if black can legally castle on the kingside
+ * at some point in the game, false otherwise
+ */
 bool board::can_black_castle_kside() const
 {
     return can_black_castle_kside_;
