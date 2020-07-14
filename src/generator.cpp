@@ -7,17 +7,31 @@
 /**
  * constructor to generate
  * moves for the starting board
+ * @param bd : reference to the board object that tracks position
  */
 generator::generator(const board& bd) :
 b(bd), active(b.side_to_move())
 {
 }
 
+/**
+ * getter method to return the side that
+ * currently has to move in the set position
+ * @return Color::Value enum type representing the color
+ * (either WHITE or BLACK) that has to move
+ */
 Color::Value generator::side_to_move() const
 {
     return active;
 }
 
+/**
+ * method that builds and returns list of possible
+ * moves for active side
+ * @return std::vector<move> (movelist) that represents
+ * all possible moves player of the active color
+ * can make
+ */
 movelist generator::get_moves()
 {
     active = b.side_to_move();
@@ -26,16 +40,37 @@ movelist generator::get_moves()
     return ml;
 }
 
+/**
+ * pseudo-iterator method that returns a
+ * const reference to the first move in the 
+ * movelist - random
+ * @pre get_moves() has to be called
+ * @return const reference to a move object
+ * that's at index 0 in the most recently 
+ * generated movelist 
+ */
 const move& generator::next_move() const
 {
     return ml.front();
 }
 
+/**
+ * getter method to return the const reference
+ * to the board linked to this generator
+ * @return const reference to a board object
+ * representing the position we are generating
+ * moves for
+ */
 const board& generator::pos() const
 {
     return b;
 }
 
+/**
+ * helper method that calls appropriate piece-wise
+ * move generation methods based on 
+ * active side 
+ */
 void generator::run()
 {
     if (active == Color::WHITE)
@@ -379,23 +414,23 @@ void generator::generate_black_rook_moves()
 
 void generator::generate_black_queen_moves()
 {
-    U64 w_queen_pos = b.get_queens(Color::WHITE);
+    U64 b_queen_pos = b.get_queens(Color::BLACK);
     // only generate moves if there are white queens on the board
-    if (bitboard::pop_count(w_queen_pos) > 0)
+    if (bitboard::pop_count(b_queen_pos) > 0)
     {
-        U64 w_queen_attacks = generate_white_queen_attacks();
-        std::vector<int> w_queen_pos_squares = bitboard::serialize(w_queen_pos);
-        std::vector<int> w_queen_attack_squares = bitboard::serialize(w_queen_attacks);
+        U64 b_queen_attacks = generate_black_queen_attacks();
+        std::vector<int> b_queen_pos_squares = bitboard::serialize(b_queen_pos);
+        std::vector<int> b_queen_attack_squares = bitboard::serialize(b_queen_attacks);
 
         U64 possible_squares, flags;
         Board::Square sq;
-        for (int qsq : w_queen_pos_squares)
+        for (int qsq : b_queen_pos_squares)
         {
             sq = (Board::Square) qsq;
-            possible_squares = w_queen_attacks & b.get_queen_targets(sq);
+            possible_squares = b_queen_attacks & b.get_queen_targets(sq);
             for (int to : bitboard::serialize(possible_squares))
             {
-                flags = ((1ULL << to) & b.get_pieces(Color::BLACK)) ?
+                flags = ((1ULL << to) & b.get_pieces(Color::WHITE)) ?
                         Move::CAPTURE_FLAG :
                         Move::QUIET_FLAG;
                 ml.push_back(move(qsq, to, Move::PieceEncoding::QUEEN, flags));
