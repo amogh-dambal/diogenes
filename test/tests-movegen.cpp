@@ -11,29 +11,45 @@
 
 // TODO: write more comprehensive move-generation tests
 
-/*
 TEST_CASE("starting position - WHITE to move", "[movegen]")
 {
     board b;
     generator g(b);
 
+    REQUIRE (g.pos() == b);
+
     auto moves = g.get_moves();
+
     REQUIRE(moves.size() == 20);
 }
 
 TEST_CASE("generate bishop moves - WHITE to move", "[movegen - white bishop]")
 {
     std::string fen;
-    fen = "8/7k/8/4n3/1r6/2B5/8/7K w - - 0 1";
+    fen = "8/7k/5n2/8/1r6/2B5/8/7K w - - 0 1";
     board bd(fen);
-
     generator gr(bd);
+
+    REQUIRE(gr.pos() == bd);
 
     REQUIRE(gr.side_to_move() == Color::WHITE);
 
     auto moves = gr.get_moves();
+    REQUIRE (moves.size() == 11);
 }
-*/
+
+TEST_CASE("generate rook moves - WHITE to move", "[movegen-white rook]")
+{
+    std::string fen_record = "1k1b4/8/8/8/2nR2b1/8/3P4/K7 w - - 0 1";
+    board bd(fen_record);
+    generator gr(bd);
+
+    REQUIRE(gr.pos() == bd);
+    REQUIRE(gr.side_to_move() == Color::WHITE);
+
+    auto moves = gr.get_moves();
+    REQUIRE(moves.size() == 13);
+}
 
 TEST_CASE("move generation - random position - T1", "[movegen]")
 {
@@ -41,58 +57,26 @@ TEST_CASE("move generation - random position - T1", "[movegen]")
     board b(fen);
     generator gen(b);
 
+    REQUIRE(gen.pos() == b);
     auto moves = gen.get_moves();
-
-    for (const move& mv : moves)
-    {
-        std::cout << mv << " ";
-    }
-    std::cout << std::endl;
 
 }
 
-/*
-TEST_CASE("move generation from start position - series", "[movegen]")
+TEST_CASE("move generation - random pos - T2", "[movegen]")
 {
-    board b;
+    std::cout << "==============================\n";
+    std::string fen_record = "k7/p3r3/1b6/8/8/4Q3/4PPPP/6K1 w - - 0 1";
+    board b(fen_record);
     generator gen(b);
 
-    std::cout << b << "\n";
+    REQUIRE(gen.pos() == b);
     auto moves = gen.get_moves();
+
+
+    std::cout << "FEN: " << fen_record << "\n";
+    std::cout << "Position: " << "\n" << b << "\n";
     for (const move& mv : moves)
     {
         std::cout << mv << " ";
     }
-    std::cout << "\n";
-
-    b.make(gen.next_move());
-    std::cout << b << "\n";
-
-    moves = gen.get_moves();
-    for (const move& mv : moves)
-    {
-        std::cout << mv << " ";
-    }
-    std::cout << "\n";
-
-    b.make(gen.next_move());
-
-    std::cout << b << "\n";
-
-    moves = gen.get_moves();
-    for (const move& mv : moves)
-    {
-        std::cout << mv << " ";
-    }
-    std::cout << "\n";
-    std::cout << std::endl;
-
-    b.make(gen.next_move());
-    std::cout << b << std::endl;
-    for (const move& mv : moves)
-    {
-        std::cout << mv << " ";
-    }
-    std::cout << "\n" << std::endl;
 }
- */

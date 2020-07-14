@@ -25,6 +25,7 @@ public:
     movelist get_moves();
     const move& next_move() const;
     Color::Value side_to_move() const;
+    const board& pos() const;
 
 private:
     const board& b;
