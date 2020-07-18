@@ -419,7 +419,7 @@ U64 board::get_queen_targets(Board::Square sq) const
 
 /**
  * getter function, returns a bitboard where
- * each set bit represents a square that holds a piece
+ * each set bit represents a square that holds a piece.
  * equivalent to the bitwise negation of the
  * empty squares returned by the get_empty_squares()
  * method

@@ -36,7 +36,15 @@ movelist generator::get_moves()
 {
     active = b.side_to_move();
     ml.clear();
-    run();
+    run(Move::GeneratorStatus::PSEUDOLEGAL);
+    return ml;
+}
+
+movelist generator::get_legal_moves()
+{
+    active = b.side_to_move();
+    ml.clear();
+    run(Move::GeneratorStatus::LEGAL);
     return ml;
 }
 
@@ -71,16 +79,8 @@ const board& generator::pos() const
  * move generation methods based on 
  * active side 
  */
-void generator::run()
 {
-    if (active == Color::WHITE)
     {
-        generate_white_pawn_moves();
-        generate_white_knight_moves();
-        generate_white_king_moves();
-        generate_white_bishop_moves();
-        generate_white_rook_moves();
-        generate_white_queen_moves();
     }
     else
     {
@@ -506,6 +506,9 @@ U64 generator::generate_white_pawn_push_targets(bool single) const
         }
         else
         {
+            // only calculate double pushes for
+            // pawns in their original squares
+            w_pawns &= (Board::FIRST_RANK << 16);
             attacks |= (bitboard::north(bitboard::north(w_pawns)) & b.get_empty_squares());
         }
     }
@@ -606,6 +609,8 @@ U64 generator::generate_black_pawn_push_targets(bool single) const
     }
     else
     {
+        // only calculate double pushes for pawns in their original squares
+        b_pawns &= (Board::EIGHTH_RANK >> (unsigned)16);
         attacks |= bitboard::south(bitboard::south(b_pawns)) & b.get_empty_squares();
     }
     return attacks;
