@@ -79,18 +79,34 @@ const board& generator::pos() const
  * move generation methods based on 
  * active side 
  */
+void generator::run(Move::GeneratorStatus status)
 {
+    if (status == Move::GeneratorStatus::PSEUDOLEGAL)
     {
+        if (active == Color::WHITE)
+        {
+            generate_white_pawn_moves();
+            generate_white_knight_moves();
+            generate_white_king_moves();
+            generate_white_bishop_moves();
+            generate_white_rook_moves();
+            generate_white_queen_moves();
+        }
+        else
+        {
+            generate_black_pawn_moves();
+            generate_black_knight_moves();
+            generate_black_king_moves();
+            generate_black_bishop_moves();
+            generate_black_rook_moves();
+            generate_black_queen_moves();
+        }
     }
     else
     {
-        generate_black_pawn_moves();
-        generate_black_knight_moves();
-        generate_black_king_moves();
-        generate_black_bishop_moves();
-        generate_black_rook_moves();
-        generate_black_queen_moves();
+
     }
+
 }
 
 void generator::generate_white_pawn_moves()

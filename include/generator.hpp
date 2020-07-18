@@ -11,6 +11,9 @@
 #include "board.hpp"
 #include "bitboard.hpp"
 /**
+ * move generator with
+ * functions to generate
+ * legal and pseudo legal moves
  * legal move generator
  */
 
@@ -26,13 +29,14 @@ public:
     const move& next_move() const;
     Color::Value side_to_move() const;
     const board& pos() const;
+    movelist get_legal_moves();
 
 private:
     const board& b;
     movelist ml;
     Color::Value active;
 
-    void run();
+    void run(Move::GeneratorStatus);
 
     // helper functions
     void generate_white_pawn_moves();
@@ -54,7 +58,6 @@ private:
     U64 generate_white_bishop_attacks() const;
     U64 generate_white_rook_attacks() const;
     U64 generate_white_queen_attacks() const;
-    U64 generate_white_king_attacks() const;
 
     U64 generate_black_pawn_push_targets(bool single=true) const;
     U64 generate_black_pawn_attacks() const;
@@ -62,7 +65,6 @@ private:
     U64 generate_black_bishop_attacks() const;
     U64 generate_black_rook_attacks() const;
     U64 generate_black_queen_attacks() const;
-    U64 generate_black_king_attacks() const;
 
 };
 

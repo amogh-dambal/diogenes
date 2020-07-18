@@ -134,6 +134,12 @@ namespace Move
         KINGSIDE_CASTLE
     };
 
+    enum class GeneratorStatus
+    {
+        PSEUDOLEGAL,
+        LEGAL
+    };
+
     const U8 QUIET_FLAG = 0x0;
     const U8 EN_PASSANT_FLAG = 0x5;
     const U8 CAPTURE_FLAG = 0x4;
