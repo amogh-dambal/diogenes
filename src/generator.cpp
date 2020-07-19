@@ -40,6 +40,10 @@ movelist generator::get_moves()
     return ml;
 }
 
+/**
+ *
+ * @return
+ */
 movelist generator::get_legal_moves()
 {
     active = b.side_to_move();
@@ -77,7 +81,11 @@ const board& generator::pos() const
 /**
  * helper method that calls appropriate piece-wise
  * move generation methods based on 
- * active side 
+ * active side
+ * @param status: GeneratorStatus enum type that determines
+ * what kinds of moves - either PSEUDOLEGAL or LEGAL - to generate
+ * PSEUDOLEGAL moves do not consider checks or pinned pieces
+ * LEGAL moves are all valid moves as per the rules of chess
  */
 void generator::run(Move::GeneratorStatus status)
 {

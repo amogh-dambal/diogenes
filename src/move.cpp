@@ -63,7 +63,38 @@ std::ostream& operator<<(std::ostream& out, const move& m)
     // TODO: write promotion logic
     else if (m.is_promotion_)
     {
-        out << "promotion";
+        // promotion capture
+        if (m.is_capture_)
+        {
+            out << move::get_square_as_string(m.from_).at(0)
+                << "x"
+                << move::get_square_as_string(m.to_)
+                << "=";
+
+        }
+        // quiet promotion
+        else
+        {
+            out << move::get_square_as_string(m.to_) << "=";
+        }
+        U64 promote_to = (m.mv & 0x3000ULL);
+        switch (promote_to)
+        {
+            case 0:
+                out << "N";
+                break;
+            case 1:
+                out << "B";
+                break;
+            case 2:
+                out << "R";
+                break;
+            case 3:
+                out << "Q";
+                break;
+            default:
+                break;
+        }
     }
     // TODO: write en passant output logic
     // simple case (most quiet moves & captures)
@@ -95,6 +126,11 @@ std::ostream& operator<<(std::ostream& out, const move& m)
         }
         if (m.is_capture_)
         {
+            // output file of capturing pawn as per algebraic notation
+            if (m.piece_encoding == Move::PieceEncoding::PAWN)
+            {
+                out << move::get_square_as_string(m.from_).at(0);
+            }
             out << "x";
         }
         out << move::get_square_as_string(m.to_);
