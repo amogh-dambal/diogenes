@@ -31,10 +31,10 @@ move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const 
     mv |= (((U8)piece & 0x7) << 16);
 
 
-    is_capture_ = mv & Move::CAPTURE_MASK;
-    is_castle_ = mv & Move::CASTLE_MASK;
-    is_promotion_ = mv & Move::PROMOTION_MASK;
-    is_double_push_ = mv & Move::DOUBLE_PUSH_MASK;
+    is_capture_ = (mv & Move::CAPTURE_MASK);
+    is_castle_ = (piece == Move::QUEENSIDE_CASTLE || piece == Move::KINGSIDE_CASTLE);
+    is_promotion_ = (flags & Move::PROMOTION_FLAG);
+    is_double_push_ = (flags == Move::DOUBLE_PUSH_FLAG);
     // prevents captures from being flagged as EP moves
     is_ep_ = ((mv & Move::EN_PASSANT_MASK) == Move::EN_PASSANT_MASK);
 }
@@ -77,7 +77,7 @@ std::ostream& operator<<(std::ostream& out, const move& m)
         {
             out << move::get_square_as_string(m.to_) << "=";
         }
-        U64 promote_to = (m.mv & 0x3000ULL);
+        U64 promote_to = (m.mv & 0x3000ULL) >> 12ULL;
         switch (promote_to)
         {
             case 0:
