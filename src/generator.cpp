@@ -118,11 +118,24 @@ void generator::generate_white_pawn_moves()
     // white pawn single push moves
     flags = Move::QUIET_FLAG;
     targets = generate_white_pawn_push_targets(true);
-
     target_squares = bitboard::serialize(targets);
     for (int tgt_sq : target_squares)
     {
-        ml.push_back(move(tgt_sq-8, tgt_sq, Move::PieceEncoding::PAWN, flags));
+        // promotion
+        if (tgt_sq > 55)
+        {
+            flags = Move::PROMOTION_FLAG;
+            for (int i = 0; i < 4; i++)
+            {
+                ml.push_back(move(tgt_sq - 8, tgt_sq, Move::PieceEncoding::PAWN, flags++));
+            }
+        }
+        // quiet single pawn push
+        else
+        {
+            ml.push_back(move(tgt_sq - 8, tgt_sq, Move::PieceEncoding::PAWN, flags));
+        }
+
     }
 
     // white pawn double push moves
@@ -142,15 +155,41 @@ void generator::generate_white_pawn_moves()
     unsigned int from;
     for (int asq : attack_squares)
     {
-        if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SW)))
+        // promotion capture
+        if (asq > 55)
         {
-            from = asq + Board::SW;
-            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
+            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SW)))
+            {
+                from = asq + Board::SW;
+                for (int i = 0; i < 4; i++)
+                {
+                    ml.push_back(move(from, asq, Move::PAWN, flags++));
+                }
+            }
+            flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
+            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SE)))
+            {
+                from = asq + Board::SE;
+                for (int i = 0; i < 4; i++)
+                {
+                    ml.push_back(move(from, asq, Move::PAWN, flags++));
+                }
+            }
         }
-        if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SE)))
+        // non-promotion captures
+        else
         {
-            from = asq + Board::SE;
-            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SW)))
+            {
+                from = asq + Board::SW;
+                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            }
+            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SE)))
+            {
+                from = asq + Board::SE;
+                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            }
         }
     }
 }
@@ -319,7 +358,20 @@ void generator::generate_black_pawn_moves()
     target_squares = bitboard::serialize(targets);
     for (int tsq : target_squares)
     {
-        ml.push_back(move(tsq + 8, tsq, Move::PieceEncoding::PAWN, flags));
+        // promotions
+        if (tsq < 8)
+        {
+            flags = Move::PROMOTION_FLAG;
+            for (int i = 0; i < 4; i++)
+            {
+                ml.push_back(move(tsq + 8, tsq, Move::PAWN, flags++));
+            }
+        }
+        else
+        {
+            ml.push_back(move(tsq + 8, tsq, Move::PieceEncoding::PAWN, flags));
+        }
+
     }
     // black pawn double push moves
     flags = Move::DOUBLE_PUSH_FLAG;
@@ -336,18 +388,40 @@ void generator::generate_black_pawn_moves()
     unsigned int from;
     for (int asq : attack_squares)
     {
-        if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NW)))
+        if (asq < 8)
         {
-            from = asq + Board::Direction::NW;
-            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
+            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NW)))
+            {
+                from = asq + Board::Direction::NW;
+                for (int i = 0; i < 4; i++)
+                {
+                    ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags + i));
+                }
+            }
+            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NE)))
+            {
+                from = asq + Board::Direction::NE;
+                for (int i = 0; i < 4; i++)
+                {
+                    ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags + i));
+                }
+            }
         }
-        if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NE)))
+        else
         {
-            from = asq + Board::Direction::NE;
-            ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NW)))
+            {
+                from = asq + Board::Direction::NW;
+                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            }
+            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NE)))
+            {
+                from = asq + Board::Direction::NE;
+                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            }
         }
     }
-
 }
 
 void generator::generate_black_knight_moves() 

@@ -17,6 +17,9 @@
  * legal move generator
  */
 
+// TODO: implement pawn promotion and en-passant move generation
+// TODO: legal move generation
+
 typedef std::vector<move> movelist;
 
 class generator

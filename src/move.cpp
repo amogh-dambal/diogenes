@@ -65,7 +65,8 @@ std::ostream& operator<<(std::ostream& out, const move& m)
     {
         out << "promotion";
     }
-    // simple case (most quiet moves)
+    // TODO: write en passant output logic
+    // simple case (most quiet moves & captures)
     else
     {
         switch (m.piece_encoding)
