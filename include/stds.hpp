@@ -134,17 +134,22 @@ namespace Move
         KINGSIDE_CASTLE
     };
 
+    const U8 QUIET_FLAG = 0x0;
+
     enum class GeneratorStatus
     {
         PSEUDOLEGAL,
         LEGAL
     };
-
-    const U8 QUIET_FLAG = 0x0;
     const U8 EN_PASSANT_FLAG = 0x5;
     const U8 CAPTURE_FLAG = 0x4;
     const U8 CASTLE_FLAG = 0x2;
     const U8 PROMOTION_FLAG = 0x8;
+    const U8 KNIGHT_PROMOTION = PROMOTION_FLAG | 0x0;
+    const U8 BISHOP_PROMOTION = PROMOTION_FLAG | 0x1;
+    const U8 ROOK_PROMOTION = PROMOTION_FLAG | 0x2;
+    const U8 QUEEN_PROMOTION = PROMOTION_FLAG | 0x3;
+
     const U8 DOUBLE_PUSH_FLAG = 0x1;
 
     const U32 FROM_MASK = 0x3f;
