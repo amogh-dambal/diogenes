@@ -512,20 +512,21 @@ U64 generator::generate_white_pawn_attacks() const
 U64 generator::generate_white_pawn_push_targets(bool single) const
 {
     U64 attacks = 0;
+    U64 empty = b.get_empty_squares();
     U64 w_pawns = b.get_pawns(Color::WHITE); 
 
     if (bitboard::pop_count(w_pawns) > 0)
     {
         if (single)
         {
-            attacks |= bitboard::north(w_pawns) & b.get_empty_squares();
+            attacks |= bitboard::north(w_pawns) & empty;
         }
         else
         {
             // only calculate double pushes for
             // pawns in their original squares
-            w_pawns &= (Board::FIRST_RANK << 16);
-            attacks |= (bitboard::north(bitboard::north(w_pawns)) & b.get_empty_squares());
+            w_pawns &= (0xff00);
+            attacks |= bitboard::north(bitboard::north(w_pawns) & empty) & empty;
         }
     }
     return attacks;
@@ -618,16 +619,19 @@ U64 generator::generate_white_queen_attacks() const
 U64 generator::generate_black_pawn_push_targets(bool single) const
 {
     U64 attacks = 0;
+    U64 empty = b.get_empty_squares();
     U64 b_pawns = b.get_pawns(Color::BLACK);
     if (single)
     {
-        attacks |= bitboard::south(b_pawns) & b.get_empty_squares();
+        attacks |= bitboard::south(b_pawns) & empty;
     }
     else
     {
         // only calculate double pushes for pawns in their original squares
-        b_pawns &= (Board::EIGHTH_RANK >> (unsigned)16);
-        attacks |= bitboard::south(bitboard::south(b_pawns)) & b.get_empty_squares();
+        b_pawns &= (0x00ff000000000000);
+
+        attacks |= bitboard::south(bitboard::south(b_pawns) & empty) & empty;
+
     }
     return attacks;
 }
