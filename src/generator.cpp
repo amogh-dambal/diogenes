@@ -200,6 +200,22 @@ void generator::generate_white_pawn_moves()
             }
         }
     }
+
+    // en passant moves, if applicable
+    flags = Move::EN_PASSANT_FLAG;
+    if (b.ep_target_square() != Board::Square::NONE)
+    {
+        unsigned int ep_sq = b.ep_target_square();
+        U64 ep = 1ULL << ep_sq;
+        if (ep & w_pawn_attacks)
+        {
+            U64 ep_attacks = (bitboard::southwest(ep) & Board::NOT_H_FILE) | (bitboard::southeast(ep) & Board::NOT_A_FILE);
+            for (int epasq : bitboard::serialize(ep_attacks))
+            {
+                ml.push_back(move(epasq, ep_sq, Move::PieceEncoding::PAWN, flags));
+            }
+        }
+    }
 }
 
 void generator::generate_white_knight_moves()
@@ -427,6 +443,22 @@ void generator::generate_black_pawn_moves()
             {
                 from = asq + Board::Direction::NE;
                 ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
+            }
+        }
+    }
+
+    // en passant moves, if applicable
+    flags = Move::EN_PASSANT_FLAG;
+    if (b.ep_target_square() != Board::Square::NONE)
+    {
+        unsigned int ep_sq = b.ep_target_square();
+        U64 ep = 1ULL << ep_sq;
+        if (ep & attacks)
+        {
+            U64 ep_attacks = (bitboard::northwest(ep) & Board::NOT_H_FILE) | (bitboard::northeast(ep) & Board::NOT_A_FILE);
+            for (int epasq : bitboard::serialize(ep_attacks))
+            {
+                ml.push_back(move(epasq, ep_sq, Move::PieceEncoding::PAWN, flags));
             }
         }
     }
