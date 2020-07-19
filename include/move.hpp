@@ -8,6 +8,7 @@
 #include <fstream>
 #include <map>
 #include <iostream>
+#include <sstream>
 
 #include "stds.hpp"
 
@@ -18,6 +19,8 @@ public:
     move(U32 from, U32 to, Move::PieceEncoding piece, U32 flags);
 
     friend std::ostream& operator<<(std::ostream& out, const move& m);
+    std::string to_string() const;
+
 
     Move::PieceEncoding piece() const;
     Board::Square from() const;

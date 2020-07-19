@@ -138,6 +138,13 @@ std::ostream& operator<<(std::ostream& out, const move& m)
     return out;
 }
 
+std::string move::to_string() const
+{
+    std::ostringstream oss;
+    oss << *this;
+    return oss.str();
+}
+
 Move::PieceEncoding move::piece() const
 {
     return piece_encoding;
