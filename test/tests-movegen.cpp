@@ -80,3 +80,27 @@ TEST_CASE("move generation - random pos - T2", "[movegen]")
         std::cout << mv << " ";
     }
 }
+
+TEST_CASE("move generation - pawn double push", "[movegen]")
+{
+    std::string fen_record = "8/8/8/8/8/2P3P1/PP1PPP1P/6K1 w - - 0 1";
+    board b(fen_record);
+
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(b.get_pawns(Color::WHITE) == 0x44bb00);
+
+    generator g(b);
+
+    REQUIRE(g.side_to_move() == Color::WHITE);
+    REQUIRE(g.pos() == b);
+
+    auto moves = g.get_moves();
+
+    REQUIRE(moves.size() == 17);
+
+    for (const move& m : moves)
+    {
+        std::cout << m << " ";
+    }
+    std::cout << std::endl;
+}
