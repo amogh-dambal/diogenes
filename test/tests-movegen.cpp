@@ -51,36 +51,6 @@ TEST_CASE("generate rook moves - WHITE to move", "[movegen-white rook]")
     REQUIRE(moves.size() == 13);
 }
 
-TEST_CASE("move generation - random position - T1", "[movegen]")
-{
-    std::string fen = "rnbqkbnr/1ppppppp/p7/8/8/PP6/2PPPPPP/RNBQKBNR w KQkq - 0 1";
-    board b(fen);
-    generator gen(b);
-
-    REQUIRE(gen.pos() == b);
-    auto moves = gen.get_moves();
-
-}
-
-TEST_CASE("move generation - random pos - T2", "[movegen]")
-{
-    std::cout << "==============================\n";
-    std::string fen_record = "k7/p3r3/1b6/8/8/4Q3/4PPPP/6K1 w - - 0 1";
-    board b(fen_record);
-    generator gen(b);
-
-    REQUIRE(gen.pos() == b);
-    auto moves = gen.get_moves();
-
-
-    std::cout << "FEN: " << fen_record << "\n";
-    std::cout << "Position: " << "\n" << b << "\n";
-    for (const move& mv : moves)
-    {
-        std::cout << mv << " ";
-    }
-}
-
 TEST_CASE("move generation - pawn double push", "[movegen]")
 {
     std::string fen_record = "8/8/8/8/8/2P3P1/PP1PPP1P/6K1 w - - 0 1";
@@ -97,10 +67,32 @@ TEST_CASE("move generation - pawn double push", "[movegen]")
     auto moves = g.get_moves();
 
     REQUIRE(moves.size() == 17);
-
-    for (const move& m : moves)
-    {
-        std::cout << m << " ";
-    }
-    std::cout << std::endl;
 }
+
+TEST_CASE("move generation - pawn promotion")
+{
+    std::string fr = "r1n5/1P6/8/8/8/8/8/7K w - - 0 1";
+    board bd(fr);
+    generator gen(bd);
+
+    // sanity tests
+    REQUIRE(bd.side_to_move() == Color::WHITE);
+    REQUIRE(gen.pos() == bd);
+    REQUIRE(gen.side_to_move() == bd.side_to_move());
+
+    auto moves = gen.get_moves();
+    REQUIRE(moves.size() == 15);
+
+    fr = "8/8/8/8/8/8/2p5/1k1B3K b - - 0 1";
+    board brd(fr);
+    generator g(brd);
+
+    REQUIRE(brd.side_to_move() == Color::BLACK);
+    REQUIRE(g.pos() == brd);
+    REQUIRE(g.side_to_move() == brd.side_to_move());
+
+    moves = g.get_moves();
+    REQUIRE(moves.size() == 12);
+
+}
+
