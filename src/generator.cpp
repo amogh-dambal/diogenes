@@ -654,7 +654,8 @@ U64 generator::generate_white_knight_attacks() const
     std::vector<int> knight_sqs = bitboard::serialize(w_knights);
 
     Board::Square sq;
-    const U64 possible_mvs = b.get_empty_squares();
+    const U64 b_pcs = b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK);
+    const U64 possible_mvs = b.get_empty_squares() | b_pcs;
     for (int ksq : knight_sqs)
     {
         sq = (Board::Square) ksq;
@@ -771,7 +772,8 @@ U64 generator::generate_black_knight_attacks() const
     std::vector<int> knight_sqs = bitboard::serialize(b_knights);
 
     Board::Square sq;
-    const U64 possible_mvs = b.get_pieces(Color::WHITE) | b.get_empty_squares();
+    const U64 w_pcs = b.get_pieces(Color::WHITE) ^ b.get_kings(Color::WHITE);
+    const U64 possible_mvs = w_pcs | b.get_empty_squares();
     for (int ksq : knight_sqs)
     {
         sq = (Board::Square) ksq;

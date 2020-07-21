@@ -17,7 +17,6 @@
  * legal move generator
  */
 
-// TODO: implement pawn promotion and en-passant move generation
 // TODO: legal move generation
 
 typedef std::vector<move> movelist;
@@ -42,6 +41,8 @@ private:
     void run(Move::GeneratorStatus);
 
     // helper functions
+    U64 generate_white_attacks();
+
     void generate_white_pawn_moves();
     void generate_white_knight_moves();
     void generate_white_bishop_moves();
