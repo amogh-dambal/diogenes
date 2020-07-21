@@ -342,7 +342,8 @@ void generator::generate_white_king_moves()
     }
 
     // captures
-    U64 capture_squares = b.get_pieces(Color::BLACK) & king_targets;
+    const U64 b_pcs = b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK);
+    U64 capture_squares = b_pcs & king_targets;
     for (int sq : bitboard::serialize(capture_squares))
     {
         ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
@@ -585,7 +586,8 @@ void generator::generate_black_king_moves()
     }
 
     // captures
-    U64 capture_squares = b.get_pieces(Color::WHITE) & king_targets;
+    const U64 w_pcs = b.get_pieces(Color::WHITE) ^ b.get_kings(Color::WHITE);
+    U64 capture_squares = w_pcs & king_targets;
     for (int sq : bitboard::serialize(capture_squares))
     {
         ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
