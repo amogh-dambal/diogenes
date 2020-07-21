@@ -4,15 +4,30 @@
 
 #include "attacks.hpp"
 
+// TODO: fix const-correctness bug in generation of pawn push targets
+
+/**
+ * function that builds the white pawn attack set
+ * @param w_pawns : U64 bitboard representing the white pawns on the board
+ * @param possible_mvs : U64 bitboard representing the squares on the board
+ * that are empty or occupied by a piece of the opposite color
+ * @return U64 bitboard representing all squares currently under attack by white pawns
+ */
 U64 generate_white_pawn_attacks(const U64 w_pawns, const U64 possible_mvs)
 {
     U64 attacks = 0;
-
     attacks |= bitboard::northeast(w_pawns) | bitboard::northwest(w_pawns);
     attacks &= possible_mvs;
     return attacks;
 }
 
+/**
+ * function that builds the set of potential push targets for the white pawns
+ * @param w_pawns : U
+ * @param empty
+ * @param single
+ * @return
+ */
 U64 generate_white_pawn_push_targets(U64 w_pawns, const U64 empty, bool single)
 {
     U64 attacks = 0;
