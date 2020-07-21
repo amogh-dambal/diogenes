@@ -122,9 +122,13 @@ void generator::generate_white_pawn_moves()
     U64 targets;
     std::vector<int> target_squares;
     std::vector<int> attack_squares;
+
+    const U64 w_pawns = b.get_pawns(Color::WHITE);
+    const U64 empty = b.get_empty_squares();
+
     // white pawn single push moves
     flags = Move::QUIET_FLAG;
-    targets = generate_white_pawn_push_targets(true);
+    targets = generate_white_pawn_push_targets(w_pawns, empty, true);
     target_squares = bitboard::serialize(targets);
     for (int tgt_sq : target_squares)
     {
@@ -147,7 +151,7 @@ void generator::generate_white_pawn_moves()
 
     // white pawn double push moves
     flags = Move::DOUBLE_PUSH_FLAG;
-    targets = generate_white_pawn_push_targets(false);
+    targets = generate_white_pawn_push_targets(w_pawns, empty, false);
 
     target_squares = bitboard::serialize(targets);
     for (int tgt_sq : target_squares)
@@ -156,7 +160,8 @@ void generator::generate_white_pawn_moves()
     }
 
     // white pawn attacks
-    U64 w_pawn_attacks = generate_white_pawn_attacks();
+    const U64 b_attackables = b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK);
+    U64 w_pawn_attacks = generate_white_pawn_attacks(w_pawns, b_attackables);
     attack_squares = bitboard::serialize(w_pawn_attacks);
     flags = Move::CAPTURE_FLAG;
     unsigned int from;
@@ -219,11 +224,13 @@ void generator::generate_white_pawn_moves()
 
 void generator::generate_white_knight_moves()
 {
-    U64 w_knights = b.get_knights(Color::WHITE);
+    const U64 w_knights = b.get_knights(Color::WHITE);
+    const U64 available_squares = b.get_pieces(Color::BLACK) | b.get_empty_squares();
+    const U64* const targets = b.get_knight_targets();
+
     if (bitboard::pop_count(w_knights) > 0)
     {
-        U64 all_attacked_squares = generate_white_knight_attacks();
-
+        U64 all_attacked_squares = generate_white_knight_attacks(w_knights, available_squares, targets);
         std::vector<int> w_knight_squares = bitboard::serialize(w_knights);
 
         U64 possible_moves;
@@ -231,7 +238,7 @@ void generator::generate_white_knight_moves()
         bool is_capture;
         for (int ksq : w_knight_squares)
         {
-            possible_moves = all_attacked_squares & b.get_knight_targets((Board::Square)ksq);
+            possible_moves = all_attacked_squares & targets[(Board::Square)ksq];
             for (int to : bitboard::serialize(possible_moves))
             {
                 is_capture = (1ULL << to) & b.get_pieces(Color::BLACK);
@@ -246,10 +253,13 @@ void generator::generate_white_knight_moves()
 
 void generator::generate_white_bishop_moves()
 {
-    U64 w_bishop_pos = b.get_bishops(Color::WHITE);
+    const U64 w_bishop_pos = b.get_bishops(Color::WHITE);
+    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_bishops(Color::WHITE);
     if (bitboard::pop_count(w_bishop_pos) > 0)
     {
-        U64 w_bishop_attacks = generate_white_bishop_attacks();
+        U64 w_bishop_attacks = generate_white_bishop_attacks(w_bishop_pos, blockers);
+        w_bishop_attacks &= ~(b.get_pieces(Color::WHITE));
+
         std::vector<int> w_bishop_pos_squares = bitboard::serialize(w_bishop_pos);
         std::vector<int> w_bishop_attack_squares = bitboard::serialize(w_bishop_attacks);
 
@@ -273,11 +283,13 @@ void generator::generate_white_bishop_moves()
 
 void generator::generate_white_rook_moves()
 {
-    U64 w_rook_pos = b.get_rooks(Color::WHITE);
+    const U64 w_rook_pos = b.get_rooks(Color::WHITE);
+    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_rooks(Color::WHITE);
     // only generate moves if there are rooks on the board
     if (bitboard::pop_count(w_rook_pos) > 0)
     {
-        U64 w_rook_attacks = generate_white_rook_attacks();
+        U64 w_rook_attacks = generate_white_rook_attacks(w_rook_pos, blockers);
+        w_rook_attacks &= ~(b.get_pieces(Color::WHITE));
         std::vector<int> w_rook_pos_squares = bitboard::serialize(w_rook_pos);
         std::vector<int> w_rook_attack_squares = bitboard::serialize(w_rook_attacks);
 
@@ -300,11 +312,13 @@ void generator::generate_white_rook_moves()
 
 void generator::generate_white_queen_moves()
 {
-    U64 w_queen_pos = b.get_queens(Color::WHITE);
+    const U64 w_queen_pos = b.get_queens(Color::WHITE);
+    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_queens(Color::WHITE);
     // only generate moves if there are white queens on the board
     if (bitboard::pop_count(w_queen_pos) > 0)
     {
-        U64 w_queen_attacks = generate_white_queen_attacks();
+        U64 w_queen_attacks = generate_white_queen_attacks(w_queen_pos, blockers);
+        w_queen_attacks &= ~(b.get_pieces(Color::WHITE));
         std::vector<int> w_queen_pos_squares = bitboard::serialize(w_queen_pos);
         std::vector<int> w_queen_attack_squares = bitboard::serialize(w_queen_attacks);
 
@@ -376,9 +390,12 @@ void generator::generate_black_pawn_moves()
     std::vector<int> target_squares;
     std::vector<int> attack_squares;
 
+    const U64 b_pawns = b.get_pawns(Color::BLACK);
+    const U64 empty = b.get_empty_squares();
+
     // black pawn single push moves
     flags = Move::QUIET_FLAG;
-    targets = generate_black_pawn_push_targets(true);
+    targets = generate_black_pawn_push_targets(b_pawns, empty, true);
     target_squares = bitboard::serialize(targets);
     for (int tsq : target_squares)
     {
@@ -399,15 +416,16 @@ void generator::generate_black_pawn_moves()
     }
     // black pawn double push moves
     flags = Move::DOUBLE_PUSH_FLAG;
-    targets = generate_black_pawn_push_targets(false);
+    targets = generate_black_pawn_push_targets(b_pawns, empty, false);
     target_squares = bitboard::serialize(targets);
     for (int tsq : target_squares)
     {
         ml.push_back(move(tsq + 16, tsq, Move::PieceEncoding::PAWN, flags));
     }
     // black pawn attacks
+    const U64 w_attackables = b.get_pieces(Color::WHITE) ^ b.get_kings(Color::WHITE);
     flags = Move::CAPTURE_FLAG;
-    attacks = generate_black_pawn_attacks();
+    attacks = generate_black_pawn_attacks(b_pawns, w_attackables);
     attack_squares = bitboard::serialize(attacks);
     unsigned int from;
     for (int asq : attack_squares)
@@ -466,8 +484,10 @@ void generator::generate_black_pawn_moves()
 
 void generator::generate_black_knight_moves() 
 {
-    U64 b_knights = b.get_knights(Color::BLACK);
-    U64 all_attacked_squares = generate_black_knight_attacks();
+    const U64 b_knights = b.get_knights(Color::BLACK);
+    const U64 available_squares = b.get_pieces(Color::WHITE) | b.get_empty_squares();
+    const U64* const targets = b.get_knight_targets();
+    U64 all_attacked_squares = generate_black_knight_attacks(b_knights, available_squares, targets);
 
     std::vector<int> b_knight_squares = bitboard::serialize(b_knights);
 
@@ -476,7 +496,7 @@ void generator::generate_black_knight_moves()
     bool is_capture;
     for (int ksq : b_knight_squares)
     {
-        possible_moves = all_attacked_squares & b.get_knight_targets((Board::Square)ksq);
+        possible_moves = all_attacked_squares & targets[(Board::Square)ksq];
         for (int to : bitboard::serialize(possible_moves))
         {
             is_capture = (1ULL << to) & b.get_pieces(Color::WHITE);
@@ -490,10 +510,11 @@ void generator::generate_black_knight_moves()
 
 void generator::generate_black_bishop_moves()
 {
-    U64 b_bishop_pos = b.get_bishops(Color::BLACK);
+    const U64 b_bishop_pos = b.get_bishops(Color::BLACK);
+    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_bishops(Color::BLACK);
     if (bitboard::pop_count(b_bishop_pos) > 0)
     {
-        U64 b_bishop_attacks = generate_black_bishop_attacks();
+        const U64 b_bishop_attacks = generate_black_bishop_attacks(b_bishop_pos, blockers);
         std::vector<int> b_bishop_pos_squares = bitboard::serialize(b_bishop_pos);
         std::vector<int> b_bishop_attack_squares = bitboard::serialize(b_bishop_attacks);
 
@@ -517,11 +538,12 @@ void generator::generate_black_bishop_moves()
 
 void generator::generate_black_rook_moves()
 {
-    U64 b_rook_pos = b.get_rooks(Color::BLACK);
+    const U64 b_rook_pos = b.get_rooks(Color::BLACK);
+    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_rooks(Color::BLACK);
     // only generate moves if there are rooks on the board
     if (bitboard::pop_count(b_rook_pos) > 0)
     {
-        U64 b_rook_attacks = generate_black_rook_attacks();
+        const U64 b_rook_attacks = generate_black_rook_attacks(b_rook_pos, blockers);
         std::vector<int> b_rook_pos_squares = bitboard::serialize(b_rook_pos);
         std::vector<int> b_rook_attack_squares = bitboard::serialize(b_rook_attacks);
 
@@ -544,11 +566,12 @@ void generator::generate_black_rook_moves()
 
 void generator::generate_black_queen_moves()
 {
-    U64 b_queen_pos = b.get_queens(Color::BLACK);
+    const U64 b_queen_pos = b.get_queens(Color::BLACK);
+    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_queens(Color::BLACK);
     // only generate moves if there are white queens on the board
     if (bitboard::pop_count(b_queen_pos) > 0)
     {
-        U64 b_queen_attacks = generate_black_queen_attacks();
+        U64 b_queen_attacks = generate_black_queen_attacks(b_queen_pos, blockers);
         std::vector<int> b_queen_pos_squares = bitboard::serialize(b_queen_pos);
         std::vector<int> b_queen_attack_squares = bitboard::serialize(b_queen_attacks);
 
@@ -611,243 +634,4 @@ void generator::generate_black_king_moves()
         ml.push_back(move(ksq, ksq-2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
     }
 }
-
-U64 generator::generate_white_pawn_attacks() const
-{
-    U64 w_pawns = b.get_pawns(Color::WHITE);
-    U64 attacks = 0;
-
-    const U64 possible_mvs = b.get_pieces(Color::BLACK);
-
-    attacks |= bitboard::northeast(w_pawns) | bitboard::northwest(w_pawns);
-    attacks &= possible_mvs;
-    return attacks;
-}
-
-U64 generator::generate_white_pawn_push_targets(bool single) const
-{
-    U64 attacks = 0;
-    U64 empty = b.get_empty_squares();
-    U64 w_pawns = b.get_pawns(Color::WHITE); 
-
-    if (bitboard::pop_count(w_pawns) > 0)
-    {
-        if (single)
-        {
-            attacks |= bitboard::north(w_pawns) & empty;
-        }
-        else
-        {
-            // only calculate double pushes for
-            // pawns in their original squares
-            w_pawns &= (0xff00);
-            attacks |= bitboard::north(bitboard::north(w_pawns) & empty) & empty;
-        }
-    }
-    return attacks;
-}
-
-U64 generator::generate_white_knight_attacks() const
-{
-    U64 attacks = 0;
-    U64 w_knights = b.get_knights(Color::WHITE);
-
-    std::vector<int> knight_sqs = bitboard::serialize(w_knights);
-
-    Board::Square sq;
-    const U64 b_pcs = b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK);
-    const U64 possible_mvs = b.get_empty_squares() | b_pcs;
-    for (int ksq : knight_sqs)
-    {
-        sq = (Board::Square) ksq;
-        attacks |= (b.get_knight_targets(sq) & possible_mvs);
-    }
-    return attacks;
-}
-
-U64 generator::generate_white_bishop_attacks() const
-{
-    U64 attacks = 0;
-    U64 w_bishops = b.get_bishops(Color::WHITE);
-    std::vector<int> bishop_sqs = bitboard::serialize(w_bishops);
-
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_bishops(Color::WHITE);
-
-    U64 bpos;
-    for (int bsq : bishop_sqs)
-    {
-        bpos = 1ULL << bsq;
-        attacks |= bitboard::occ_fill_northeast(bpos, blockers);
-        attacks |= bitboard::occ_fill_northwest(bpos, blockers);
-        attacks |= bitboard::occ_fill_southeast(bpos, blockers);
-        attacks |= bitboard::occ_fill_southwest(bpos, blockers);
-    }
-    attacks &= ~(b.get_pieces(Color::WHITE));
-    return attacks;
-}
-
-U64 generator::generate_white_rook_attacks() const
-{
-    U64 attacks = 0;
-    U64 w_rooks = b.get_rooks(Color::WHITE);
-    std::vector<int> rook_sqs = bitboard::serialize(w_rooks);
-    
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_rooks(Color::WHITE); 
-    
-    U64 rpos;
-    for (int rsq : rook_sqs)
-    {
-        rpos = 1ULL << rsq;
-        attacks |= bitboard::occ_fill_north(rpos, blockers);
-        attacks |= bitboard::occ_fill_south(rpos, blockers);
-        attacks |= bitboard::occ_fill_east(rpos, blockers);
-        attacks |= bitboard::occ_fill_west(rpos, blockers);
-    }
-    attacks &= ~(b.get_pieces(Color::WHITE)); 
-    return attacks;
-}
-
-U64 generator::generate_white_queen_attacks() const
-{
-    U64 attacks = 0;
-    U64 w_queens = b.get_queens(Color::WHITE);
-    std::vector<int> queen_sqs = bitboard::serialize(w_queens);
-    
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_queens(Color::WHITE);
-    U64 qpos;
-    for (int qsq : queen_sqs)
-    {
-        qpos = 1ULL << qsq;
-        attacks |= bitboard::occ_fill_north(qpos, blockers);
-        attacks |= bitboard::occ_fill_south(qpos, blockers);
-        attacks |= bitboard::occ_fill_east(qpos, blockers);
-        attacks |= bitboard::occ_fill_west(qpos, blockers);
-        attacks |= bitboard::occ_fill_northeast(qpos, blockers);
-        attacks |= bitboard::occ_fill_northwest(qpos, blockers);
-        attacks |= bitboard::occ_fill_southeast(qpos, blockers);
-        attacks |= bitboard::occ_fill_southwest(qpos, blockers);
-    }
-    attacks &= ~(b.get_pieces(Color::WHITE)); 
-    return attacks;
-
-}
-
-U64 generator::generate_black_pawn_push_targets(bool single) const
-{
-    U64 attacks = 0;
-    U64 empty = b.get_empty_squares();
-    U64 b_pawns = b.get_pawns(Color::BLACK);
-    if (single)
-    {
-        attacks |= bitboard::south(b_pawns) & empty;
-    }
-    else
-    {
-        // only calculate double pushes for pawns in their original squares
-        b_pawns &= (0x00ff000000000000);
-
-        attacks |= bitboard::south(bitboard::south(b_pawns) & empty) & empty;
-
-    }
-    return attacks;
-}
-
-U64 generator::generate_black_pawn_attacks() const
-{
-    U64 attacks = 0;
-    U64 b_pawns = b.get_pawns(Color::BLACK);
-
-    const U64 possible_mvs = b.get_pieces(Color::WHITE);
-
-    attacks |= bitboard::southwest(b_pawns) | bitboard::southeast(b_pawns);
-    attacks &= possible_mvs;
-
-    return attacks;
-}
-
-U64 generator::generate_black_knight_attacks() const
-{
-    U64 attacks = 0;
-    U64 b_knights = b.get_knights(Color::BLACK);
-
-    std::vector<int> knight_sqs = bitboard::serialize(b_knights);
-
-    Board::Square sq;
-    const U64 w_pcs = b.get_pieces(Color::WHITE) ^ b.get_kings(Color::WHITE);
-    const U64 possible_mvs = w_pcs | b.get_empty_squares();
-    for (int ksq : knight_sqs)
-    {
-        sq = (Board::Square) ksq;
-        attacks |= (b.get_knight_targets(sq) & possible_mvs);
-    }
-    return attacks;
-}
-
-U64 generator::generate_black_bishop_attacks() const
-{
-    U64 attacks = 0;
-    U64 b_bishops = b.get_bishops(Color::BLACK);
-    std::vector<int> bishop_sqs = bitboard::serialize(b_bishops);
-
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_bishops(Color::BLACK);
-
-    U64 bpos;
-    for (int bsq : bishop_sqs)
-    {
-        bpos = 1ULL << bsq;
-        attacks |= bitboard::occ_fill_northeast(bpos, blockers);
-        attacks |= bitboard::occ_fill_northwest(bpos, blockers);
-        attacks |= bitboard::occ_fill_southeast(bpos, blockers);
-        attacks |= bitboard::occ_fill_southwest(bpos, blockers);
-    }
-    attacks &= ~(b.get_pieces(Color::BLACK));
-    return attacks;
-}
-
-U64 generator::generate_black_rook_attacks() const
-{
-    U64 attacks = 0;
-    U64 b_rooks = b.get_rooks(Color::BLACK);
-    std::vector<int> rook_sqs = bitboard::serialize(b_rooks);
-
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_rooks(Color::BLACK);
-
-    U64 rpos;
-    for (int rsq : rook_sqs)
-    {
-        rpos = 1ULL << rsq;
-        attacks |= bitboard::occ_fill_north(rpos, blockers);
-        attacks |= bitboard::occ_fill_south(rpos, blockers);
-        attacks |= bitboard::occ_fill_east(rpos, blockers);
-        attacks |= bitboard::occ_fill_west(rpos, blockers);
-    }
-    attacks &= ~(b.get_pieces(Color::BLACK));
-    return attacks;
-}
-
-U64 generator::generate_black_queen_attacks() const
-{
-    U64 attacks = 0;
-    U64 b_queens = b.get_queens(Color::BLACK);
-    std::vector<int> queen_sqs = bitboard::serialize(b_queens);
-
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_queens(Color::BLACK);
-    U64 qpos;
-    for (int qsq : queen_sqs)
-    {
-        qpos = 1ULL << qsq;
-        attacks |= bitboard::occ_fill_north(qpos, blockers);
-        attacks |= bitboard::occ_fill_south(qpos, blockers);
-        attacks |= bitboard::occ_fill_east(qpos, blockers);
-        attacks |= bitboard::occ_fill_west(qpos, blockers);
-        attacks |= bitboard::occ_fill_northeast(qpos, blockers);
-        attacks |= bitboard::occ_fill_northwest(qpos, blockers);
-        attacks |= bitboard::occ_fill_southeast(qpos, blockers);
-        attacks |= bitboard::occ_fill_southwest(qpos, blockers);
-    }
-    attacks &= ~(b.get_pieces(Color::BLACK));
-    return attacks;
-
-}
-
 
