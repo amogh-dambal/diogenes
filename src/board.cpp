@@ -784,3 +784,8 @@ void board::set_side_to_move(Color::Value value)
 {
     this->side_to_move_ = value;
 }
+
+const U64* const board::get_knight_targets() const
+{
+    return this->knight_targets;
+}
