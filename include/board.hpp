@@ -16,6 +16,7 @@
 #include "move.hpp"
 
 typedef std::map<std::string, Board::Square> square_parser;
+typedef const U64 TARGET_LOOKUP_TABLE[64];
 
 class board
 {
@@ -65,6 +66,8 @@ public:
     // function to test move generation - remove once
     // make/unmake routines are written
     void set_side_to_move(Color::Value);
+
+    const U64* const get_knight_targets() const;
 
 private:
     // piece board sets
