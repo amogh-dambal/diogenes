@@ -134,7 +134,7 @@ U64 generate_black_pawn_attacks(const U64 b_pawns, const U64 possible_mvs)
     return attacks;
 }
 
-U64 generate_black_knight_attacks(const U64 b_knights, const U64 possible_mvs, const U64 targets[64])
+U64 generate_black_knight_attacks(const U64 b_knights, const U64 possible_mvs, const U64* const targets)
 {
     U64 attacks = 0;
     std::vector<int> knight_sqs = bitboard::serialize(b_knights);

@@ -92,20 +92,7 @@ TEST_CASE("move generation - pawn promotion")
     REQUIRE(g.side_to_move() == brd.side_to_move());
 
     moves = g.get_moves();
+
     REQUIRE(moves.size() == 12);
 
-}
-
-TEST_CASE("move generation - knight captures")
-{
-    board b("8/8/8/3k1p2/6p1/4N3/8/K7 w - - 0 1");
-    generator gen(b);
-
-    auto moves = gen.get_moves();
-
-    for (const move& mv : moves)
-    {
-        std::cout << mv << " ";
-    }
-    std::cout << std::endl;
 }
