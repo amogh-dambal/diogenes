@@ -112,7 +112,6 @@ void generator::run(Move::GeneratorStatus status)
     }
     else
     {
-
     }
 
 }
