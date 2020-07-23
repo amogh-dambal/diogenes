@@ -112,8 +112,38 @@ void generator::run(Move::GeneratorStatus status)
     }
     else
     {
+        if (active == Color::WHITE)
+        {
+            generate_legal_white_moves();
+        }
+        else
+        {
+            generate_legal_black_moves();
+        }
     }
+}
 
+void generator::generate_legal_white_moves()
+{
+    // generate legal king moves
+    U64 b_attackables = b.get_empty_squares() | b.get_pieces(Color::WHITE);
+    // x-ray the king when calculating slider attacks
+    U64 b_attackables_sliders = b_attackables ^ b.get_kings(Color::WHITE);
+
+    U64 b_pawn_attacks = generate_black_pawn_attacks(b.get_pawns(Color::BLACK), b_attackables);
+    U64 b_knight_attacks = generate_black_knight_attacks(b.get_knights(Color::BLACK), b_attackables, b.get_knight_targets());
+    U64 b_bishop_attacks = generate_black_bishop_attacks(b.get_bishops(Color::BLACK), b_attackables_sliders);
+    U64 b_rook_attacks = generate_black_rook_attacks(b.get_rooks(Color::BLACK), b_attackables_sliders);
+    U64 b_queen_attacks = generate_black_queen_attacks(b.get_queens(Color::BLACK), b_attackables_sliders);
+
+    U64 w_king_danger_squares = b_pawn_attacks | b_knight_attacks | b_bishop_attacks | b_rook_attacks | b_queen_attacks;
+
+    generate_white_king_moves(w_king_danger_squares);
+}
+
+void generator::generate_legal_black_moves()
+{
+    return;
 }
 
 void generator::generate_white_pawn_moves()
@@ -339,7 +369,7 @@ void generator::generate_white_queen_moves()
     }
 }
 
-void generator::generate_white_king_moves()
+void generator::generate_white_king_moves(const U64 danger_squares)
 {
     // non-special king moves
     U64 flags = Move::QUIET_FLAG;
@@ -348,7 +378,7 @@ void generator::generate_white_king_moves()
     U64 king_targets = b.get_king_targets((Board::Square)ksq);
 
     // quiet moves
-    U64 quiet_squares = b.get_empty_squares() & king_targets;
+    U64 quiet_squares = b.get_empty_squares() & king_targets & ~danger_squares;
     for (int sq : bitboard::serialize(quiet_squares))
     {
         ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
@@ -356,7 +386,7 @@ void generator::generate_white_king_moves()
 
     // captures
     const U64 b_pcs = b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK);
-    U64 capture_squares = b_pcs & king_targets;
+    U64 capture_squares = b_pcs & king_targets & ~danger_squares;
     for (int sq : bitboard::serialize(capture_squares))
     {
         ml.push_back(move(ksq, sq, Move::PieceEncoding::KING, flags));
@@ -366,14 +396,16 @@ void generator::generate_white_king_moves()
     flags = Move::CASTLE_FLAG;
     if (
             b.can_white_castle_kside() &
-            !(b.get_occupied_squares() & Move::KINGSIDE_CASTLE_FREE)
+            !(b.get_occupied_squares() & Move::KINGSIDE_CASTLE_FREE) &
+            !(danger_squares & Move::KINGSIDE_CASTLE_FREE)
     )
     {
         ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
     }
     if (
             b.can_white_castle_qside() &
-            !(b.get_occupied_squares() & Move::QUEENSIDE_CASTLE_FREE)
+            !(b.get_occupied_squares() & Move::QUEENSIDE_CASTLE_FREE) &
+            !(danger_squares & Move::QUEENSIDE_CASTLE_FREE)
     )
     {
         // mark flag as queenside castle

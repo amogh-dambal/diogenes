@@ -41,6 +41,9 @@ private:
 
     void run(Move::GeneratorStatus);
 
+    void generate_legal_white_moves();
+    void generate_legal_black_moves();
+
     // helper functions
     U64 generate_white_attacks();
 
@@ -49,7 +52,8 @@ private:
     void generate_white_bishop_moves();
     void generate_white_rook_moves();
     void generate_white_queen_moves();
-    void generate_white_king_moves();
+    void generate_white_king_moves(U64 danger_squares = Board::NO_SQUARES);
+
     void generate_black_pawn_moves();
     void generate_black_knight_moves();
     void generate_black_bishop_moves();
