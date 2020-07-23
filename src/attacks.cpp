@@ -23,10 +23,12 @@ U64 generate_white_pawn_attacks(const U64 w_pawns, const U64 possible_mvs)
 
 /**
  * function that builds the set of potential push targets for the white pawns
- * @param w_pawns : U
- * @param empty
- * @param single
- * @return
+ * @param w_pawns : U64 bitboard representing the white pawns on the board
+ * @param empty : U64 bitboard representing the empty squares on the board
+ * @param single : boolean flag that determines whether function will generate
+ * single push (TRUE) or double push targets (FALSE)
+ * @return U64 bitboard representing all possible squares a white pawn can
+ * currently be pushed to - single or double depending on the flag
  */
 U64 generate_white_pawn_push_targets(U64 w_pawns, const U64 empty, bool single)
 {
@@ -49,6 +51,16 @@ U64 generate_white_pawn_push_targets(U64 w_pawns, const U64 empty, bool single)
     return attacks;
 }
 
+/**
+ * builds the set of squares attacked by the white knights
+ * @param w_knights : U64 bitboard representing the current locations of all
+ * white knights on the board
+ * @param possible_mvs : U64 bitboard of all available squares - empty squares and
+ * squares occupied by black pieces
+ * @param targets: lookup table, using the square to index into the table to get the
+ * set of all squares attacked by a knight at that square
+ * @return U64 bitboard representing all squares under attack by the white knights
+ */
 U64 generate_white_knight_attacks(const U64 w_knights, const U64 possible_mvs, const U64* const targets)
 {
     U64 attacks = 0;
@@ -64,6 +76,13 @@ U64 generate_white_knight_attacks(const U64 w_knights, const U64 possible_mvs, c
     return attacks;
 }
 
+/**
+ * function to build attack set of all white bishops on the board
+ * @param w_bishops : U64 bitboard representing the location of the white bishops
+ * @param blockers : U64 bitboard representing the set of all pieces blocking the rays
+ * of the bishop - includes all white and black pieces
+ * @return U64 bitboard representing the current attack set of the white bishops 
+ */
 U64 generate_white_bishop_attacks(const U64 w_bishops, const U64 blockers)
 {
     U64 attacks = 0;
@@ -83,6 +102,13 @@ U64 generate_white_bishop_attacks(const U64 w_bishops, const U64 blockers)
     return attacks;
 }
 
+/**
+ * function to build attack set of all white rooks on the board
+ * @param w_rooks : U64 bitboard representing the location of the white rooks
+ * @param blockers : U64 bitboard representing the set of all pieces blocking the rays
+ * of the rook - includes all white and black pieces
+ * @return U64 bitboard representing the current attack set of the white rooks 
+ */
 U64 generate_white_rook_attacks(const U64 w_rooks, const U64 blockers)
 {
     U64 attacks = 0;
@@ -100,6 +126,13 @@ U64 generate_white_rook_attacks(const U64 w_rooks, const U64 blockers)
     return attacks;
 }
 
+/**
+ * function to build attack set of all white queens on the board
+ * @param w_queens : U64 bitboard representing the location of the white queens
+ * @param blockers : U64 bitboard representing the set of all pieces blocking the rays
+ * of the queen - includes all white and black pieces
+ * @return U64 bitboard representing the current attack set of the white queens 
+ */
 U64 generate_white_queen_attacks(const U64 w_queens, const U64 blockers)
 {
     U64 attacks = 0;
@@ -121,6 +154,9 @@ U64 generate_white_queen_attacks(const U64 w_queens, const U64 blockers)
     return attacks;
 
 }
+
+/* following functions have identical behavior to the other set of functions, 
+ * only these act on the black pieces, and so the colors used as paramaters are flipped */
 
 U64 generate_black_pawn_push_targets(U64 b_pawns, const U64 empty, bool single)
 {
