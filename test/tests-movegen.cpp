@@ -11,6 +11,8 @@
 
 // TODO: write more comprehensive move-generation tests
 
+/* PSEUDOLEGAL MOVE GENERATION */
+
 TEST_CASE("starting position - WHITE to move", "[movegen]")
 {
     board b;
@@ -95,4 +97,30 @@ TEST_CASE("move generation - pawn promotion")
 
     REQUIRE(moves.size() == 12);
 
+}
+
+/* LEGAL MOVE GENERATION */
+TEST_CASE("legal move generation - white king moves")
+{
+    std::string fen_record;
+    board b;
+    generator* g;
+
+    fen_record = "8/8/8/8/8/7b/8/R3K2R w KQ - 0 1";
+    b = board(fen_record);
+    g = new generator(b);
+
+    auto lmoves = g->get_legal_moves();
+
+    REQUIRE(lmoves.size() == 5);
+    delete g;
+
+    fen_record = "8/8/8/8/8/1n5b/8/R3K2R w KQ - 0 1";
+    b = board(fen_record);
+    g = new generator(b);
+
+    lmoves = g->get_legal_moves();
+    REQUIRE(lmoves.size() == 3);
+
+    delete g;
 }

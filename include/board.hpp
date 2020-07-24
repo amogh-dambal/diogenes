@@ -14,6 +14,7 @@
 
 #include "stds.hpp"
 #include "move.hpp"
+#include "attacks.hpp"
 
 typedef std::map<std::string, Board::Square> square_parser;
 typedef const U64 TARGET_LOOKUP_TABLE[64];

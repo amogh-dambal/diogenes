@@ -54,5 +54,7 @@ TEST_CASE("Function to get index of MS1B", "[bitscan_reverse]")
 
 TEST_CASE("Occluded fills")
 {
+    U64 b = 1ULL << 23;
 
+    U64 a = bitboard::occ_fill_southwest(b, Board::NO_SQUARES);
 }

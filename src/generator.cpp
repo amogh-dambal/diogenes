@@ -126,19 +126,80 @@ void generator::run(Move::GeneratorStatus status)
 void generator::generate_legal_white_moves()
 {
     // generate legal king moves
-    U64 b_attackables = b.get_empty_squares() | b.get_pieces(Color::WHITE);
+    const U64 w_king = b.get_kings(Color::WHITE);
+    const U64 b_attackables = b.get_empty_squares() | b.get_pieces(Color::WHITE);
     // x-ray the king when calculating slider attacks
-    U64 b_attackables_sliders = b_attackables ^ b.get_kings(Color::WHITE);
+    const U64 blockers = b.get_pieces(Color::BOTH) ^ w_king;
 
-    U64 b_pawn_attacks = generate_black_pawn_attacks(b.get_pawns(Color::BLACK), b_attackables);
-    U64 b_knight_attacks = generate_black_knight_attacks(b.get_knights(Color::BLACK), b_attackables, b.get_knight_targets());
-    U64 b_bishop_attacks = generate_black_bishop_attacks(b.get_bishops(Color::BLACK), b_attackables_sliders);
-    U64 b_rook_attacks = generate_black_rook_attacks(b.get_rooks(Color::BLACK), b_attackables_sliders);
-    U64 b_queen_attacks = generate_black_queen_attacks(b.get_queens(Color::BLACK), b_attackables_sliders);
+    const U64 b_pawn_attacks = generate_black_pawn_attacks(b.get_pawns(Color::BLACK), b_attackables);
+    const U64 b_knight_attacks = generate_black_knight_attacks(b.get_knights(Color::BLACK), b_attackables, b.get_knight_targets());
+    const U64 b_bishop_attacks = generate_black_bishop_attacks(b.get_bishops(Color::BLACK), blockers ^ b.get_bishops(Color::BLACK));
+    const U64 b_rook_attacks = generate_black_rook_attacks(b.get_rooks(Color::BLACK), blockers ^ b.get_rooks(Color::BLACK));
+    const U64 b_queen_attacks = generate_black_queen_attacks(b.get_queens(Color::BLACK), blockers ^ b.get_queens(Color::BLACK));
 
-    U64 w_king_danger_squares = b_pawn_attacks | b_knight_attacks | b_bishop_attacks | b_rook_attacks | b_queen_attacks;
-
+    // TODO: add black king attacks to the danger squares
+    const U64 w_king_danger_squares = b_pawn_attacks | b_knight_attacks | b_bishop_attacks | b_rook_attacks | b_queen_attacks;
     generate_white_king_moves(w_king_danger_squares);
+
+    // check evasions
+    const auto ksq = (Board::Square) bitboard::bitscan_forward(w_king);
+    const bool in_check = w_king_danger_squares & w_king;
+    U64 checkers = 0;
+    int n_checkers = 0;
+    if (in_check)
+    {
+        U64 piece_attack;
+
+        piece_attack = generate_black_pawn_attacks(w_king, b.get_pawns(Color::BLACK));
+        checkers |= piece_attack;
+
+        piece_attack = b.get_knight_targets(ksq) & b.get_knights(Color::BLACK);
+        checkers |= piece_attack;
+
+        piece_attack = generate_black_bishop_attacks(w_king, blockers) & b.get_bishops(Color::BLACK);
+        checkers |= piece_attack;
+
+        piece_attack = generate_black_rook_attacks(w_king, blockers) & b.get_rooks(Color::BLACK);
+        checkers |= piece_attack;
+
+        piece_attack = generate_black_queen_attacks(w_king, blockers) & b.get_rooks(Color::BLACK);
+        checkers |= piece_attack;
+
+        n_checkers = bitboard::pop_count(checkers);
+    }
+
+    U64 capture_mask = Board::ALL_SQUARES;
+    U64 push_mask = Board::ALL_SQUARES;
+
+    // double check - early return
+    // since only valid moves are king moves
+    if (n_checkers > 1)
+    {
+        return;
+    }
+    else if (n_checkers == 1)
+    {
+        // move
+        // block
+        // capture
+        capture_mask = checkers;
+        auto checker_square = (Board::Square) bitboard::bitscan_forward(checkers);
+
+        // if piece giving check is a slider
+        if (
+                b.exists(Color::BLACK, Move::PieceEncoding::BISHOP, checker_square) ||
+                b.exists(Color::BLACK, Move::PieceEncoding::ROOK, checker_square) ||
+                b.exists(Color::BLACK, Move::PieceEncoding::QUEEN, checker_square)
+                )
+        {
+            // TODO: figure out how to get squares in between piece giving check and king
+        }
+        // piece giving check is pawn or knight - we cannot block the check, must capture or move
+        else
+        {
+            push_mask = 0;
+        }
+    }
 }
 
 void generator::generate_legal_black_moves()
