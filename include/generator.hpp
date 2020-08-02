@@ -62,6 +62,7 @@ private:
     void generate_black_king_moves();
 
 
+    U64 calculate_push_mask(Move::PieceEncoding checker_type, U64 checkers, U64 w_king);
 
 };
 

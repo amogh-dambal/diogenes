@@ -179,27 +179,39 @@ void generator::generate_legal_white_moves()
     }
     else if (n_checkers == 1)
     {
-        // move
-        // block
-        // capture
+        // move, block, capture
         capture_mask = checkers;
         auto checker_square = (Board::Square) bitboard::bitscan_forward(checkers);
 
-        // if piece giving check is a slider
-        if (
-                b.exists(Color::BLACK, Move::PieceEncoding::BISHOP, checker_square) ||
-                b.exists(Color::BLACK, Move::PieceEncoding::ROOK, checker_square) ||
-                b.exists(Color::BLACK, Move::PieceEncoding::QUEEN, checker_square)
-                )
+        // default throwaway value to indicate knight/pawn
+        Move::PieceEncoding checker_type = Move::PieceEncoding::KING;
+
+        if (b.exists(Color::BLACK, Move::PieceEncoding::BISHOP, checker_square))
         {
-            // TODO: figure out how to get squares in between piece giving check and king
+            checker_type = Move::PieceEncoding::BISHOP;
         }
-        // piece giving check is pawn or knight - we cannot block the check, must capture or move
+        else if (b.exists(Color::BLACK, Move::PieceEncoding::ROOK, checker_square))
+        {
+            checker_type = Move::PieceEncoding::ROOK;
+        }
+        else if (b.exists(Color::BLACK, Move::PieceEncoding::QUEEN, checker_square))
+        {
+            checker_type = Move::PieceEncoding::QUEEN;
+        }
+        else if (b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, checker_square))
+        {
+            checker_type = Move::PieceEncoding::KNIGHT;
+        }
         else
         {
-            push_mask = 0;
+            checker_type = Move::PieceEncoding::PAWN;
         }
+
+        push_mask = calculate_push_mask(checker_type, checkers, w_king);
     }
+    
+
+
 }
 
 void generator::generate_legal_black_moves()
@@ -728,3 +740,90 @@ void generator::generate_black_king_moves()
     }
 }
 
+/**
+ * function to generate all possible squares
+ * a piece can be moved to in order to block a check
+ * being given
+ * @param checker_type : Move::PieceEncoding enum type documenting what kind of piece giving check.
+ * KING in this function represents an artificial value, indiciating that the piece giving check
+ * is not a slider
+ * @param checkers : U64 bitboard holding the location of the piece giving check
+ * @param w_king : U64 bitboard that holds the location of the white king
+ * @return U64 bitboard of all the squares a piece can be pushed to given the current checked position
+ */
+U64 generator::calculate_push_mask(const Move::PieceEncoding checker_type, const U64 checkers, const U64 w_king)
+{
+    int ksq = bitboard::bitscan_forward(w_king);
+    int csq = bitboard::bitscan_forward(checkers);
+
+    U64 push_mask = 0;
+    int dirs[4] = {Board::Direction::N, Board::Direction::NE, Board::Direction::NW, Board::Direction::E};
+    bool above = ksq > csq;
+    // only calculate push mask for checks given by sliding pieces
+    if (
+            checker_type == Move::PieceEncoding::ROOK ||
+            checker_type == Move::PieceEncoding::BISHOP ||
+            checker_type == Move::PieceEncoding::QUEEN
+    )
+    {
+        int distance;
+        for (int dir : dirs)
+        {
+            distance = (above) ? (ksq - csq) : (csq - ksq);
+            if ((distance % dir) == 0)
+            {
+                if (above)
+                {
+                    switch (dir)
+                    {
+                        case Board::Direction::N:
+                            push_mask = bitboard::occ_fill_north(checkers, w_king);
+                            break;
+                        case Board::Direction::NE:
+                            push_mask = bitboard::occ_fill_northeast(checkers, w_king);
+                            break;
+                        case Board::Direction::NW:
+                            push_mask = bitboard::occ_fill_northwest(checkers, w_king);
+                            break;
+                        case Board::Direction::E:
+                            push_mask = bitboard::occ_fill_east(checkers, w_king);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (dir)
+                    {
+                        case Board::Direction::S:
+                            push_mask = bitboard::occ_fill_south(checkers, w_king);
+                            break;
+                        case Board::Direction::SE:
+                            push_mask = bitboard::occ_fill_southeast(checkers, w_king);
+                            break;
+                        case Board::Direction::SW:
+                            push_mask = bitboard::occ_fill_southwest(checkers, w_king);
+                            break;
+                        case Board::Direction::W:
+                            push_mask = bitboard::occ_fill_west(checkers, w_king);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+            }
+        }
+    }
+    else if (checker_type == Move::PieceEncoding::PAWN)
+    {
+        int ep_sq = b.ep_target_square();
+        if (ep_sq != Board::Square::NONE)
+        {
+            push_mask |= (1ULL << ep_sq);
+        }
+    }
+    return push_mask;
+
+}
