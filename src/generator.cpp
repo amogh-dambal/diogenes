@@ -827,6 +827,17 @@ U64 generator::calculate_push_mask(const Move::PieceEncoding checker_type, const
     return push_mask;
 
 }
+
+/**
+ * function to check board for pinned pieces
+ * and return the rays starting from the king and
+ * ending at each pinning slider
+ * @return std::vector of U64 bitboard types, with
+ * each bitboard containing a pin ray. return value
+ * will have max size of 2, min size of 0 (no pinned pieces)
+ * this function only checks legal pins, i.e.
+ * pieces pinned to the king
+ */
 std::vector<U64> generator::get_pin_rays()
 {
     const U64 w_king = b.get_kings(Color::WHITE);
