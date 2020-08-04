@@ -530,6 +530,49 @@ bool board::exists(Color::Value color, Move::PieceEncoding piece, Board::Square 
 }
 
 /**
+ * mailboxing function that determines
+ * what piece is on a given square
+ * @param sq : Board::Square enum type representing
+ * one of the squares on the chessboard
+ * @return int value representing a piece, -1 if square is empty
+ */
+int board::piece_on(Board::Square sq) const
+{
+    U64 sq_bb = 1ULL << sq;
+    if (sq_bb & occupied_squares)
+    {
+        if (sq_bb & pawns[Color::BOTH])
+        {
+            return Move::PieceEncoding::PAWN;
+        }
+        else if (sq_bb & knights[Color::BOTH])
+        {
+            return Move::PieceEncoding::KNIGHT;
+        }
+        else if (sq_bb & bishops[Color::BOTH])
+        {
+            return Move::PieceEncoding::BISHOP;
+        }
+        else if (sq_bb & rooks[Color::BOTH])
+        {
+            return Move::PieceEncoding::ROOK;
+        }
+        else if (sq_bb & queens[Color::BOTH])
+        {
+            return Move::PieceEncoding::QUEEN;
+        }
+        else if (sq_bb & kings[Color::BOTH])
+        {
+            return Move::PieceEncoding::KING;
+        }
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+/**
  * getter function that returns if it is legally possible
  * for white to make a queenside castle in the future
  * blockers/attack rays do not affect this function
