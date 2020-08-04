@@ -752,7 +752,32 @@ void generator::generate_black_king_moves()
  * @return U64 bitboard of all the squares a piece can be pushed to given the current checked position
  */
 U64 generator::calculate_push_mask(const Move::PieceEncoding checker_type, const U64 checkers, const U64 w_king)
+U64 generator::calculate_push_mask(const U64 checkers, const U64 w_king)
 {
+    auto checker_square = (Board::Square) bitboard::bitscan_forward(checkers);
+    Move::PieceEncoding checker_type;
+
+    if (b.exists(Color::BLACK, Move::PieceEncoding::BISHOP, checker_square))
+    {
+        checker_type = Move::PieceEncoding::BISHOP;
+    }
+    else if (b.exists(Color::BLACK, Move::PieceEncoding::ROOK, checker_square))
+    {
+        checker_type = Move::PieceEncoding::ROOK;
+    }
+    else if (b.exists(Color::BLACK, Move::PieceEncoding::QUEEN, checker_square))
+    {
+        checker_type = Move::PieceEncoding::QUEEN;
+    }
+    else if (b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, checker_square))
+    {
+        checker_type = Move::PieceEncoding::KNIGHT;
+    }
+    else
+    {
+        checker_type = Move::PieceEncoding::PAWN;
+    }
+
     int ksq = bitboard::bitscan_forward(w_king);
     int csq = bitboard::bitscan_forward(checkers);
 
