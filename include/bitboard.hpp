@@ -49,6 +49,7 @@ namespace bitboard
     int bitscan_forward(U64 b);
     int bitscan_reverse(U64 b);
     std::vector<int> serialize(U64 b);
+    bool is_diagonal(U64 ray);
 
     // output a given bitboard
     void print_bitboard(U64 bb);

@@ -398,6 +398,15 @@ std::vector<int> bitboard::serialize(const U64 b)
     return squares;
 }
 
+bool bitboard::is_diagonal(const U64 ray)
+{
+    int top = bitscan_reverse(ray);
+    int bottom = bitscan_forward(ray);
+
+    int r = top - bottom;
+    return (r % 7 == 0) || (r % 9) == 0;
+}
+
 /**
  * helper function to output a bitboard to the console
  * in an 8x8 chessboard style, viewed from White's perspective
