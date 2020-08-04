@@ -125,11 +125,12 @@ void generator::run(Move::GeneratorStatus status)
 
 void generator::generate_legal_white_moves()
 {
-    // generate legal king moves
+    /* generate legal king moves */
     const U64 w_king = b.get_kings(Color::WHITE);
     const U64 b_attackables = b.get_empty_squares() | b.get_pieces(Color::WHITE);
     // x-ray the king when calculating slider attacks
     const U64 blockers = b.get_pieces(Color::BOTH) ^ w_king;
+    const U64 blockers_no_xray = blockers ^ w_king;
 
     const U64 b_pawn_attacks = generate_black_pawn_attacks(b.get_pawns(Color::BLACK), b_attackables);
     const U64 b_knight_attacks = generate_black_knight_attacks(b.get_knights(Color::BLACK), b_attackables, b.get_knight_targets());
@@ -168,8 +169,10 @@ void generator::generate_legal_white_moves()
         n_checkers = bitboard::pop_count(checkers);
     }
 
-    U64 capture_mask = Board::ALL_SQUARES;
-    U64 push_mask = Board::ALL_SQUARES;
+    U64 capture_mask = b.get_pieces(Color::BLACK);
+    U64 push_mask = b.get_empty_squares();
+
+    /* if in check */
 
     // double check - early return
     // since only valid moves are king moves
@@ -181,37 +184,197 @@ void generator::generate_legal_white_moves()
     {
         // move, block, capture
         capture_mask = checkers;
-        auto checker_square = (Board::Square) bitboard::bitscan_forward(checkers);
-
-        // default throwaway value to indicate knight/pawn
-        Move::PieceEncoding checker_type = Move::PieceEncoding::KING;
-
-        if (b.exists(Color::BLACK, Move::PieceEncoding::BISHOP, checker_square))
-        {
-            checker_type = Move::PieceEncoding::BISHOP;
-        }
-        else if (b.exists(Color::BLACK, Move::PieceEncoding::ROOK, checker_square))
-        {
-            checker_type = Move::PieceEncoding::ROOK;
-        }
-        else if (b.exists(Color::BLACK, Move::PieceEncoding::QUEEN, checker_square))
-        {
-            checker_type = Move::PieceEncoding::QUEEN;
-        }
-        else if (b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, checker_square))
-        {
-            checker_type = Move::PieceEncoding::KNIGHT;
-        }
-        else
-        {
-            checker_type = Move::PieceEncoding::PAWN;
-        }
-
-        push_mask = calculate_push_mask(checker_type, checkers, w_king);
+        push_mask = calculate_push_mask(checkers, w_king);
     }
-    
 
+    /* pins */
 
+    // find all pinned pieces
+    // 1. calculate moves from opp. sliding pieces
+    // 2. sliding piece moves from king
+    // 3. overlap
+    // intersection of "pinned squares" and "white pieces" : pinned white pieces
+
+    std::vector<U64> pin_rays = get_pin_rays();
+
+    // if there are any pinned pieces
+    Move::PieceEncoding pinned_piece_type;
+    U64 w_pieces = b.get_pieces(Color::WHITE);
+    const U64 b_pieces = b.get_pieces(Color::BLACK);
+    U64 open_squares;
+    U64 pinned_piece;
+    int pinned_sq;
+    bool is_pin;
+
+    if (pin_rays.size() > 0)
+    {
+        is_pin = true;
+        for (const U64 ray : pin_rays)
+        {
+            // remove white pieces from ray and
+            // get squares available to move to
+            open_squares = ray & (ray ^ b.get_pieces(Color::BOTH));
+
+            // get pinned piece
+            pinned_piece = ray & (w_pieces ^ w_king);
+            pinned_sq = bitboard::bitscan_forward(pinned_piece);
+            int p = b.piece_on((Board::Square)pinned_sq);
+            if (p == -1)
+            {
+                throw std::logic_error("error: there must be a piece on the pin ray");
+            }
+            else if (p == Move::PieceEncoding::KING)
+            {
+                throw std::logic_error("error: there cannot be a king on the pin ray");
+            }
+            pinned_piece_type = (Move::PieceEncoding) p;
+
+            // knights cannot move when pinned
+            if (pinned_piece_type != Move::PieceEncoding::KNIGHT)
+            {
+                // TODO: write the is_diagonal() method in the bitboard namespace
+                if (bitboard::is_diagonal(ray))
+                {
+                    U64 attacks;
+                    U64 moves;
+                    // have to consider bishops, queens, pawn captures
+                    switch (pinned_piece_type)
+                    {
+                        case Move::PieceEncoding::BISHOP:
+                            attacks = generate_white_bishop_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            moves = attacks & open_squares;
+
+                            if (bitboard::pop_count(moves) > 0)
+                            {
+                                U32 flags;
+                                std::vector<int> move_squares = bitboard::serialize(moves);
+                                for (const int sq : move_squares)
+                                {
+                                    flags = ((1ULL << sq) & b_pieces) ?
+                                            Move::CAPTURE_FLAG :
+                                            Move::QUIET_FLAG;
+                                    ml.push_back(move(pinned_sq, sq, pinned_piece_type, flags));
+                                }
+                            }
+                            break;
+                        case Move::PieceEncoding::QUEEN:
+                            attacks = generate_white_queen_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            moves = attacks & open_squares;
+
+                            if (bitboard::pop_count(moves) > 0)
+                            {
+                                U32 flags;
+                                std::vector<int> move_squares = bitboard::serialize(moves);
+                                for (const int sq : move_squares)
+                                {
+                                    flags = ((1ULL << sq) & b_pieces) ?
+                                            Move::CAPTURE_FLAG :
+                                            Move::QUIET_FLAG;
+                                    ml.push_back(move(pinned_sq, sq, pinned_piece_type, flags));
+                                }
+                            }
+                            break;
+                        case Move::PieceEncoding::PAWN:
+                            attacks = generate_white_pawn_attacks(pinned_piece, open_squares);
+                            moves = attacks & open_squares;
+                            if (bitboard::pop_count(moves) > 0)
+                            {
+                                U32 flags;
+                                std::vector<int> move_squares = bitboard::serialize(moves);
+                                for (const int sq : move_squares)
+                                {
+                                    flags = ((1ULL << sq) & b_pieces) ?
+                                            Move::CAPTURE_FLAG :
+                                            Move::QUIET_FLAG;
+                                    if (flags == Move::CAPTURE_FLAG)
+                                    {
+                                        ml.push_back(move(pinned_sq, sq, pinned_piece_type, flags));
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    // have to consider rooks, queens, pawn pushes
+                    switch (pinned_piece_type)
+                    {
+                        U64 attacks;
+                        U64 moves;
+                        case Move::PieceEncoding::ROOK:
+                            attacks = generate_white_rook_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            moves = attacks & open_squares;
+
+                            if (bitboard::pop_count(moves) > 0)
+                            {
+                                U32 flags;
+                                std::vector<int> move_squares = bitboard::serialize(moves);
+                                for (const int sq : move_squares)
+                                {
+                                    flags = ((1ULL << sq) & b_pieces) ?
+                                            Move::CAPTURE_FLAG :
+                                            Move::QUIET_FLAG;
+                                    ml.push_back(move(pinned_sq, sq, pinned_piece_type, flags));
+                                }
+                            }
+                            break;
+                        case Move::PieceEncoding::QUEEN:
+                            attacks = generate_white_queen_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            moves = attacks & open_squares;
+
+                            if (bitboard::pop_count(moves) > 0)
+                            {
+                                U32 flags;
+                                std::vector<int> move_squares = bitboard::serialize(moves);
+                                for (const int sq : move_squares)
+                                {
+                                    flags = ((1ULL << sq) & b_pieces) ?
+                                            Move::CAPTURE_FLAG :
+                                            Move::QUIET_FLAG;
+                                    ml.push_back(move(pinned_sq, sq, pinned_piece_type, flags));
+                                }
+                            }
+                            break;
+                        case Move::PieceEncoding::PAWN:
+                            attacks = generate_white_pawn_push_targets(pinned_piece, open_squares) | generate_white_pawn_push_targets(pinned_piece, open_squares, false);
+                            moves = attacks & open_squares;
+                            if (bitboard::pop_count(moves) > 0)
+                            {
+                                U32 flags;
+                                std::vector<int> move_squares = bitboard::serialize(moves);
+                                for (const int sq : move_squares)
+                                {
+                                    flags = ((1ULL << sq) & b_pieces) ?
+                                            Move::CAPTURE_FLAG :
+                                            Move::QUIET_FLAG;
+                                    if (flags == Move::QUIET_FLAG)
+                                    {
+                                        ml.push_back(move(pinned_sq, sq, pinned_piece_type, flags));
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    // part 4 - other moves
+    // filter out pinned pieces from bitboard of white moves and generate moves normally
+    if (is_pin)
+    {
+        // sliders & king_as_queen & w_pieces
+        U64 pinned_pieces = (b_rook_attacks | b_queen_attacks | b_bishop_attacks) & generate_white_queen_attacks(w_king, blockers) & w_pieces;
+        w_pieces = w_pieces ^ pinned_pieces;
+    }
+
+    // TODO: rewrite methods that piece-wise generation of moves and use them here
 }
 
 void generator::generate_legal_black_moves()
@@ -744,14 +907,11 @@ void generator::generate_black_king_moves()
  * function to generate all possible squares
  * a piece can be moved to in order to block a check
  * being given
- * @param checker_type : Move::PieceEncoding enum type documenting what kind of piece giving check.
- * KING in this function represents an artificial value, indiciating that the piece giving check
- * is not a slider
  * @param checkers : U64 bitboard holding the location of the piece giving check
  * @param w_king : U64 bitboard that holds the location of the white king
+ * @pre bitboard::pop_count(checkers) == 1
  * @return U64 bitboard of all the squares a piece can be pushed to given the current checked position
  */
-U64 generator::calculate_push_mask(const Move::PieceEncoding checker_type, const U64 checkers, const U64 w_king)
 U64 generator::calculate_push_mask(const U64 checkers, const U64 w_king)
 {
     auto checker_square = (Board::Square) bitboard::bitscan_forward(checkers);

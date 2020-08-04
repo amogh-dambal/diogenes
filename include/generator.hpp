@@ -62,8 +62,9 @@ private:
     void generate_black_queen_moves();
     void generate_black_king_moves();
 
+    std::vector<U64> get_pin_rays();
+    U64 calculate_push_mask(U64 checkers, U64 w_king);
 
-    U64 calculate_push_mask(Move::PieceEncoding checker_type, U64 checkers, U64 w_king);
     const std::map<int, FillFunctionPtr> filler = {
             {Board::Direction::N, &bitboard::fill_north},
             {Board::Direction::S, &bitboard::fill_south},
