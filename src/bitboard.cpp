@@ -398,6 +398,13 @@ std::vector<int> bitboard::serialize(const U64 b)
     return squares;
 }
 
+/**
+ * function that determines the direction of a ray
+ * @param ray : U64 bitboard with one contiguous ray
+ * @pre bits set in ray must be contiguous, pop_count
+ * must be > 1
+ * @return true if ray is diagonally oriented, false otherwise
+ */
 bool bitboard::is_diagonal(const U64 ray)
 {
     int top = bitscan_reverse(ray);
