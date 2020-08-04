@@ -21,6 +21,7 @@
 // TODO: legal move generation
 
 typedef std::vector<move> movelist;
+typedef U64 (*FillFunctionPtr)(U64, U64);
 
 class generator
 {
@@ -63,6 +64,16 @@ private:
 
 
     U64 calculate_push_mask(Move::PieceEncoding checker_type, U64 checkers, U64 w_king);
+    const std::map<int, FillFunctionPtr> filler = {
+            {Board::Direction::N, &bitboard::fill_north},
+            {Board::Direction::S, &bitboard::fill_south},
+            {Board::Direction::E, &bitboard::fill_east},
+            {Board::Direction::W, &bitboard::fill_west},
+            {Board::Direction::NE, &bitboard::fill_northeast},
+            {Board::Direction::SE, &bitboard::fill_southeast},
+            {Board::Direction::SW, &bitboard::fill_southwest},
+            {Board::Direction::NW, &bitboard::fill_northwest},
+    };
 
 };
 

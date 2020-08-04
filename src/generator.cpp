@@ -827,3 +827,28 @@ U64 generator::calculate_push_mask(const Move::PieceEncoding checker_type, const
     return push_mask;
 
 }
+std::vector<U64> generator::get_pin_rays()
+{
+    const U64 w_king = b.get_kings(Color::WHITE);
+    const U64 b_sliders = b.get_pieces(Color::BLACK) ^ (b.get_kings(Color::BLACK) | b.get_pawns(Color::BLACK) | b.get_knights(Color::BLACK));
+    const U64 w_pieces = b.get_pieces(Color::WHITE);
+    const U64 empty_squares = b.get_empty_squares();
+    std::vector<U64> rays;
+
+    U64 ray, king, sliders;
+
+    for (auto dir : filler)
+    {
+        king = 0;
+        sliders = 0;
+        king |= (*dir.second)(w_king, empty_squares);
+        sliders |= (*(filler.find((int)dir.first * -1)->second))(b_sliders, empty_squares);
+        ray = king & sliders;
+        if (ray & w_pieces)
+        {
+            rays.push_back(ray);
+        }
+    }
+
+    return rays;
+}
