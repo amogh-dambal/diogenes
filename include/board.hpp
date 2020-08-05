@@ -5,7 +5,6 @@
 #ifndef DIOGENES_BOARD_HPP
 #define DIOGENES_BOARD_HPP
 
-
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -29,8 +28,6 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const board& b);
     std::string to_string() const;
 
-    // TODO write make/unmake routine
-    //  - develop way to track history
     void make(const move& m);
     void unmake(const move& m);
 
@@ -66,10 +63,6 @@ public:
     bool can_white_castle_kside() const;
     bool can_black_castle_qside() const;
     bool can_black_castle_kside() const;
-
-    // function to test move generation - remove once
-    // make/unmake routines are written
-    void set_side_to_move(Color::Value);
 
     const U64* const get_knight_targets() const;
 
@@ -121,7 +114,6 @@ private:
 
     std::deque<U16> history;
 
-
     // function that initializes lookup tables
     void populate_lookup_tables();
 
@@ -132,6 +124,7 @@ private:
     // have to call after make/unmake move to set game state
     void update_board();
 
+    // push the latest move to the game history
     void write_to_history(const U8 capture_type);
 };
 

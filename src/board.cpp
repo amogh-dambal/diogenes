@@ -409,7 +409,7 @@ void board::unmake(const move& m)
 
     if (m.is_capture())
     {
-        U8 capture = (made_move_game_state & 0x7000ULL) >> 12ULL;
+        U8 capture = (made_move_game_state & 0xe000ULL) >> 13ULL;
 
         bb_move |= (1ULL << from) | (1ULL << to);
         U64 replacing_bb = (1ULL << to);
@@ -417,23 +417,23 @@ void board::unmake(const move& m)
         {
             // pawn was captured
             case 0x1:
-                pawns[inactive] ^= replacing_bb;
+                pawns[inactive] |= replacing_bb;
                 break;
             // knight was captured
             case 0x2:
-                knights[inactive] ^= replacing_bb;
+                knights[inactive] |= replacing_bb;
                 break;
             // bishop was captured
             case 0x3:
-                bishops[inactive] ^= replacing_bb;
+                bishops[inactive] |= replacing_bb;
                 break;
             // rook was captured
             case 0x4:
-                rooks[inactive] ^= replacing_bb;
+                rooks[inactive] |= replacing_bb;
                 break;
             // queen was captured
             case 0x5:
-                queens[inactive] ^= replacing_bb;
+                queens[inactive] |= replacing_bb;
                 break;
         }
         // replace capturing piece
@@ -998,12 +998,6 @@ void board::write_to_history(const U8 capture_type)
     gs |= (capture_type << 13ULL);
 
     history.push_back(gs);
-}
-
-// test function - remove when make/unmake is written
-void board::set_side_to_move(Color::Value value)
-{
-    this->side_to_move_ = value;
 }
 
 const U64* const board::get_knight_targets() const

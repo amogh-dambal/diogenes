@@ -174,3 +174,39 @@ TEST_CASE("make/unmake", "[make/unmake]")
 }
 
 // TODO: write tests for lookup tables
+
+// TODO: write more thorough tests for make/unmake - there cannot be errors
+TEST_CASE("make/unmake - random pos - 1")
+{
+
+    std::string fen_record = "1R6/2bnQP1K/br1N1BP1/nPkp1P2/2p1P1P1/4Ppqp/p1r1ppp1/2NR3B w - - 0 1";
+    board b(fen_record);
+
+    std::cout << "position: " << "\n" << b << "\n";
+
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(b.ply() == 0);
+    REQUIRE(b.ep_target_square() == Board::Square::NONE);
+    REQUIRE(!b.game_over());
+    REQUIRE(b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, Board::Square::d7));
+
+    move qxd7(Board::Square::e7, Board::Square::d7, Move::PieceEncoding::QUEEN, Move::CAPTURE_FLAG);
+    b.make(qxd7);
+    std::cout << "1. Qxd7: " << "\n" << b << "\n";
+
+    REQUIRE(b.side_to_move() == Color::BLACK);
+    REQUIRE(b.ply() == 1);
+    REQUIRE(b.ep_target_square() == Board::Square::NONE);
+    REQUIRE(!b.game_over());
+    REQUIRE(!b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, Board::Square::d7));
+    REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::QUEEN, Board::Square::d7));
+
+    b.unmake(qxd7);
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(b.ply() == 0);
+    REQUIRE(b.ep_target_square() == Board::Square::NONE);
+    REQUIRE(!b.game_over());
+    REQUIRE(b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, Board::Square::d7));
+    REQUIRE(!b.exists(Color::WHITE, Move::PieceEncoding::QUEEN, Board::Square::d7));
+    std::cout << "position: " << "\n" << b << "\n";
+}
