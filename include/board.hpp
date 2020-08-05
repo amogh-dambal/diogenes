@@ -29,6 +29,8 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const board& b);
     std::string to_string() const;
 
+    // TODO write make/unmake routine
+    //  - develop way to track history
     void make(const move& m);
     void unmake(const move& m);
 
@@ -117,6 +119,9 @@ private:
 
     Board::Square ep_target_sq_;
 
+    std::deque<U16> history;
+
+
     // function that initializes lookup tables
     void populate_lookup_tables();
 
@@ -127,7 +132,7 @@ private:
     // have to call after make/unmake move to set game state
     void update_board();
 
-
+    void write_to_history(const U8 capture_type);
 };
 
 #endif //DIOGENES_BOARD_HPP

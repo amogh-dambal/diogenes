@@ -268,24 +268,46 @@ std::ostream& operator<<(std::ostream& out, const board& b)
  */
 void board::make(const move& m)
 {
-    U64 from = m.from();
-    U64 to = m.to();
+    int from = m.from();
+    int to = m.to();
     U64 bitboard_move = 0;
 
     auto active = side_to_move_;
     auto inactive = (Color::Value) !side_to_move_;
 
+    U8 capture_type = 0x0;
     if (m.is_capture())
     {
-        U64 capture_mask = ~(1ULL << to);
+        U64 capture_loc = 1ULL << to;
+        U64 capture_mask = ~(capture_loc);
 
-        // remove captured piece
-        pawns[inactive] &= capture_mask;
-        knights[inactive] &= capture_mask;
-        bishops[inactive] &= capture_mask;
-        rooks[inactive] &= capture_mask;
-        queens[inactive] &= capture_mask;
-        kings[inactive] &= capture_mask;
+        // get type of piece captured
+        // and remove it
+        if (capture_loc & pawns[inactive])
+        {
+            capture_type = 0x1;
+            pawns[inactive] &= capture_mask;
+        }
+        else if (capture_loc & knights[inactive])
+        {
+            capture_type = 0x2;
+            knights[inactive] &= capture_mask;
+        }
+        else if (capture_loc & bishops[inactive])
+        {
+            capture_type = 0x3;
+            bishops[inactive] &= capture_mask;
+        }
+        else if (capture_loc & rooks[inactive])
+        {
+            capture_type = 0x4;
+            rooks[inactive] &= capture_mask;
+        }
+        else if (capture_loc & queens[inactive])
+        {
+            capture_type = 0x5;
+            queens[inactive] &= capture_mask;
+        }
 
         // update moved piece
         bitboard_move |= (1ULL << from) | (1ULL << to);
@@ -346,6 +368,8 @@ void board::make(const move& m)
     update_board();
     ply_++;
     side_to_move_ = (Color::Value) !side_to_move_;
+
+    write_to_history(capture_type);
 }
 
 /**
