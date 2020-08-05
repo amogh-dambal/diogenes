@@ -152,5 +152,25 @@ TEST_CASE("series of moves", "[make]")
 
 }
 
+TEST_CASE("make/unmake", "[make/unmake]")
+{
+    board b;
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(b.ply() == 0);
+    REQUIRE(b.ep_target_square() == Board::Square::NONE);
+    REQUIRE(!b.game_over());
+    REQUIRE(!b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
+
+    move e4(Board::Square::e2, Board::Square::e4, Move::PieceEncoding::PAWN, Move::DOUBLE_PUSH_FLAG);
+
+    b.make(e4);
+    b.unmake(e4);
+
+    REQUIRE(b.side_to_move() == Color::WHITE);
+    REQUIRE(b.ply() == 0);
+    REQUIRE(b.ep_target_square() == Board::Square::NONE);
+    REQUIRE(!b.game_over());
+    REQUIRE(!b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
+}
 
 // TODO: write tests for lookup tables

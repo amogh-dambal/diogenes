@@ -34,6 +34,7 @@ can_white_castle_qside_(true)
     queens[Color::BLACK] = queens[Color::WHITE] << 56ULL;
     kings[Color::BLACK] = kings[Color::WHITE] << 56ULL;
 
+    write_to_history(0x0);
     update_board();
     populate_lookup_tables();
 }
@@ -160,6 +161,7 @@ game_over_(false)
         }
     }
 
+    write_to_history(0x0);
     update_board();
     populate_lookup_tables();
 }
@@ -389,14 +391,14 @@ void board::unmake(const move& m)
 
     U16 prev_game_state = history.back();
     // reset game state
-    ep_target_sq_ = static_cast<Board::Square>(prev_game_state & 0x3fULL);
-    U8 castling = (prev_game_state & (0xfULL << 6ULL)) >> 6ULL;
+    ep_target_sq_ = static_cast<Board::Square>(prev_game_state & 0x7fULL);
+    U8 castling = (prev_game_state & (0xfULL << 7ULL)) >> 7ULL;
     can_white_castle_qside_ = castling & 0x1ULL;
     can_white_castle_kside_ = castling & 0x2ULL;
     can_black_castle_qside_ = castling & 0x4ULL;
     can_black_castle_kside_ = castling & 0x8ULL;
-    game_over_ = prev_game_state & (0x400ULL);
-    side_to_move_ = static_cast<Color::Value>(prev_game_state & (0x800ULL));
+    game_over_ = prev_game_state & (0x800ULL);
+    side_to_move_ = static_cast<Color::Value>(prev_game_state & (0x1000ULL));
 
     U64 bb_move = 0;
     int from = m.from();
@@ -457,6 +459,8 @@ void board::unmake(const move& m)
             case Move::PieceEncoding::QUEEN:
                 queens[active] ^= promotion_replace_bb;
                 break;
+            default:
+                break;
         }
     }
     else if (m.is_castle())
@@ -494,6 +498,9 @@ void board::unmake(const move& m)
         bb_move |= (1ULL << from) | (1ULL << to);
         update_bitboards(m, bb_move);
     }
+
+    ply_--;
+    update_board();
 }
 
 // getter functions
@@ -985,10 +992,10 @@ void board::write_to_history(const U8 capture_type)
     unsigned char castling = 0;
     castling |= (can_white_castle_qside_) | (can_white_castle_kside_ << 1ULL) |
             (can_black_castle_qside_ << 2ULL) | (can_black_castle_kside_ << 3ULL);
-    gs |= (castling << 6ULL);
-    gs |= (game_over_ << 10ULL);
-    gs |= (side_to_move_ << 11ULL);
-    gs |= (capture_type << 12ULL);
+    gs |= (castling << 7ULL);
+    gs |= (game_over_ << 11ULL);
+    gs |= (side_to_move_ << 12ULL);
+    gs |= (capture_type << 13ULL);
 
     history.push_back(gs);
 }
