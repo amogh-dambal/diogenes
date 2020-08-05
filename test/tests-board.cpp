@@ -209,4 +209,5 @@ TEST_CASE("make/unmake - random pos - 1")
     REQUIRE(b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, Board::Square::d7));
     REQUIRE(!b.exists(Color::WHITE, Move::PieceEncoding::QUEEN, Board::Square::d7));
     std::cout << "position: " << "\n" << b << "\n";
+
 }
