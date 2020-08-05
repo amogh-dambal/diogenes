@@ -60,7 +60,6 @@ std::ostream& operator<<(std::ostream& out, const move& m)
             out << "O-O";
         }
     }
-    // TODO: write promotion logic
     else if (m.is_promotion_)
     {
         // promotion capture
@@ -96,7 +95,6 @@ std::ostream& operator<<(std::ostream& out, const move& m)
                 break;
         }
     }
-    // TODO: write en passant output logic
     // simple case (most quiet moves & captures)
     else
     {
@@ -197,4 +195,41 @@ std::string move::get_square_as_string(Board::Square sq)
     char file = ((sq & 0xff) % 8) + 'a';
     char rank = ((sq & 0xff) / 8) + '1';
     return s + file + rank;
+}
+
+/**
+ * if the move is a promotion,
+ * return the kind of piece
+ * the pawn is being promoted
+ * to
+ * @pre move must be a promotion,
+ * method will throw logic error if not
+ * @return the type of piece being promoted to
+ */
+Move::PieceEncoding move::promoted_piece() const
+{
+    if (!this->is_promotion_)
+    {
+        throw std::logic_error("Error! Checking for promoted piece type on a non-promotion");
+    }
+
+    U8 flags = (this->mv & 0xf000ULL) >> 12ULL;
+    U8 promotion_type = flags & 0x3;
+
+    if (promotion_type == 0)
+    {
+        return Move::PieceEncoding::KNIGHT;
+    }
+    else if (promotion_type == 1)
+    {
+        return Move::PieceEncoding::BISHOP;
+    }
+    else if (promotion_type == 2)
+    {
+        return Move::PieceEncoding::ROOK;
+    }
+    else if (promotion_type == 3)
+    {
+        return Move::PieceEncoding::QUEEN;
+    }
 }
