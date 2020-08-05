@@ -232,7 +232,6 @@ void generator::generate_legal_white_moves()
             // knights cannot move when pinned
             if (pinned_piece_type != Move::PieceEncoding::KNIGHT)
             {
-                // TODO: write the is_diagonal() method in the bitboard namespace
                 if (bitboard::is_diagonal(ray))
                 {
                     U64 attacks;
