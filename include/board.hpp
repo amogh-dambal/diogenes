@@ -112,6 +112,8 @@ private:
 
     Board::Square ep_target_sq_;
 
+    // TODO: refactor implementation of
+    //  - game history encoding, need to use more constants
     std::deque<U16> history;
 
     // function that initializes lookup tables

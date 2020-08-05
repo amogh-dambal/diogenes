@@ -118,6 +118,29 @@ namespace Board {
     const U64 NOT_H_FILE =      ~H_FILE;
 
     const char FEN_RANK_DELIMITER = '/';
+
+    namespace GameStateEncoding
+    {
+        const U8 WQ_SHIFT = 0x0ULL;
+        const U8 WK_SHIFT = 0x1ULL;
+        const U8 BQ_SHIFT = 0x2ULL;
+        const U8 BK_SHIFT = 0x3ULL;
+
+        const U8 WQ_MASK = 0x1ULL;
+        const U8 WK_MASK = 0x2ULL;
+        const U8 BQ_MASK = 0x4ULL;
+        const U8 BK_MASK = 0x8ULL;
+
+        const U8 CASTLE_PERMISSION_SHIFT    = 7ULL;
+        const U8 GAME_OVER_SHIFT            = 11ULL;
+        const U8 SIDE_TO_MOVE_SHIFT         = 12ULL;
+        const U8 CAPTURE_TYPE_SHIFT         = 13ULL;
+
+        const U16 EP_TARGET_SQUARE_MASK     = 0x7fULL;
+        const U16 CASTLE_MASK               = 0x3f80;
+        const U16 GAME_OVER_MASK            = 0x800ULL;
+        const U16 SIDE_TO_MOVE_MASK         = 0x1000ULL;
+    }
 }
 
 namespace Move

@@ -391,14 +391,14 @@ void board::unmake(const move& m)
 
     U16 prev_game_state = history.back();
     // reset game state
-    ep_target_sq_ = static_cast<Board::Square>(prev_game_state & 0x7fULL);
-    U8 castling = (prev_game_state & (0xfULL << 7ULL)) >> 7ULL;
-    can_white_castle_qside_ = castling & 0x1ULL;
-    can_white_castle_kside_ = castling & 0x2ULL;
-    can_black_castle_qside_ = castling & 0x4ULL;
-    can_black_castle_kside_ = castling & 0x8ULL;
-    game_over_ = prev_game_state & (0x800ULL);
-    side_to_move_ = static_cast<Color::Value>(prev_game_state & (0x1000ULL));
+    ep_target_sq_ = static_cast<Board::Square>(prev_game_state & Board::GameStateEncoding::EP_TARGET_SQUARE_MASK);
+    U8 castling = (prev_game_state & Board::GameStateEncoding::CASTLE_MASK) >> Board::GameStateEncoding::CASTLE_PERMISSION_SHIFT;
+    can_white_castle_qside_ = castling & Board::GameStateEncoding::WQ_MASK;
+    can_white_castle_kside_ = castling & Board::GameStateEncoding::WK_MASK;
+    can_black_castle_qside_ = castling & Board::GameStateEncoding::BQ_MASK;
+    can_black_castle_kside_ = castling & Board::GameStateEncoding::BK_MASK;
+    game_over_ = prev_game_state & Board::GameStateEncoding::GAME_OVER_MASK;
+    side_to_move_ = static_cast<Color::Value>(prev_game_state & Board::GameStateEncoding::SIDE_TO_MOVE_MASK);
 
     U64 bb_move = 0;
     int from = m.from();
@@ -990,12 +990,16 @@ void board::write_to_history(const U8 capture_type)
     U16 gs = 0;
     gs |= ep_target_sq_;
     unsigned char castling = 0;
-    castling |= (can_white_castle_qside_) | (can_white_castle_kside_ << 1ULL) |
-            (can_black_castle_qside_ << 2ULL) | (can_black_castle_kside_ << 3ULL);
-    gs |= (castling << 7ULL);
-    gs |= (game_over_ << 11ULL);
-    gs |= (side_to_move_ << 12ULL);
-    gs |= (capture_type << 13ULL);
+    castling |=
+            (can_white_castle_qside_ << Board::GameStateEncoding::WQ_SHIFT) |
+            (can_white_castle_kside_ << Board::GameStateEncoding::WK_SHIFT) |
+            (can_black_castle_qside_ << Board::GameStateEncoding::BQ_SHIFT) |
+            (can_black_castle_kside_ << Board::GameStateEncoding::BK_SHIFT);
+
+    gs |= (castling         << Board::GameStateEncoding::CASTLE_PERMISSION_SHIFT);
+    gs |= (game_over_       << Board::GameStateEncoding::GAME_OVER_SHIFT);
+    gs |= (side_to_move_    << Board::GameStateEncoding::SIDE_TO_MOVE_SHIFT);
+    gs |= (capture_type     << Board::GameStateEncoding::CAPTURE_TYPE_SHIFT);
 
     history.push_back(gs);
 }
