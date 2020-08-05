@@ -293,6 +293,27 @@ void board::make(const move& m)
     }
     else if (m.is_promotion())
     {
+        bitboard_move = 1ULL << from;
+        pawns[active] ^=  bitboard_move;
+
+        U64 new_piece_bb = 1ULL << to;
+        switch (m.promoted_piece())
+        {
+            case Move::PieceEncoding::KNIGHT:
+                knights[active] |= new_piece_bb;
+                break;
+            case Move::PieceEncoding::BISHOP:
+                bishops[active] |= new_piece_bb;
+                break;
+            case Move::PieceEncoding::ROOK:
+                rooks[active] |= new_piece_bb;
+                break;
+            case Move::PieceEncoding::QUEEN:
+                queens[active] |= new_piece_bb;
+                break;
+            default:
+                break;
+        }
     }
     else if (m.is_castle())
     {
