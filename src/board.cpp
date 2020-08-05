@@ -822,6 +822,21 @@ void board::populate_lookup_tables()
     }
 }
 
+void board::write_to_history(const U8 capture_type)
+{
+    U16 gs = 0;
+    gs |= ep_target_sq_;
+    unsigned char castling = 0;
+    castling |= (can_white_castle_qside_) | (can_white_castle_kside_ << 1ULL) |
+            (can_black_castle_qside_ << 2ULL) | (can_black_castle_kside_ << 3ULL);
+    gs |= (castling << 6ULL);
+    gs |= (game_over_ << 10ULL);
+    gs |= (side_to_move_ << 11ULL);
+    gs |= (capture_type << 12ULL);
+
+    history.push_back(gs);
+}
+
 // test function - remove when make/unmake is written
 void board::set_side_to_move(Color::Value value)
 {
