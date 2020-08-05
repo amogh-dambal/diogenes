@@ -337,7 +337,118 @@ void board::make(const move& m)
  */
 void board::unmake(const move& m)
 {
+    // get most recently pushed game state from the stack
+    // and reset history
+    U16 made_move_game_state = history.back(); // to track capture type of the last move
+    history.pop_back();
 
+    U16 prev_game_state = history.back();
+    // reset game state
+    ep_target_sq_ = static_cast<Board::Square>(prev_game_state & 0x3fULL);
+    U8 castling = (prev_game_state & (0xfULL << 6ULL)) >> 6ULL;
+    can_white_castle_qside_ = castling & 0x1ULL;
+    can_white_castle_kside_ = castling & 0x2ULL;
+    can_black_castle_qside_ = castling & 0x4ULL;
+    can_black_castle_kside_ = castling & 0x8ULL;
+    game_over_ = prev_game_state & (0x400ULL);
+    side_to_move_ = static_cast<Color::Value>(prev_game_state & (0x800ULL));
+
+    U64 bb_move = 0;
+    int from = m.from();
+    int to = m.to();
+
+    auto active = side_to_move_;
+    auto inactive = static_cast<Color::Value>(!side_to_move_);
+
+    if (m.is_capture())
+    {
+        U8 capture = (made_move_game_state & 0x7000ULL) >> 12ULL;
+
+        bb_move |= (1ULL << from) | (1ULL << to);
+        U64 replacing_bb = (1ULL << to);
+        switch (capture)
+        {
+            // pawn was captured
+            case 0x1:
+                pawns[inactive] ^= replacing_bb;
+                break;
+            // knight was captured
+            case 0x2:
+                knights[inactive] ^= replacing_bb;
+                break;
+            // bishop was captured
+            case 0x3:
+                bishops[inactive] ^= replacing_bb;
+                break;
+            // rook was captured
+            case 0x4:
+                rooks[inactive] ^= replacing_bb;
+                break;
+            // queen was captured
+            case 0x5:
+                queens[inactive] ^= replacing_bb;
+                break;
+        }
+        // replace capturing piece
+        update_bitboards(m, bb_move);
+    }
+    else if (m.is_promotion())
+    {
+        bb_move |= (1ULL << from) | (1ULL << to);
+        pawns[active] ^= bb_move;
+
+        U64 promotion_replace_bb = (1ULL << to);
+        switch (m.promoted_piece())
+        {
+            case Move::PieceEncoding::KNIGHT:
+                knights[active] ^= promotion_replace_bb;
+                break;
+            case Move::PieceEncoding::BISHOP:
+                bishops[active] ^= promotion_replace_bb;
+                break;
+            case Move::PieceEncoding::ROOK:
+                rooks[active] ^= promotion_replace_bb;
+                break;
+            case Move::PieceEncoding::QUEEN:
+                queens[active] ^= promotion_replace_bb;
+                break;
+        }
+    }
+    else if (m.is_castle())
+    {
+        U64 castle_bb = 0;
+        if (m.piece() == Move::PieceEncoding::QUEENSIDE_CASTLE)
+        {
+            if (active == Color::WHITE)
+            {
+                castle_bb |= (1ULL << Board::Square::a1) | (1ULL << Board::Square::d1);
+            }
+            else
+            {
+                castle_bb |= (1ULL << Board::Square::a8) | (1ULL << Board::Square::d8);
+            }
+            kings[active] <<= 2ULL;
+        }
+        else
+        {
+            if (active == Color::WHITE)
+            {
+                castle_bb |= (1ULL << Board::Square::h1) | (1ULL << Board::Square::e1);
+            }
+            else
+            {
+                castle_bb |= (1ULL << Board::Square::h8) | (1ULL << Board::Square::e8);
+            }
+            kings[active] >>= 2ULL;
+        }
+        rooks[active] ^= castle_bb;
+    }
+    // quiet moves
+    else
+    {
+        bb_move |= (1ULL << from) | (1ULL << to);
+        update_bitboards(m, bb_move);
+    }
 }
 
 // getter functions
