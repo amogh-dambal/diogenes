@@ -232,4 +232,9 @@ Move::PieceEncoding move::promoted_piece() const
     {
         return Move::PieceEncoding::QUEEN;
     }
+    else
+    {
+        // ERROR return code 
+        return Move::PieceEncoding::KING;
+    }
 }
