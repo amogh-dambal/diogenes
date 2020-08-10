@@ -152,7 +152,6 @@ U64 generate_white_queen_attacks(const U64 w_queens, const U64 blockers)
         attacks |= bitboard::occ_fill_southwest(qpos, blockers);
     }
     return attacks;
-
 }
 
 /* following functions have identical behavior to the other set of functions, 
