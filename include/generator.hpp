@@ -50,7 +50,7 @@ private:
     U64 get_checkers(U64 w_king, U64 blockers);
     bool generate_legal_pinned_moves(U64 king, U64 blockers, U64& pinned_pieces);
     std::vector<U64> get_pin_rays();
-    Move::PieceEncoding get_pinned_piece(const U64 pinned_piece_bb);
+    Move::PieceEncoding get_pinned_piece(U64 pinned_piece_bb);
     U64 calculate_push_mask(U64 checkers, U64 w_king);
 
     void generate_white_pawn_moves(U64 w_pawns, U64 capture, U64 push);
