@@ -884,6 +884,8 @@ U64 generator::calculate_push_mask(const U64 checkers, const U64 w_king)
             push_mask |= (1ULL << ep_sq);
         }
     }
+    push_mask ^= (checkers | w_king);
+
     return push_mask;
 
 }
