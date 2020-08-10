@@ -30,7 +30,7 @@ U64 generate_white_pawn_attacks(const U64 w_pawns, const U64 possible_mvs)
  * @return U64 bitboard representing all possible squares a white pawn can
  * currently be pushed to - single or double depending on the flag
  */
-U64 generate_white_pawn_push_targets(U64 w_pawns, const U64 empty, bool single)
+U64 generate_white_pawn_push_targets(const U64 w_pawns, const U64 empty, bool single)
 {
     U64 attacks = 0;
 
@@ -44,8 +44,7 @@ U64 generate_white_pawn_push_targets(U64 w_pawns, const U64 empty, bool single)
         {
             // only calculate double pushes for
             // pawns in their original squares
-            w_pawns &= (0xff00);
-            attacks |= bitboard::north(bitboard::north(w_pawns) & empty) & empty;
+            attacks |= bitboard::north(bitboard::north(w_pawns & 0xff00ULL) & empty) & empty;
         }
     }
     return attacks;
@@ -53,7 +52,7 @@ U64 generate_white_pawn_push_targets(U64 w_pawns, const U64 empty, bool single)
 
 // functions have same behavior as white pawn functions
 // but in opposite direction
-U64 generate_black_pawn_push_targets(U64 b_pawns, const U64 empty, bool single)
+U64 generate_black_pawn_push_targets(const U64 b_pawns, const U64 empty, bool single)
 {
     U64 attacks = 0;
     if (single)
@@ -63,9 +62,7 @@ U64 generate_black_pawn_push_targets(U64 b_pawns, const U64 empty, bool single)
     else
     {
         // only calculate double pushes for pawns in their original squares
-        b_pawns &= (0x00ff000000000000);
-
-        attacks |= bitboard::south(bitboard::south(b_pawns) & empty) & empty;
+        attacks |= bitboard::south(bitboard::south(b_pawns & 0x00ff000000000000ULL) & empty) & empty;
 
     }
     return attacks;
@@ -79,7 +76,6 @@ U64 generate_black_pawn_attacks(const U64 b_pawns, const U64 possible_mvs)
 
     return attacks;
 }
-
 
 /**
  * builds the set of squares attacked by the white knights
