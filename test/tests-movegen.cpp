@@ -112,11 +112,13 @@ TEST_CASE("move generation - white in check", "[movegen]")
         g = new generator(*b);
 
         auto lmoves = g->get_legal_moves();
+
         REQUIRE(lmoves.size() == 7);
 
         delete b;
         delete g;
     }
+
 
     SECTION("blocking moves, dense (opening) position", "[movegen]")
     {
@@ -156,15 +158,8 @@ TEST_CASE("move generation - white in check", "[movegen]")
 
         REQUIRE(lmoves.size() == 9);
 
-        for (const move& m : lmoves)
-        {
-            std::cout << m << " ";
-        }
-        std::cout << std::endl;
-
         delete b;
         delete g;
 
     }
-
 }

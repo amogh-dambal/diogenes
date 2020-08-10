@@ -29,7 +29,6 @@ public:
     generator(const board&&) = delete; // prevents rvalue binding
 
     movelist get_moves();
-    const move& next_move() const;
     Color::Value side_to_move() const;
     const board& pos() const;
     movelist get_legal_moves();
@@ -38,33 +37,33 @@ private:
     const board& b;
     movelist ml;
     Color::Value active;
+    Color::Value inactive;
 
     void run(Move::GeneratorStatus);
 
-    void generate_legal_white_moves();
-    void generate_legal_black_moves();
+    void generate_legal_moves();
+    void generate_pseudolegal_moves();
 
+    // legal move generation
     // helper functions
-    U64 get_white_king_danger_squares(U64 blockers);
+    U64 get_king_danger_squares(U64 blockers);
     U64 get_checkers(U64 w_king, U64 blockers);
-    bool generate_legal_white_pinned_moves(U64 w_king, U64 blockers, U64& pinned_pieces);
+    bool generate_legal_pinned_moves(U64 king, U64 blockers, U64& pinned_pieces);
+    std::vector<U64> get_pin_rays();
+    Move::PieceEncoding get_pinned_piece(const U64 pinned_piece_bb);
+    U64 calculate_push_mask(U64 checkers, U64 w_king);
 
     void generate_white_pawn_moves(U64 w_pawns, U64 capture, U64 push);
-    void generate_white_knight_moves(U64 w_knights, U64 open_squares);
-    void generate_white_bishop_moves(U64 w_bishops, U64 open_squares);
-    void generate_white_rook_moves(U64 w_rooks, U64 open_squares);
-    void generate_white_queen_moves(U64 w_queens, U64 open_squares);
-    void generate_white_king_moves(U64 danger_squares = Board::NO_SQUARES, bool in_check = false);
+    void generate_black_pawn_moves(U64 b_pawns, U64 capture, U64 push);
 
-    void generate_black_pawn_moves();
-    void generate_black_knight_moves();
-    void generate_black_bishop_moves();
-    void generate_black_rook_moves();
-    void generate_black_queen_moves();
-    void generate_black_king_moves();
+    void generate_white_castle_moves(int ksq, U64 danger_squares);
+    void generate_black_castle_moves(int ksq, U64 danger_squares);
 
-    std::vector<U64> get_pin_rays();
-    U64 calculate_push_mask(U64 checkers, U64 w_king);
+    void generate_knight_moves(U64 knights, U64 open_squares);
+    void generate_bishop_moves(U64 bishops, U64 open_squares);
+    void generate_rook_moves(U64 rooks, U64 open_squares);
+    void generate_queen_moves(U64 queens, U64 open_squares);
+    void generate_king_moves(U64 king, U64 danger_squares = Board::NO_SQUARES, bool in_check = false);
 
     const std::map<int, FillFunctionPtr> filler = {
             {Board::Direction::N, &bitboard::occ_fill_north},
