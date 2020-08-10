@@ -98,8 +98,8 @@ private:
     void rook_fill(U64 rpos, int sq);
     void bishop_fill(U64 bpos, int sq);
 
-    square_parser& get_parser();
-    Board::Square parse_square(const std::string& sq);
+    static square_parser& get_parser();
+    static Board::Square parse_square(const std::string& sq);
 
     Color::Value side_to_move_;
     int ply_;
@@ -112,8 +112,6 @@ private:
 
     Board::Square ep_target_sq_;
 
-    // TODO: refactor implementation of
-    //  - game history encoding, need to use more constants
     std::deque<U16> history;
 
     // function that initializes lookup tables
