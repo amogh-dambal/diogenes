@@ -41,13 +41,15 @@ ull perft(int depth, const board& b)
     return knodes;
 }
 
-/*
+
 TEST_CASE("perft correctness", "[perft]")
 {
     SECTION("starting position")
     {
         board b;
 
+        // TODO: fix perft bugs
+        //  - generating too many moves?
         REQUIRE(perft(1, b) == 20);
         REQUIRE(perft(2, b) == 400);
         REQUIRE(perft(3, b) == 8902);
@@ -56,4 +58,4 @@ TEST_CASE("perft correctness", "[perft]")
         REQUIRE(perft(6, b) == 119060324);
     }
 }
-*/
+
