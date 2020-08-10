@@ -311,7 +311,7 @@ int bitboard::bitscan_forward(const U64 b)
 {
     if (b == 0)
     {
-        throw std::invalid_argument("Error! Param b cannot be equal to 0.\n");
+        throw std::invalid_argument("BITSCAN_FORWARD: Error! Param b cannot be equal to 0.\n");
     }
 
     const int debruijn_lookup[64] = {
@@ -345,7 +345,7 @@ int bitboard::bitscan_reverse(const U64 b)
 {
     if (b == 0)
     {
-        throw std::invalid_argument("Error! Param b cannot be equal to 0.\n");
+        throw std::invalid_argument("BITSCAN_REVERSE: Error! Param b cannot be equal to 0.\n");
     }
     const int debruijn_lookup[64] = {
         0, 47,  1, 56, 48, 27,  2, 60,
