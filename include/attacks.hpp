@@ -24,6 +24,7 @@ U64 generate_black_knight_attacks(U64 b_knights, U64 possible_mvs, const U64* co
 U64 generate_black_bishop_attacks(U64 b_bishops, U64 blockers);
 U64 generate_black_rook_attacks(U64 b_rooks, U64 blockers);
 U64 generate_black_queen_attacks(U64 b_queens, U64 blockers);
+U64 generate_black_king_attacks(U64 b_kings, U64 possible_mvs, const U64* const targets);
 
 
 #endif //DIOGENES_ATTACKS_HPP

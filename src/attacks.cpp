@@ -254,3 +254,11 @@ U64 generate_black_queen_attacks(const U64 b_queens, const U64 blockers)
     return attacks;
 
 }
+
+U64 generate_black_king_attacks(const U64 b_kings, const U64 possible_mvs, const U64* const targets)
+{
+    U64 attacks = 0;
+    auto sq = static_cast<Board::Square>(bitboard::bitscan_forward(b_kings));
+    attacks |= targets[sq] & possible_mvs;
+    return attacks;
+}
