@@ -1008,3 +1008,8 @@ const U64* const board::get_knight_targets() const
 {
     return this->knight_targets;
 }
+
+const U64* const board::get_king_targets() const
+{
+    return this->king_targets;
+}

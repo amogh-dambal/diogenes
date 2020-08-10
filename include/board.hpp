@@ -65,6 +65,7 @@ public:
     bool can_black_castle_kside() const;
 
     const U64* const get_knight_targets() const;
+    const U64* const get_king_targets() const;
 
 private:
     // piece board sets
