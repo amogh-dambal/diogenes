@@ -701,38 +701,37 @@ bool board::exists(Color::Value color, Move::PieceEncoding piece, Board::Square 
  */
 int board::piece_on(Board::Square sq) const
 {
+    int p = -1;
+    
     U64 sq_bb = 1ULL << sq;
     if (sq_bb & occupied_squares)
     {
         if (sq_bb & pawns[Color::BOTH])
         {
-            return Move::PieceEncoding::PAWN;
+            p = Move::PieceEncoding::PAWN;
         }
         else if (sq_bb & knights[Color::BOTH])
         {
-            return Move::PieceEncoding::KNIGHT;
+            p = Move::PieceEncoding::KNIGHT;
         }
         else if (sq_bb & bishops[Color::BOTH])
         {
-            return Move::PieceEncoding::BISHOP;
+            p = Move::PieceEncoding::BISHOP;
         }
         else if (sq_bb & rooks[Color::BOTH])
         {
-            return Move::PieceEncoding::ROOK;
+            p = Move::PieceEncoding::ROOK;
         }
         else if (sq_bb & queens[Color::BOTH])
         {
-            return Move::PieceEncoding::QUEEN;
+            p = Move::PieceEncoding::QUEEN;
         }
         else if (sq_bb & kings[Color::BOTH])
         {
-            return Move::PieceEncoding::KING;
+            p = Move::PieceEncoding::KING;
         }
     }
-    else
-    {
-        return -1;
-    }
+    return p; 
 }
 
 /**
