@@ -89,16 +89,21 @@ const board& generator::pos() const
  */
 void generator::run(Move::GeneratorStatus status)
 {
+    U64 open_squares, push, capture;
     if (status == Move::GeneratorStatus::PSEUDOLEGAL)
     {
         if (active == Color::WHITE)
         {
-            generate_white_pawn_moves();
-            generate_white_knight_moves();
+            open_squares = ~(b.get_pieces(Color::WHITE));
+            push = b.get_empty_squares();
+            capture = b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK);
+
+            generate_white_pawn_moves(b.get_pawns(Color::WHITE), capture, push);
+            generate_white_knight_moves(b.get_knights(Color::WHITE), open_squares);
             generate_white_king_moves();
-            generate_white_bishop_moves();
-            generate_white_rook_moves();
-            generate_white_queen_moves();
+            generate_white_bishop_moves(b.get_bishops(Color::WHITE), open_squares);
+            generate_white_rook_moves(b.get_rooks(Color::WHITE), open_squares);
+            generate_white_queen_moves(b.get_queens(Color::WHITE), open_squares);
         }
         else
         {
@@ -125,76 +130,117 @@ void generator::run(Move::GeneratorStatus status)
 
 void generator::generate_legal_white_moves()
 {
-    /* generate legal king moves */
     const U64 w_king = b.get_kings(Color::WHITE);
-    const U64 b_attackables = b.get_empty_squares() | b.get_pieces(Color::WHITE);
     // x-ray the king when calculating slider attacks
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ w_king;
+    const U64 blockers = b.get_pieces(Color::BOTH) ^w_king;
     const U64 blockers_no_xray = blockers ^ w_king;
 
-    const U64 b_pawn_attacks = generate_black_pawn_attacks(b.get_pawns(Color::BLACK), b_attackables);
-    const U64 b_knight_attacks = generate_black_knight_attacks(b.get_knights(Color::BLACK), b_attackables, b.get_knight_targets());
-    const U64 b_bishop_attacks = generate_black_bishop_attacks(b.get_bishops(Color::BLACK), blockers ^ b.get_bishops(Color::BLACK));
-    const U64 b_rook_attacks = generate_black_rook_attacks(b.get_rooks(Color::BLACK), blockers ^ b.get_rooks(Color::BLACK));
-    const U64 b_queen_attacks = generate_black_queen_attacks(b.get_queens(Color::BLACK), blockers ^ b.get_queens(Color::BLACK));
-
-    // TODO: add black king attacks to the danger squares
-    const U64 w_king_danger_squares = b_pawn_attacks | b_knight_attacks | b_bishop_attacks | b_rook_attacks | b_queen_attacks;
-    generate_white_king_moves(w_king_danger_squares);
-
-    // check evasions
-    const auto ksq = (Board::Square) bitboard::bitscan_forward(w_king);
+    // generate legal king moves
+    const U64 w_king_danger_squares = get_white_king_danger_squares(blockers);
     const bool in_check = w_king_danger_squares & w_king;
-    U64 checkers = 0;
-    int n_checkers = 0;
-    if (in_check)
-    {
-        U64 piece_attack;
-
-        piece_attack = generate_black_pawn_attacks(w_king, b.get_pawns(Color::BLACK));
-        checkers |= piece_attack;
-
-        piece_attack = b.get_knight_targets(ksq) & b.get_knights(Color::BLACK);
-        checkers |= piece_attack;
-
-        piece_attack = generate_black_bishop_attacks(w_king, blockers) & b.get_bishops(Color::BLACK);
-        checkers |= piece_attack;
-
-        piece_attack = generate_black_rook_attacks(w_king, blockers) & b.get_rooks(Color::BLACK);
-        checkers |= piece_attack;
-
-        piece_attack = generate_black_queen_attacks(w_king, blockers) & b.get_rooks(Color::BLACK);
-        checkers |= piece_attack;
-
-        n_checkers = bitboard::pop_count(checkers);
-    }
+    generate_white_king_moves(w_king_danger_squares, in_check);
 
     U64 capture_mask = b.get_pieces(Color::BLACK);
     U64 push_mask = b.get_empty_squares();
-
-    /* if in check */
-
-    // double check - early return
-    // since only valid moves are king moves
-    if (n_checkers > 1)
+    if (in_check)
     {
-        return;
-    }
-    else if (n_checkers == 1)
-    {
-        // move, block, capture
-        capture_mask = checkers;
-        push_mask = calculate_push_mask(checkers, w_king);
+        // check evasions
+        U64 checkers = get_checkers(w_king, blockers);
+        int n_checkers = bitboard::pop_count(checkers);
+
+        // set capture/push masks
+        if (n_checkers > 1)
+        {
+            // double check - early return, since only valid moves are king moves
+            return;
+        }
+        else if (n_checkers == 1)
+        {
+            // move, block, capture
+            capture_mask = checkers;
+            push_mask &= calculate_push_mask(checkers, w_king);
+        }
     }
 
     /* pins */
+    U64 pinned_pieces = 0;
+    bool is_pin = generate_legal_white_pinned_moves(w_king, blockers_no_xray, pinned_pieces);
 
+    // part 4 - other moves
+    // filter out pinned pieces from bitboard of white moves and generate moves normally
+    U64 w_pieces = b.get_pieces(Color::WHITE);
+    if (is_pin)
+    {
+        // sliders & king_as_queen & w_pieces
+        w_pieces = w_pieces ^ pinned_pieces;
+    }
+
+    const U64 move_to = capture_mask | push_mask;
+    const U64 w_bishops = b.get_bishops(Color::WHITE) & w_pieces;
+    const U64 w_knights = b.get_knights(Color::WHITE) & w_pieces;
+    const U64 w_rooks = b.get_rooks(Color::WHITE) & w_pieces;
+    const U64 w_queens = b.get_queens(Color::WHITE) & w_pieces;
+    const U64 w_pawns = b.get_pawns(Color::WHITE) & w_pieces;
+
+    generate_white_bishop_moves(w_bishops, move_to);
+    generate_white_knight_moves(w_knights, move_to);
+    generate_white_rook_moves(w_rooks, move_to);
+    generate_white_queen_moves(w_queens, move_to);
+    generate_white_pawn_moves(w_pawns, capture_mask, push_mask);
+}
+
+U64 generator::get_checkers(const U64 w_king, const U64 blockers)
+{
+    const auto ksq = (Board::Square) bitboard::bitscan_forward(w_king);
+    U64 checkers = 0;
+    U64 piece_attack;
+
+    piece_attack = generate_black_pawn_attacks(w_king, b.get_pawns(Color::BLACK));
+    checkers |= piece_attack;
+
+    piece_attack = b.get_knight_targets(ksq) & b.get_knights(Color::BLACK);
+    checkers |= piece_attack;
+
+    piece_attack = generate_black_bishop_attacks(w_king, blockers) & b.get_bishops(Color::BLACK);
+    checkers |= piece_attack;
+
+    piece_attack = generate_black_rook_attacks(w_king, blockers) & b.get_rooks(Color::BLACK);
+    checkers |= piece_attack;
+
+    piece_attack = generate_black_queen_attacks(w_king, blockers) & b.get_rooks(Color::BLACK);
+    checkers |= piece_attack;
+
+    return checkers;
+}
+
+U64 generator::get_white_king_danger_squares(const U64 blockers)
+{
+    const U64 b_attackables = b.get_empty_squares() | b.get_pieces(Color::WHITE);
+    // get white king danger squares
+    const U64 b_pawn_attacks = generate_black_pawn_attacks(b.get_pawns(Color::BLACK), b_attackables);
+    const U64 b_knight_attacks = generate_black_knight_attacks(b.get_knights(Color::BLACK), b_attackables,
+                                                               b.get_knight_targets());
+    const U64 b_bishop_attacks = generate_black_bishop_attacks(b.get_bishops(Color::BLACK),
+                                                               blockers ^ b.get_bishops(Color::BLACK));
+    const U64 b_rook_attacks = generate_black_rook_attacks(b.get_rooks(Color::BLACK),
+                                                           blockers ^ b.get_rooks(Color::BLACK));
+    const U64 b_queen_attacks = generate_black_queen_attacks(b.get_queens(Color::BLACK),
+                                                             blockers ^ b.get_queens(Color::BLACK));
+    const U64 b_king_attacks = generate_black_king_attacks(b.get_kings(Color::BLACK), b_attackables,
+                                                           b.get_king_targets());
+
+    const U64 w_king_danger_squares =
+            b_pawn_attacks | b_knight_attacks | b_bishop_attacks | b_rook_attacks | b_queen_attacks | b_king_attacks;
+    return w_king_danger_squares;
+}
+
+bool generator::generate_legal_white_pinned_moves(const U64 w_king, const U64 blockers, U64& pinned_pieces)
+{
     // find all pinned pieces
     // 1. calculate moves from opp. sliding pieces
     // 2. sliding piece moves from king
     // 3. overlap
     // intersection of "pinned squares" and "white pieces" : pinned white pieces
-
     std::vector<U64> pin_rays = get_pin_rays();
 
     // if there are any pinned pieces
@@ -203,22 +249,24 @@ void generator::generate_legal_white_moves()
     const U64 b_pieces = b.get_pieces(Color::BLACK);
     U64 open_squares;
     U64 pinned_piece;
+    U64 pps = 0;
     int pinned_sq;
-    bool is_pin;
 
-    if (pin_rays.size() > 0)
+    bool is_pin = pin_rays.size() > 0;
+
+    if (is_pin)
     {
-        is_pin = true;
         for (const U64 ray : pin_rays)
         {
             // remove white pieces from ray and
             // get squares available to move to
-            open_squares = ray & (ray ^ b.get_pieces(Color::BOTH));
+            open_squares = ray & (ray ^ b.get_pieces(Color::WHITE));
 
             // get pinned piece
             pinned_piece = ray & (w_pieces ^ w_king);
+            pps |= pinned_piece;
             pinned_sq = bitboard::bitscan_forward(pinned_piece);
-            int p = b.piece_on((Board::Square)pinned_sq);
+            int p = b.piece_on((Board::Square) pinned_sq);
             if (p == -1)
             {
                 throw std::logic_error("error: there must be a piece on the pin ray");
@@ -240,7 +288,7 @@ void generator::generate_legal_white_moves()
                     switch (pinned_piece_type)
                     {
                         case Move::PieceEncoding::BISHOP:
-                            attacks = generate_white_bishop_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            attacks = generate_white_bishop_attacks(pinned_piece, blockers ^ pinned_piece);
                             moves = attacks & open_squares;
 
                             if (bitboard::pop_count(moves) > 0)
@@ -257,7 +305,7 @@ void generator::generate_legal_white_moves()
                             }
                             break;
                         case Move::PieceEncoding::QUEEN:
-                            attacks = generate_white_queen_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            attacks = generate_white_queen_attacks(pinned_piece, blockers ^ pinned_piece);
                             moves = attacks & open_squares;
 
                             if (bitboard::pop_count(moves) > 0)
@@ -304,7 +352,7 @@ void generator::generate_legal_white_moves()
                         U64 attacks;
                         U64 moves;
                         case Move::PieceEncoding::ROOK:
-                            attacks = generate_white_rook_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            attacks = generate_white_rook_attacks(pinned_piece, blockers ^ pinned_piece);
                             moves = attacks & open_squares;
 
                             if (bitboard::pop_count(moves) > 0)
@@ -321,7 +369,7 @@ void generator::generate_legal_white_moves()
                             }
                             break;
                         case Move::PieceEncoding::QUEEN:
-                            attacks = generate_white_queen_attacks(pinned_piece, blockers_no_xray ^ pinned_piece);
+                            attacks = generate_white_queen_attacks(pinned_piece, blockers ^ pinned_piece);
                             moves = attacks & open_squares;
 
                             if (bitboard::pop_count(moves) > 0)
@@ -338,7 +386,8 @@ void generator::generate_legal_white_moves()
                             }
                             break;
                         case Move::PieceEncoding::PAWN:
-                            attacks = generate_white_pawn_push_targets(pinned_piece, open_squares) | generate_white_pawn_push_targets(pinned_piece, open_squares, false);
+                            attacks = generate_white_pawn_push_targets(pinned_piece, open_squares) |
+                                      generate_white_pawn_push_targets(pinned_piece, open_squares, false);
                             moves = attacks & open_squares;
                             if (bitboard::pop_count(moves) > 0)
                             {
@@ -364,16 +413,8 @@ void generator::generate_legal_white_moves()
         }
     }
 
-    // part 4 - other moves
-    // filter out pinned pieces from bitboard of white moves and generate moves normally
-    if (is_pin)
-    {
-        // sliders & king_as_queen & w_pieces
-        U64 pinned_pieces = (b_rook_attacks | b_queen_attacks | b_bishop_attacks) & generate_white_queen_attacks(w_king, blockers) & w_pieces;
-        w_pieces = w_pieces ^ pinned_pieces;
-    }
-
-    // TODO: rewrite methods that piece-wise generation of moves and use them here
+    pinned_pieces = pps;
+    return is_pin;
 }
 
 void generator::generate_legal_black_moves()
@@ -381,19 +422,16 @@ void generator::generate_legal_black_moves()
     return;
 }
 
-void generator::generate_white_pawn_moves()
+void generator::generate_white_pawn_moves(const U64 w_pawns, const U64 capture, const U64 push)
 {
     U64 flags;
     U64 targets;
     std::vector<int> target_squares;
     std::vector<int> attack_squares;
 
-    const U64 w_pawns = b.get_pawns(Color::WHITE);
-    const U64 empty = b.get_empty_squares();
-
     // white pawn single push moves
     flags = Move::QUIET_FLAG;
-    targets = generate_white_pawn_push_targets(w_pawns, empty, true);
+    targets = generate_white_pawn_push_targets(w_pawns, push, true);
     target_squares = bitboard::serialize(targets);
     for (int tgt_sq : target_squares)
     {
@@ -416,7 +454,7 @@ void generator::generate_white_pawn_moves()
 
     // white pawn double push moves
     flags = Move::DOUBLE_PUSH_FLAG;
-    targets = generate_white_pawn_push_targets(w_pawns, empty, false);
+    targets = generate_white_pawn_push_targets(w_pawns, push, false);
 
     target_squares = bitboard::serialize(targets);
     for (int tgt_sq : target_squares)
@@ -425,7 +463,7 @@ void generator::generate_white_pawn_moves()
     }
 
     // white pawn attacks
-    const U64 b_attackables = b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK);
+    const U64 b_attackables = (b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK)) & capture;
     U64 w_pawn_attacks = generate_white_pawn_attacks(w_pawns, b_attackables);
     attack_squares = bitboard::serialize(w_pawn_attacks);
     flags = Move::CAPTURE_FLAG;
@@ -487,9 +525,8 @@ void generator::generate_white_pawn_moves()
     }
 }
 
-void generator::generate_white_knight_moves()
+void generator::generate_white_knight_moves(const U64 w_knights, const U64 open_squares)
 {
-    const U64 w_knights = b.get_knights(Color::WHITE);
     const U64 available_squares = b.get_pieces(Color::BLACK) | b.get_empty_squares();
     const U64* const targets = b.get_knight_targets();
 
@@ -503,7 +540,7 @@ void generator::generate_white_knight_moves()
         bool is_capture;
         for (int ksq : w_knight_squares)
         {
-            possible_moves = all_attacked_squares & targets[(Board::Square)ksq];
+            possible_moves = all_attacked_squares & targets[(Board::Square)ksq] & open_squares;
             for (int to : bitboard::serialize(possible_moves))
             {
                 is_capture = (1ULL << to) & b.get_pieces(Color::BLACK);
@@ -516,14 +553,14 @@ void generator::generate_white_knight_moves()
     }
 }
 
-void generator::generate_white_bishop_moves()
+void generator::generate_white_bishop_moves(const U64 w_bishops, const U64 open_squares)
 {
-    const U64 w_bishop_pos = b.get_bishops(Color::WHITE);
+    const U64 w_bishop_pos = w_bishops;
     const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_bishops(Color::WHITE);
     if (bitboard::pop_count(w_bishop_pos) > 0)
     {
         U64 w_bishop_attacks = generate_white_bishop_attacks(w_bishop_pos, blockers);
-        w_bishop_attacks &= ~(b.get_pieces(Color::WHITE));
+        w_bishop_attacks &= open_squares;
 
         std::vector<int> w_bishop_pos_squares = bitboard::serialize(w_bishop_pos);
         std::vector<int> w_bishop_attack_squares = bitboard::serialize(w_bishop_attacks);
@@ -546,15 +583,15 @@ void generator::generate_white_bishop_moves()
     }
 }
 
-void generator::generate_white_rook_moves()
+void generator::generate_white_rook_moves(const U64 w_rooks, const U64 open_squares)
 {
-    const U64 w_rook_pos = b.get_rooks(Color::WHITE);
+    const U64 w_rook_pos = w_rooks;
     const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_rooks(Color::WHITE);
     // only generate moves if there are rooks on the board
     if (bitboard::pop_count(w_rook_pos) > 0)
     {
         U64 w_rook_attacks = generate_white_rook_attacks(w_rook_pos, blockers);
-        w_rook_attacks &= ~(b.get_pieces(Color::WHITE));
+        w_rook_attacks &= open_squares;
         std::vector<int> w_rook_pos_squares = bitboard::serialize(w_rook_pos);
         std::vector<int> w_rook_attack_squares = bitboard::serialize(w_rook_attacks);
 
@@ -575,15 +612,15 @@ void generator::generate_white_rook_moves()
     }
 }
 
-void generator::generate_white_queen_moves()
+void generator::generate_white_queen_moves(const U64 w_queens, const U64 open_squares)
 {
-    const U64 w_queen_pos = b.get_queens(Color::WHITE);
+    const U64 w_queen_pos = w_queens;
     const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_queens(Color::WHITE);
     // only generate moves if there are white queens on the board
     if (bitboard::pop_count(w_queen_pos) > 0)
     {
         U64 w_queen_attacks = generate_white_queen_attacks(w_queen_pos, blockers);
-        w_queen_attacks &= ~(b.get_pieces(Color::WHITE));
+        w_queen_attacks &= open_squares;
         std::vector<int> w_queen_pos_squares = bitboard::serialize(w_queen_pos);
         std::vector<int> w_queen_attack_squares = bitboard::serialize(w_queen_attacks);
 
@@ -604,7 +641,7 @@ void generator::generate_white_queen_moves()
     }
 }
 
-void generator::generate_white_king_moves(const U64 danger_squares)
+void generator::generate_white_king_moves(const U64 danger_squares, const bool in_check)
 {
     // non-special king moves
     U64 flags = Move::QUIET_FLAG;
@@ -628,24 +665,27 @@ void generator::generate_white_king_moves(const U64 danger_squares)
     }
 
     // castles
-    flags = Move::CASTLE_FLAG;
-    if (
-            b.can_white_castle_kside() &
-            !(b.get_occupied_squares() & Move::KINGSIDE_CASTLE_FREE) &
-            !(danger_squares & Move::KINGSIDE_CASTLE_FREE)
-    )
+    if (!in_check)
     {
-        ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
-    }
-    if (
-            b.can_white_castle_qside() &
-            !(b.get_occupied_squares() & Move::QUEENSIDE_CASTLE_FREE) &
-            !(danger_squares & Move::QUEENSIDE_CASTLE_FREE)
-    )
-    {
-        // mark flag as queenside castle
-        flags |= 0x1ULL; 
-        ml.push_back(move(ksq, ksq-2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
+        flags = Move::CASTLE_FLAG;
+        if (
+                b.can_white_castle_kside() &
+                !(b.get_occupied_squares() & Move::KINGSIDE_CASTLE_FREE) &
+                !(danger_squares & Move::KINGSIDE_CASTLE_FREE)
+                )
+        {
+            ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
+        }
+        if (
+                b.can_white_castle_qside() &
+                !(b.get_occupied_squares() & Move::QUEENSIDE_CASTLE_FREE) &
+                !(danger_squares & Move::QUEENSIDE_CASTLE_FREE)
+                )
+        {
+            // mark flag as queenside castle
+            flags |= 0x1ULL;
+            ml.push_back(move(ksq, ksq-2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
+        }
     }
 }
 
@@ -978,6 +1018,7 @@ U64 generator::calculate_push_mask(const U64 checkers, const U64 w_king)
                 }
                 else
                 {
+                    dir *= -1;
                     switch (dir)
                     {
                         case Board::Direction::S:
@@ -1026,8 +1067,9 @@ std::vector<U64> generator::get_pin_rays()
 {
     const U64 w_king = b.get_kings(Color::WHITE);
     const U64 b_sliders = b.get_pieces(Color::BLACK) ^ (b.get_kings(Color::BLACK) | b.get_pawns(Color::BLACK) | b.get_knights(Color::BLACK));
-    const U64 w_pieces = b.get_pieces(Color::WHITE);
-    const U64 empty_squares = b.get_empty_squares();
+    const U64 w_pieces = b.get_pieces(Color::WHITE) ^ w_king;
+
+    const U64 blockers = b.get_pieces(Color::BOTH);
     std::vector<U64> rays;
 
     U64 ray, king, sliders;
@@ -1036,11 +1078,13 @@ std::vector<U64> generator::get_pin_rays()
     {
         king = 0;
         sliders = 0;
-        king |= (*dir.second)(w_king, empty_squares);
-        sliders |= (*(filler.find((int)dir.first * -1)->second))(b_sliders, empty_squares);
-        ray = king & sliders;
-        if (ray & w_pieces)
+        king |= (*dir.second)(w_king, blockers ^ w_king);
+        sliders |= (*(filler.find((int)dir.first * -1)->second))(b_sliders, blockers ^ b_sliders);
+        U64 pin_test = king & sliders;
+
+        if (pin_test & w_pieces)
         {
+            ray = king | sliders;
             rays.push_back(ray);
         }
     }
