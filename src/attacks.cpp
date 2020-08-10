@@ -4,8 +4,6 @@
 
 #include "attacks.hpp"
 
-// TODO: fix const-correctness bug in generation of pawn push targets
-
 /**
  * function that builds the white pawn attack set
  * @param w_pawns : U64 bitboard representing the white pawns on the board
