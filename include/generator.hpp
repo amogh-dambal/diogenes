@@ -18,8 +18,7 @@
  * legal move generator
  */
 
-// TODO: legal move generation
-
+// TODO: refactor move generation to be more generic
 typedef std::vector<move> movelist;
 typedef U64 (*FillFunctionPtr)(U64, U64);
 
@@ -46,14 +45,16 @@ private:
     void generate_legal_black_moves();
 
     // helper functions
-    U64 generate_white_attacks();
+    U64 get_white_king_danger_squares(U64 blockers);
+    U64 get_checkers(U64 w_king, U64 blockers);
+    bool generate_legal_white_pinned_moves(U64 w_king, U64 blockers, U64& pinned_pieces);
 
-    void generate_white_pawn_moves();
-    void generate_white_knight_moves();
-    void generate_white_bishop_moves();
-    void generate_white_rook_moves();
-    void generate_white_queen_moves();
-    void generate_white_king_moves(U64 danger_squares = Board::NO_SQUARES);
+    void generate_white_pawn_moves(U64 w_pawns, U64 capture, U64 push);
+    void generate_white_knight_moves(U64 w_knights, U64 open_squares);
+    void generate_white_bishop_moves(U64 w_bishops, U64 open_squares);
+    void generate_white_rook_moves(U64 w_rooks, U64 open_squares);
+    void generate_white_queen_moves(U64 w_queens, U64 open_squares);
+    void generate_white_king_moves(U64 danger_squares = Board::NO_SQUARES, bool in_check = false);
 
     void generate_black_pawn_moves();
     void generate_black_knight_moves();
@@ -66,14 +67,14 @@ private:
     U64 calculate_push_mask(U64 checkers, U64 w_king);
 
     const std::map<int, FillFunctionPtr> filler = {
-            {Board::Direction::N, &bitboard::fill_north},
-            {Board::Direction::S, &bitboard::fill_south},
-            {Board::Direction::E, &bitboard::fill_east},
-            {Board::Direction::W, &bitboard::fill_west},
-            {Board::Direction::NE, &bitboard::fill_northeast},
-            {Board::Direction::SE, &bitboard::fill_southeast},
-            {Board::Direction::SW, &bitboard::fill_southwest},
-            {Board::Direction::NW, &bitboard::fill_northwest},
+            {Board::Direction::N, &bitboard::occ_fill_north},
+            {Board::Direction::S, &bitboard::occ_fill_south},
+            {Board::Direction::E, &bitboard::occ_fill_east},
+            {Board::Direction::W, &bitboard::occ_fill_west},
+            {Board::Direction::NE, &bitboard::occ_fill_northeast},
+            {Board::Direction::SE, &bitboard::occ_fill_southeast},
+            {Board::Direction::SW, &bitboard::occ_fill_southwest},
+            {Board::Direction::NW, &bitboard::occ_fill_northwest},
     };
 
 };
