@@ -100,27 +100,26 @@ TEST_CASE("move generation - pawn promotion")
 }
 
 /* LEGAL MOVE GENERATION */
-TEST_CASE("legal move generation - white king moves")
+TEST_CASE("move generation - white in check", "[movegen]")
 {
     std::string fen_record;
-    board b;
+    board* b;
     generator* g;
+    SECTION("blocking moves")
+    {
+        fen_record = "4k3/8/8/8/6b1/8/PPP2PPP/1N1K1BN1 w - - 0 1";
+        b = new board(fen_record);
+        g = new generator(*b);
 
-    fen_record = "8/8/8/8/8/7b/8/R3K2R w KQ - 0 1";
-    b = board(fen_record);
-    g = new generator(b);
+        auto lmoves = g->get_legal_moves();
+        REQUIRE(lmoves.size() == 7);
+        for (const move& m : lmoves)
+        {
+            std::cout << m << std::endl;
+        }
 
-    auto lmoves = g->get_legal_moves();
+        delete b;
+        delete g;
+    }
 
-    REQUIRE(lmoves.size() == 5);
-    delete g;
-
-    fen_record = "8/8/8/8/8/1n5b/8/R3K2R w KQ - 0 1";
-    b = board(fen_record);
-    g = new generator(b);
-
-    lmoves = g->get_legal_moves();
-    REQUIRE(lmoves.size() == 3);
-
-    delete g;
 }
