@@ -105,7 +105,7 @@ TEST_CASE("move generation - white in check", "[movegen]")
     std::string fen_record;
     board* b;
     generator* g;
-    SECTION("blocking moves")
+    SECTION("blocking moves, sparse position")
     {
         fen_record = "4k3/8/8/8/6b1/8/PPP2PPP/1N1K1BN1 w - - 0 1";
         b = new board(fen_record);
@@ -113,13 +113,58 @@ TEST_CASE("move generation - white in check", "[movegen]")
 
         auto lmoves = g->get_legal_moves();
         REQUIRE(lmoves.size() == 7);
-        for (const move& m : lmoves)
-        {
-            std::cout << m << std::endl;
-        }
 
         delete b;
         delete g;
+    }
+
+    SECTION("blocking moves, dense (opening) position", "[movegen]")
+    {
+        fen_record = "rnbqk1nr/pp3ppp/8/3p4/1b1N4/8/PPP1BPPP/RNBQK2R w KQkq - 2 7";
+
+        b = new board(fen_record);
+        g = new generator(*b);
+
+        auto lmoves = g->get_legal_moves();
+        REQUIRE(lmoves.size() == 6);
+
+        delete b;
+        delete g;
+    }
+
+    SECTION ("capturing moves", "[movegen]")
+    {
+        fen_record = "5k2/8/8/7B/1R4b1/4N3/PPP3PP/3K4 w - - 0 1";
+        b = new board(fen_record);
+        g = new generator(*b);
+
+        auto lmoves = g->get_legal_moves();
+
+        REQUIRE(lmoves.size() == 6);
+
+        delete b;
+        delete g;
+    }
+
+    SECTION("all moves", "[movegen]")
+    {
+        fen_record = "1r1qk2r/1bpp1ppp/p1n2n2/1p2p1B1/1b2P3/PB1P1N2/1PP2PPP/RN1QK2R w KQk e3 1 1";
+        b = new board(fen_record);
+        g = new generator(*b);
+
+        auto lmoves = g->get_legal_moves();
+
+        REQUIRE(lmoves.size() == 9);
+
+        for (const move& m : lmoves)
+        {
+            std::cout << m << " ";
+        }
+        std::cout << std::endl;
+
+        delete b;
+        delete g;
+
     }
 
 }
