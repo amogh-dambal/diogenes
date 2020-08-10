@@ -160,6 +160,26 @@ TEST_CASE("move generation - white in check", "[movegen]")
 
         delete b;
         delete g;
+    }
 
+    SECTION("all moves, random position", "[movegen]")
+    {
+        std::cout << "================================================\n";
+        fen_record = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+        b = new board(fen_record);
+        g = new generator(*b);
+
+        auto lmoves = g->get_legal_moves();
+
+        for (const move& m : lmoves)
+        {
+            std::cout << m << " ";
+        }
+        std::cout << std::endl;
+
+        REQUIRE(lmoves.size() == 6);
+
+        delete b;
+        delete g;
     }
 }

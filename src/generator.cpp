@@ -183,9 +183,12 @@ void generator::generate_white_pawn_moves(const U64 w_pawns, const U64 capture, 
     std::vector<int> target_squares;
     std::vector<int> attack_squares;
 
+    const U64 empty_squares = b.get_empty_squares();
+
     // white pawn single push moves
     flags = Move::QUIET_FLAG;
-    targets = generate_white_pawn_push_targets(w_pawns, push, true);
+    targets = generate_white_pawn_push_targets(w_pawns, empty_squares, true);
+    targets &= push;
     target_squares = bitboard::serialize(targets);
     for (int tgt_sq : target_squares)
     {
@@ -208,7 +211,8 @@ void generator::generate_white_pawn_moves(const U64 w_pawns, const U64 capture, 
 
     // white pawn double push moves
     flags = Move::DOUBLE_PUSH_FLAG;
-    targets = generate_white_pawn_push_targets(w_pawns, push, false);
+    targets = generate_white_pawn_push_targets(w_pawns, empty_squares, false);
+    targets &= push;
 
     target_squares = bitboard::serialize(targets);
     for (int tgt_sq : target_squares)
@@ -286,10 +290,12 @@ void generator::generate_black_pawn_moves(const U64 pawns, const U64 capture, co
     U64 attacks;
     std::vector<int> target_squares;
     std::vector<int> attack_squares;
+    const U64 empty_squares = b.get_empty_squares();
 
     // black pawn single push moves
     flags = Move::QUIET_FLAG;
-    targets = generate_black_pawn_push_targets(pawns, push, true);
+    targets = generate_black_pawn_push_targets(pawns, empty_squares, true);
+    targets &= push;
     target_squares = bitboard::serialize(targets);
     for (int tsq : target_squares)
     {
@@ -310,7 +316,8 @@ void generator::generate_black_pawn_moves(const U64 pawns, const U64 capture, co
     }
     // black pawn double push moves
     flags = Move::DOUBLE_PUSH_FLAG;
-    targets = generate_black_pawn_push_targets(pawns, push, false);
+    targets = generate_black_pawn_push_targets(pawns, empty_squares, false);
+    targets &= push;
     target_squares = bitboard::serialize(targets);
     for (int tsq : target_squares)
     {
