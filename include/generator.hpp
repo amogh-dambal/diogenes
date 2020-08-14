@@ -33,6 +33,12 @@ public:
     const board& pos() const;
     movelist get_legal_moves();
 
+    /* functions for testing only */
+    std::vector<U64> _TEST_pin_rays()
+    {
+        return get_pin_rays();
+    }
+
 private:
     const board& b;
     movelist ml;
