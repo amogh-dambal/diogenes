@@ -136,7 +136,7 @@ void generator::generate_legal_moves()
 
     /* pins */
     U64 pinned_pieces = 0;
-    bool is_pin = generate_legal_pinned_moves(king, blockers_no_xray, pinned_pieces);
+    bool is_pin = generate_legal_pinned_moves(king, capture_mask, push_mask, pinned_pieces);
 
     // part 4 - other moves
     // filter out pinned pieces from bitboard of moves and generate moves normally
