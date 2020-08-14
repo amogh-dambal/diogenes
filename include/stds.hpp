@@ -136,9 +136,9 @@ namespace Board {
         const U8 SIDE_TO_MOVE_SHIFT         = 12ULL;
         const U8 CAPTURE_TYPE_SHIFT         = 13ULL;
 
-        const U16 EP_TARGET_SQUARE_MASK     = 0x7fULL;
-        const U16 CASTLE_MASK               = 0x3f80;
-        const U16 GAME_OVER_MASK            = 0x800ULL;
+        const U16 EP_TARGET_SQUARE_MASK     = 0x007fULL;
+        const U16 CASTLE_MASK               = 0x0780ULL;
+        const U16 GAME_OVER_MASK            = 0x0800ULL;
         const U16 SIDE_TO_MOVE_MASK         = 0x1000ULL;
     }
 }
