@@ -596,25 +596,33 @@ void generator::generate_black_castle_moves(const int ksq, const U64 danger_squa
     }
 }
 
-U64 generator::get_checkers(const U64 w_king, const U64 blockers)
+U64 generator::get_checkers(const U64 king, const U64 blockers)
 {
-    const auto ksq = (Board::Square) bitboard::bitscan_forward(w_king);
+    const auto ksq = (Board::Square) bitboard::bitscan_forward(king);
     U64 checkers = 0;
     U64 piece_attack;
 
-    piece_attack = generate_black_pawn_attacks(w_king, b.get_pawns(inactive));
+    const U64 pawns = b.get_pawns(inactive);
+    if (inactive == Color::WHITE)
+    {
+        piece_attack = generate_black_pawn_attacks(king, pawns);
+    }
+    else
+    {
+        piece_attack = generate_white_pawn_attacks(king, pawns);
+    }
     checkers |= piece_attack;
 
     piece_attack = b.get_knight_targets(ksq) & b.get_knights(inactive);
     checkers |= piece_attack;
 
-    piece_attack = generate_bishop_attacks(w_king, blockers) & b.get_bishops(inactive);
+    piece_attack = generate_bishop_attacks(king, blockers) & b.get_bishops(inactive);
     checkers |= piece_attack;
 
-    piece_attack = generate_rook_attacks(w_king, blockers) & b.get_rooks(inactive);
+    piece_attack = generate_rook_attacks(king, blockers) & b.get_rooks(inactive);
     checkers |= piece_attack;
 
-    piece_attack = generate_queen_attacks(w_king, blockers) & b.get_rooks(inactive);
+    piece_attack = generate_queen_attacks(king, blockers) & b.get_queens(inactive);
     checkers |= piece_attack;
 
     return checkers;
