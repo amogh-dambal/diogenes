@@ -54,7 +54,8 @@ private:
     // helper functions
     U64 get_king_danger_squares(U64 blockers);
     U64 get_checkers(U64 w_king, U64 blockers);
-    bool generate_legal_pinned_moves(U64 king, U64 blockers, U64& pinned_pieces);
+    bool generate_legal_pinned_moves(U64 king, U64 capture, U64 push, U64& pinned_pieces);
+    bool is_direction_diagonal(Board::Direction dir);
     std::vector<U64> get_pin_rays();
     Move::PieceEncoding get_pinned_piece(U64 pinned_piece_bb);
     U64 calculate_push_mask(U64 checkers, U64 w_king);
