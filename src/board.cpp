@@ -507,12 +507,14 @@ void board::unmake(const move& m)
     auto inactive = static_cast<Color::Value>(!side_to_move_);
 
     if (m.is_capture())
+    if (m.is_promotion())
     {
         U8 capture = (made_move_game_state & 0xe000ULL) >> 13ULL;
 
         bb_move |= (1ULL << from) | (1ULL << to);
         U64 replacing_bb = (1ULL << to);
         switch (capture)
+        if (m.is_capture())
         {
             // pawn was captured
             case 0x1:
@@ -534,6 +536,31 @@ void board::unmake(const move& m)
             case 0x5:
                 queens[inactive] |= replacing_bb;
                 break;
+            // replacing captured piece
+            U8 capture = (made_move_game_state & 0xe000ULL) >> 13ULL;
+
+            U64 replacing_bb = (1ULL << to);
+            switch (capture)
+            {
+                // knight was captured
+                case 0x2:
+                    knights[inactive] |= replacing_bb;
+                    break;
+                    // bishop was captured
+                case 0x3:
+                    bishops[inactive] |= replacing_bb;
+                    break;
+                    // rook was captured
+                case 0x4:
+                    rooks[inactive] |= replacing_bb;
+                    break;
+                    // queen was captured
+                case 0x5:
+                    queens[inactive] |= replacing_bb;
+                    break;
+                default:
+                    break;
+            }
         }
         // replace capturing piece
         update_bitboards(m, bb_move);
@@ -543,6 +570,9 @@ void board::unmake(const move& m)
         bb_move |= (1ULL << from) | (1ULL << to);
         pawns[active] ^= bb_move;
 
+        // replace pawn back to original square
+        pawns[active] |= (1ULL << from);
+        // remove generated piece
         U64 promotion_replace_bb = (1ULL << to);
         switch (m.promoted_piece())
         {
@@ -592,6 +622,51 @@ void board::unmake(const move& m)
         rooks[active] ^= castle_bb;
     }
     // quiet moves
+    else if (m.is_capture())
+    {
+        if (m.is_ep())
+        {
+            // replace captured pawn
+            int ep_offset = (active == Color::WHITE) ? -8 : 8;
+            U64 replacing_bb = (1ULL << (to + ep_offset));
+            pawns[inactive] |= replacing_bb;
+        }
+        else
+        {
+            // replacing captured piece
+            U8 capture = (made_move_game_state & 0xe000ULL) >> 13ULL;
+
+            U64 replacing_bb = (1ULL << to);
+            switch (capture)
+            {
+                // pawn was captured
+                case 0x1:
+                    pawns[inactive] |= replacing_bb;
+                    break;
+                    // knight was captured
+                case 0x2:
+                    knights[inactive] |= replacing_bb;
+                    break;
+                    // bishop was captured
+                case 0x3:
+                    bishops[inactive] |= replacing_bb;
+                    break;
+                    // rook was captured
+                case 0x4:
+                    rooks[inactive] |= replacing_bb;
+                    break;
+                    // queen was captured
+                case 0x5:
+                    queens[inactive] |= replacing_bb;
+                    break;
+            }
+
+        }
+        // replace capturing piece
+        bb_move |= (1ULL << from) | (1ULL << to);
+        update_bitboards(m, bb_move);
+    }
+    // quiet move
     else
     {
         bb_move |= (1ULL << from) | (1ULL << to);
