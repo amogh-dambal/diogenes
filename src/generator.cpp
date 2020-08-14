@@ -81,6 +81,10 @@ void generator::run(Move::GeneratorStatus status)
     }
     else
     {
+        // TODO: fix duplication bug
+        //  - have to generate moves for rooks
+        //  - and queens individually
+        //  - shouldn't be too much extra overhead
         generate_legal_moves();
     }
 }
@@ -105,7 +109,6 @@ void generator::generate_legal_moves()
     const U64 king = b.get_kings(active);
     // x-ray the king when calculating slider attacks
     const U64 blockers = b.get_pieces(Color::BOTH) ^ king;
-    const U64 blockers_no_xray = blockers ^ king;
 
     // generate legal king moves
     const U64 king_danger_squares = get_king_danger_squares(blockers);
@@ -148,6 +151,7 @@ void generator::generate_legal_moves()
     }
 
     const U64 move_to = capture_mask | push_mask;
+
     const U64 pawns = b.get_pawns(active) & pieces;
     const U64 bishops = b.get_bishops(active) & pieces;
     const U64 knights = b.get_knights(active) & pieces;
@@ -156,6 +160,7 @@ void generator::generate_legal_moves()
 
     generate_pawn_moves(pawns, capture_mask, push_mask);
     generate_knight_moves(knights, move_to);
+    generate_bishop_moves(bishops, move_to);
     generate_rook_moves(rooks, move_to);
     generate_queen_moves(queens, move_to);
 }
