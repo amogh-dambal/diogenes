@@ -408,28 +408,27 @@ void generator::generate_knight_moves(const U64 knights, const U64 open_squares)
 void generator::generate_bishop_moves(const U64 bishops, const U64 open_squares)
 {
     const U64 bishop_pos = bishops;
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_bishops(active);
+    const U64 blockers = b.get_pieces(Color::BOTH);
+
+    // only generate moves if there are bishops on the board
     if (bitboard::pop_count(bishop_pos) > 0)
     {
-        U64 bishop_attacks = generate_bishop_attacks(bishop_pos, blockers);
-        bishop_attacks &= open_squares;
-
-        std::vector<int> bishop_pos_squares = bitboard::serialize(bishop_pos);
-        std::vector<int> bishop_attack_squares = bitboard::serialize(bishop_attacks);
-
-        U64 possible_squares;
-        U64 flags;
-        Board::Square sq;
-        for (int bsq : bishop_pos_squares)
+        U64 bishop_attacks;
+        std::vector<int> bishop_squares = bitboard::serialize(bishop_pos);
+        for (int bs : bishop_squares)
         {
-            sq = (Board::Square) bsq;
-            possible_squares = bishop_attacks & b.get_bishop_targets(sq);
-            for (int to : bitboard::serialize(possible_squares))
-            {
-                flags = ((1ULL << to) & b.get_pieces(inactive)) ?
+            const U64 bishop = 1ULL << bs;
+            bishop_attacks = generate_bishop_attacks(bishop, blockers ^ bishop);
+            bishop_attacks &= open_squares;
+            bishop_attacks &= b.get_bishop_targets(static_cast<Board::Square>(bs));
+
+            std::vector<int> bishop_attack_squares = bitboard::serialize(bishop_attacks);
+            U64 flags;
+            for (int to : bishop_attack_squares){
+                flags = (1ULL << to) & b.get_pieces(inactive) ?
                         Move::CAPTURE_FLAG :
                         Move::QUIET_FLAG;
-                ml.push_back(move(bsq, to, Move::PieceEncoding::BISHOP, flags));
+                ml.push_back(move(bs, to, Move::PieceEncoding::BISHOP, flags));
             }
         }
     }
@@ -438,27 +437,27 @@ void generator::generate_bishop_moves(const U64 bishops, const U64 open_squares)
 void generator::generate_rook_moves(const U64 rooks, const U64 open_squares)
 {
     const U64 rook_pos = rooks;
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_rooks(active);
+    const U64 blockers = b.get_pieces(Color::BOTH);
     // only generate moves if there are rooks on the board
     if (bitboard::pop_count(rook_pos) > 0)
     {
-        U64 rook_attacks = generate_rook_attacks(rook_pos, blockers);
-        rook_attacks &= open_squares;
-        std::vector<int> rook_pos_squares = bitboard::serialize(rook_pos);
-        std::vector<int> rook_attack_squares = bitboard::serialize(rook_attacks);
-
-        U64 possible_squares, flags;
-        Board::Square sq;
-        for (int rsq : rook_pos_squares)
+        U64 rook_attacks;
+        std::vector<int> rook_squares = bitboard::serialize(rook_pos);
+        for (int rs : rook_squares)
         {
-            sq = (Board::Square) rsq;
-            possible_squares = rook_attacks & b.get_rook_targets(sq);
-            for (int to : bitboard::serialize(possible_squares))
+            const U64 rook = 1ULL << rs;
+            rook_attacks = generate_rook_attacks(rook, blockers ^ rook);
+            rook_attacks &= open_squares;
+            rook_attacks &= b.get_rook_targets(static_cast<Board::Square>(rs));
+            std::vector<int> rook_attack_squares = bitboard::serialize(rook_attacks);
+
+            U64 flags;
+            for (int to : rook_attack_squares)
             {
                 flags = (1ULL << to) & b.get_pieces(inactive) ?
                         Move::CAPTURE_FLAG :
                         Move::QUIET_FLAG;
-                ml.push_back(move(rsq, to, Move::PieceEncoding::ROOK, flags));
+                ml.push_back(move(rs, to, Move::PieceEncoding::ROOK, flags));
             }
         }
     }
@@ -467,27 +466,27 @@ void generator::generate_rook_moves(const U64 rooks, const U64 open_squares)
 void generator::generate_queen_moves(const U64 queens, const U64 open_squares)
 {
     const U64 queen_pos = queens;
-    const U64 blockers = b.get_pieces(Color::BOTH) ^ b.get_queens(active);
+    const U64 blockers = b.get_pieces(Color::BOTH);
     // only generate moves if there are white queens on the board
     if (bitboard::pop_count(queen_pos) > 0)
     {
-        U64 queen_attacks = generate_queen_attacks(queen_pos, blockers);
-        queen_attacks &= open_squares;
-        std::vector<int> queen_pos_squares = bitboard::serialize(queen_pos);
-        std::vector<int> queen_attack_squares = bitboard::serialize(queen_attacks);
-
-        U64 possible_squares, flags;
-        Board::Square sq;
-        for (int qsq : queen_pos_squares)
+        U64 queen_attacks;
+        std::vector<int> queen_squares = bitboard::serialize(queen_pos);
+        for (int qs : queen_squares)
         {
-            sq = (Board::Square) qsq;
-            possible_squares = queen_attacks & b.get_queen_targets(sq);
-            for (int to : bitboard::serialize(possible_squares))
+            const U64 queen = 1ULL << qs;
+            queen_attacks = generate_queen_attacks(queen, blockers ^ queen);
+            queen_attacks &= open_squares;
+            queen_attacks &= b.get_queen_targets(static_cast<Board::Square>(qs));
+            std::vector<int> queen_attack_squares = bitboard::serialize(queen_attacks);
+
+            U64 flags;
+            for (int to : queen_attack_squares)
             {
-                flags = ((1ULL << to) & b.get_pieces(inactive)) ?
+                flags = (1ULL << to) & b.get_pieces(inactive) ?
                         Move::CAPTURE_FLAG :
                         Move::QUIET_FLAG;
-                ml.push_back(move(qsq, to, Move::PieceEncoding::QUEEN, flags));
+                ml.push_back(move(qs, to, Move::PieceEncoding::QUEEN, flags));
             }
         }
     }
