@@ -115,13 +115,17 @@ U64 generate_bishop_attacks(const U64 bishops, const U64 blockers)
     std::vector<int> bishop_sqs = bitboard::serialize(bishops);
 
     U64 bpos;
+    U64 attack;
     for (int bsq : bishop_sqs)
     {
+        attack = 0;
         bpos = 1ULL << bsq;
-        attacks |= bitboard::occ_fill_northeast(bpos, blockers);
-        attacks |= bitboard::occ_fill_northwest(bpos, blockers);
-        attacks |= bitboard::occ_fill_southeast(bpos, blockers);
-        attacks |= bitboard::occ_fill_southwest(bpos, blockers);
+        attack |= bitboard::occ_fill_northeast(bpos, blockers);
+        attack |= bitboard::occ_fill_northwest(bpos, blockers);
+        attack |= bitboard::occ_fill_southeast(bpos, blockers);
+        attack |= bitboard::occ_fill_southwest(bpos, blockers);
+        attack ^= bpos;
+        attacks |= attack;
     }
     // have to remember to XOR out the white pieces from the returned attacks
     // because they are treated equal to black blockers
@@ -141,13 +145,17 @@ U64 generate_rook_attacks(const U64 rooks, const U64 blockers)
     std::vector<int> rook_sqs = bitboard::serialize(rooks);
 
     U64 rpos;
+    U64 attack;
     for (int rsq : rook_sqs)
     {
+        attack = 0;
         rpos = 1ULL << rsq;
-        attacks |= bitboard::occ_fill_north(rpos, blockers);
-        attacks |= bitboard::occ_fill_south(rpos, blockers);
-        attacks |= bitboard::occ_fill_east(rpos, blockers);
-        attacks |= bitboard::occ_fill_west(rpos, blockers);
+        attack |= bitboard::occ_fill_south(rpos, blockers);
+        attack |= bitboard::occ_fill_north(rpos, blockers);
+        attack |= bitboard::occ_fill_east(rpos, blockers);
+        attack |= bitboard::occ_fill_west(rpos, blockers);
+        attack ^= rpos;
+        attacks |= attack;
     }
     return attacks;
 }
@@ -165,17 +173,21 @@ U64 generate_queen_attacks(const U64 queens, const U64 blockers)
     std::vector<int> queen_sqs = bitboard::serialize(queens);
 
     U64 qpos;
+    U64 attack;
     for (int qsq : queen_sqs)
     {
+        attack = 0;
         qpos = 1ULL << qsq;
-        attacks |= bitboard::occ_fill_north(qpos, blockers);
-        attacks |= bitboard::occ_fill_south(qpos, blockers);
-        attacks |= bitboard::occ_fill_east(qpos, blockers);
-        attacks |= bitboard::occ_fill_west(qpos, blockers);
-        attacks |= bitboard::occ_fill_northeast(qpos, blockers);
-        attacks |= bitboard::occ_fill_northwest(qpos, blockers);
-        attacks |= bitboard::occ_fill_southeast(qpos, blockers);
-        attacks |= bitboard::occ_fill_southwest(qpos, blockers);
+        attack |= bitboard::occ_fill_north(qpos, blockers);
+        attack |= bitboard::occ_fill_south(qpos, blockers);
+        attack |= bitboard::occ_fill_east(qpos, blockers);
+        attack |= bitboard::occ_fill_west(qpos, blockers);
+        attack |= bitboard::occ_fill_northeast(qpos, blockers);
+        attack |= bitboard::occ_fill_northwest(qpos, blockers);
+        attack |= bitboard::occ_fill_southeast(qpos, blockers);
+        attack |= bitboard::occ_fill_southwest(qpos, blockers);
+        attack ^= qpos;
+        attacks |= attack;
     }
     return attacks;
 }
