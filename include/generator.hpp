@@ -26,7 +26,6 @@ class generator
 {
 public:
     generator(const board& b);
-    generator(const board&&) = delete; // prevents rvalue binding
 
     movelist get_moves();
     Color::Value side_to_move() const;
