@@ -176,10 +176,9 @@ game_over_(false)
 bool board::operator==(const board& rhs) const
 {
     return
-    this->ply_ == rhs.ply_ &&
     this->can_black_castle_qside_ == rhs.can_black_castle_qside_ &&
     this->can_black_castle_kside_ == rhs.can_black_castle_kside_ &&
-    this->can_white_castle_kside_ == rhs.can_black_castle_kside_ &&
+    this->can_white_castle_kside_ == rhs.can_white_castle_kside_ &&
     this->can_white_castle_qside_ == rhs.can_white_castle_qside_ &&
 
     this->pawns[Color::WHITE] == rhs.pawns[Color::WHITE] &&
@@ -278,40 +277,11 @@ void board::make(const move& m)
     auto inactive = static_cast<Color::Value>(!side_to_move_);
 
     U8 capture_type = 0x0;
-    if (m.is_capture())
     if (m.is_promotion())
     {
-        U64 capture_loc = 1ULL << to;
-        U64 capture_mask = ~(capture_loc);
-
-        // get type of piece captured
-        // and remove it
-        if (capture_loc & pawns[inactive])
-        {
-            capture_type = 0x1;
-            pawns[inactive] &= capture_mask;
-        }
-        else if (capture_loc & knights[inactive])
-        {
-            capture_type = 0x2;
-            knights[inactive] &= capture_mask;
-        }
-        else if (capture_loc & bishops[inactive])
         // remove captured piece if applicable
         if (m.is_capture())
         {
-            capture_type = 0x3;
-            bishops[inactive] &= capture_mask;
-        }
-        else if (capture_loc & rooks[inactive])
-        {
-            capture_type = 0x4;
-            rooks[inactive] &= capture_mask;
-        }
-        else if (capture_loc & queens[inactive])
-        {
-            capture_type = 0x5;
-            queens[inactive] &= capture_mask;
             U64 capture_loc = 1ULL << to;
             U64 capture_mask = ~(capture_loc);
 
@@ -339,12 +309,6 @@ void board::make(const move& m)
             }
         }
 
-        // update moved piece
-        bitboard_move |= (1ULL << from) | (1ULL << to);
-        update_bitboards(m, bitboard_move);
-    }
-    else if (m.is_promotion())
-    {
         // remove pawn from bitboards
         bitboard_move = 1ULL << from;
         pawns[active] ^=  bitboard_move;
@@ -371,7 +335,6 @@ void board::make(const move& m)
     }
     else if (m.is_castle())
     {
-        unsigned int rook_sq = (active == Color::WHITE) ? Board::Square::a1 : Board::Square::a8;
         // update castle game state
         if (active == Color::WHITE)
         {
@@ -442,7 +405,6 @@ void board::make(const move& m)
                 queens[inactive] &= capture_mask;
             }
         }
-        kings[active] <<= 2ULL;
 
         // update moved piece
         bitboard_move |= (1ULL << from) | (1ULL << to);
@@ -497,7 +459,7 @@ void board::unmake(const move& m)
     can_black_castle_qside_ = castling & Board::GameStateEncoding::BQ_MASK;
     can_black_castle_kside_ = castling & Board::GameStateEncoding::BK_MASK;
     game_over_ = prev_game_state & Board::GameStateEncoding::GAME_OVER_MASK;
-    side_to_move_ = static_cast<Color::Value>(prev_game_state & Board::GameStateEncoding::SIDE_TO_MOVE_MASK);
+    side_to_move_ = static_cast<Color::Value>((prev_game_state & Board::GameStateEncoding::SIDE_TO_MOVE_MASK) >> Board::GameStateEncoding::SIDE_TO_MOVE_SHIFT);
 
     U64 bb_move = 0;
     int from = m.from();
@@ -506,36 +468,10 @@ void board::unmake(const move& m)
     auto active = side_to_move_;
     auto inactive = static_cast<Color::Value>(!side_to_move_);
 
-    if (m.is_capture())
     if (m.is_promotion())
     {
-        U8 capture = (made_move_game_state & 0xe000ULL) >> 13ULL;
-
-        bb_move |= (1ULL << from) | (1ULL << to);
-        U64 replacing_bb = (1ULL << to);
-        switch (capture)
         if (m.is_capture())
         {
-            // pawn was captured
-            case 0x1:
-                pawns[inactive] |= replacing_bb;
-                break;
-            // knight was captured
-            case 0x2:
-                knights[inactive] |= replacing_bb;
-                break;
-            // bishop was captured
-            case 0x3:
-                bishops[inactive] |= replacing_bb;
-                break;
-            // rook was captured
-            case 0x4:
-                rooks[inactive] |= replacing_bb;
-                break;
-            // queen was captured
-            case 0x5:
-                queens[inactive] |= replacing_bb;
-                break;
             // replacing captured piece
             U8 capture = (made_move_game_state & 0xe000ULL) >> 13ULL;
 
@@ -614,7 +550,6 @@ void board::unmake(const move& m)
         }
         rooks[active] ^= castle_bb;
     }
-    // quiet moves
     else if (m.is_capture())
     {
         if (m.is_ep())
