@@ -99,68 +99,55 @@ TEST_CASE("move generation - pawn promotion")
 
 }
 
-/* LEGAL MOVE GENERATION */
-TEST_CASE("move generation - white in check", "[movegen]")
+
+TEST_CASE("random position - WHITE to move", "[movegen]")
 {
-    std::string fen_record;
-    board* b;
-    generator* g;
-    SECTION("blocking moves, sparse position")
+    SECTION("FEN: r3k2r/ppp2Npp/1b5n/4p2b/2B1P2q/BQP2P2/P5PP/RN5K w kq - 0 1")
     {
-        fen_record = "4k3/8/8/8/6b1/8/PPP2PPP/1N1K1BN1 w - - 0 1";
-        b = new board(fen_record);
-        g = new generator(*b);
+        std::string fen = "r3k2r/ppp2Npp/1b5n/4p2b/2B1P2q/BQP2P2/P5PP/RN5K w kq - 0 1";
+        board b(fen);
+        generator g(b);
 
-        auto lmoves = g->get_legal_moves();
+        auto moves = g.get_legal_moves();
 
-        REQUIRE(lmoves.size() == 7);
+        REQUIRE(moves.size() == 32);
+    }
+}
 
-        delete b;
-        delete g;
+TEST_CASE("random position - BLACK to move", "[movegen]")
+{
+    SECTION("FEN: r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1")
+    {
+        std::string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1";
+        board b(fen);
+        generator g(b);
+
+        auto moves = g.get_legal_moves();
+
+        REQUIRE(moves.size() == 44);
     }
 
-
-    SECTION("blocking moves, dense (opening) position", "[movegen]")
+    SECTION("FEN: r3k2r/p1pNqpb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")
     {
-        fen_record = "rnbqk1nr/pp3ppp/8/3p4/1b1N4/8/PPP1BPPP/RNBQK2R w KQkq - 2 7";
+        std::string fen = "r3k2r/p1pNqpb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
+        board b(fen);
+        generator g(b);
 
-        b = new board(fen_record);
-        g = new generator(*b);
+        auto moves = g.get_legal_moves();
 
-        auto lmoves = g->get_legal_moves();
-        REQUIRE(lmoves.size() == 6);
-
-        delete b;
-        delete g;
+        REQUIRE(moves.size() == 45);
     }
 
-    SECTION ("capturing moves", "[movegen]")
+    SECTION("FEN: r3k2r/p1ppqpb1/bn2pnp1/3PN2Q/1p2P3/2N4p/PPPBBPPP/R3K2R b KQkq - 1 1")
     {
-        fen_record = "5k2/8/8/7B/1R4b1/4N3/PPP3PP/3K4 w - - 0 1";
-        b = new board(fen_record);
-        g = new generator(*b);
+        std::string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN2Q/1p2P3/2N4p/PPPBBPPP/R3K2R b KQkq - 1 1";
+        board b(fen);
+        generator g(b);
 
-        auto lmoves = g->get_legal_moves();
-
-        REQUIRE(lmoves.size() == 6);
-
-        delete b;
-        delete g;
+        auto moves = g.get_legal_moves();
+        REQUIRE(moves.size() == 43);
     }
-
-    SECTION("all moves", "[movegen]")
-    {
-        fen_record = "1r1qk2r/1bpp1ppp/p1n2n2/1p2p1B1/1b2P3/PB1P1N2/1PP2PPP/RN1QK2R w KQk e3 1 1";
-        b = new board(fen_record);
-        g = new generator(*b);
-
-        auto lmoves = g->get_legal_moves();
-
-        REQUIRE(lmoves.size() == 9);
-
-        delete b;
-        delete g;
-    }
+}
 
     SECTION("all moves, random position", "[movegen]")
     {
