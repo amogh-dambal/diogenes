@@ -651,33 +651,38 @@ U64 generator::get_king_danger_squares(const U64 blockers)
     return w_king_danger_squares;
 }
 
-bool generator::generate_legal_pinned_moves(const U64 king, const U64 blockers, U64& pinned_pieces)
+bool generator::generate_legal_pinned_moves(const U64 king, const U64 capture, const U64 push, U64& pinned_pieces)
 {
     /* find all pinned pieces
      * 1. calculate moves from opp. sliding pieces
      * 2. sliding piece moves from king
      * 3. overlap
      */
-
     // intersection of "pinned squares" and "white pieces" : pinned white pieces
     std::vector<U64> pin_rays = get_pin_rays();
 
     // if there are any pinned pieces
     Move::PieceEncoding pinned_piece_type;
     U64 pieces = b.get_pieces(active);
-    U64 open_squares;
+    U64 open_squares, quiet_squares, capture_squares;
     U64 pinned_piece;
     U64 pps = 0; // keep track of pinned pieces bitboard to update reference parameter
 
-    bool is_pin = pin_rays.size() > 0;
+    bool is_pin = !pin_rays.empty();
 
     if (is_pin)
     {
         for (const U64 ray : pin_rays)
         {
-            // remove white pieces from ray and
+            // remove active pieces from ray and
             // get squares available to move to
             open_squares = ray & (ray ^ b.get_pieces(active));
+            quiet_squares = open_squares & b.get_empty_squares();
+            capture_squares = open_squares & b.get_pieces(inactive);
+
+            open_squares &= (capture | push);
+            quiet_squares &= push;
+            capture_squares &= capture;
 
             // get pinned piece
             pinned_piece = ray & (pieces ^ king);
@@ -701,14 +706,7 @@ bool generator::generate_legal_pinned_moves(const U64 king, const U64 blockers, 
                         case Move::PieceEncoding::PAWN:
                             // since ray is diagonal
                             // pawn push moves are not allowed
-                            if (active == Color::WHITE)
-                            {
-                                generate_white_pawn_moves(pinned_piece, open_squares, 0);
-                            }
-                            else
-                            {
-                                generate_black_pawn_moves(pinned_piece, open_squares, 0);
-                            }
+                            generate_pawn_moves(pinned_piece, capture_squares, 0, true);
                             break;
                         default:
                             break;
@@ -728,14 +726,7 @@ bool generator::generate_legal_pinned_moves(const U64 king, const U64 blockers, 
                         case Move::PieceEncoding::PAWN:
                             // since ray is not diagonal
                             // pawn captures are not allowed
-                            if (active == Color::WHITE)
-                            {
-                                generate_white_pawn_moves(pinned_piece, 0, open_squares);
-                            }
-                            else
-                            {
-                                generate_black_pawn_moves(pinned_piece, 0, open_squares);
-                            }
+                            generate_pawn_moves(pinned_piece, 0, quiet_squares, true);
                             break;
                         default:
                             break;
