@@ -158,220 +158,221 @@ void generator::generate_legal_moves()
     generate_knight_moves(knights, move_to);
     generate_rook_moves(rooks, move_to);
     generate_queen_moves(queens, move_to);
-
-    if (active == Color::WHITE)
-    {
-        generate_white_pawn_moves(pawns, capture_mask, push_mask);
-    }
-    else
-    {
-        generate_black_pawn_moves(pawns, capture_mask, push_mask);
-    }
 }
 
-void generator::generate_white_pawn_moves(const U64 w_pawns, const U64 capture, const U64 push)
+// TODO: rewrite pawn move generation entirely
+void generator::generate_pawn_moves(const U64 pawns, const U64 capture, const U64 push, bool pin)
 {
-    U64 flags;
-    U64 targets;
-    std::vector<int> target_squares;
-    std::vector<int> attack_squares;
+    generate_pawn_pushes(pawns, push);
 
-    const U64 empty_squares = b.get_empty_squares();
+    // attacks/captures
+    const U64 attacks = (active == Color::WHITE) ?
+            generate_white_pawn_attacks(pawns, capture) :
+            generate_black_pawn_attacks(pawns, capture);
+    std::vector<int> attacked_squares = bitboard::serialize(attacks);
 
-    // white pawn single push moves
-    flags = Move::QUIET_FLAG;
-    targets = generate_white_pawn_push_targets(w_pawns, empty_squares, true);
-    targets &= push;
-    target_squares = bitboard::serialize(targets);
-    for (int tgt_sq : target_squares)
+    bool is_promotion;
+    for (int to : attacked_squares)
     {
-        // promotion
-        if (tgt_sq > 55)
+        is_promotion = (active == Color::WHITE) ?
+                       (to > 55) : (to < 8);
+        if (is_promotion)
         {
-            flags = Move::PROMOTION_FLAG;
-            for (int i = 0; i < 4; i++)
-            {
-                ml.push_back(move(tgt_sq - 8, tgt_sq, Move::PieceEncoding::PAWN, flags++));
-            }
+            generate_pawn_promotion_captures(pawns, to);
         }
-        // quiet single pawn push
         else
         {
-            ml.push_back(move(tgt_sq - 8, tgt_sq, Move::PieceEncoding::PAWN, flags));
-        }
-
-    }
-
-    // white pawn double push moves
-    flags = Move::DOUBLE_PUSH_FLAG;
-    targets = generate_white_pawn_push_targets(w_pawns, empty_squares, false);
-    targets &= push;
-
-    target_squares = bitboard::serialize(targets);
-    for (int tgt_sq : target_squares)
-    {
-        ml.push_back(move(tgt_sq - 16, tgt_sq, Move::PieceEncoding::PAWN, flags));
-    }
-
-    // white pawn attacks
-    const U64 attackables = (b.get_pieces(Color::BLACK) ^ b.get_kings(Color::BLACK)) & capture;
-    U64 w_pawn_attacks = generate_white_pawn_attacks(w_pawns, attackables);
-    attack_squares = bitboard::serialize(w_pawn_attacks);
-    flags = Move::CAPTURE_FLAG;
-    unsigned int from;
-    for (int asq : attack_squares)
-    {
-        // promotion capture
-        if (asq > 55)
-        {
-            flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
-            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SW)))
-            {
-                from = asq + Board::SW;
-                for (int i = 0; i < 4; i++)
-                {
-                    ml.push_back(move(from, asq, Move::PAWN, flags++));
-                }
-            }
-            flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
-            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SE)))
-            {
-                from = asq + Board::SE;
-                for (int i = 0; i < 4; i++)
-                {
-                    ml.push_back(move(from, asq, Move::PAWN, flags++));
-                }
-            }
-        }
-        // non-promotion captures
-        else
-        {
-            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SW)))
-            {
-                from = asq + Board::SW;
-                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
-            }
-            if (b.exists(Color::WHITE, Move::PAWN, (Board::Square)(asq + Board::SE)))
-            {
-                from = asq + Board::SE;
-                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
-            }
+            generate_pawn_captures(pawns, to);
         }
     }
 
-    // en passant moves, if applicable
-    flags = Move::EN_PASSANT_FLAG;
+    // en passant moves
+    auto ep_target = b.ep_target_square();
+    U64 ep_bb = 1ULL << static_cast<unsigned int>(ep_target);
     if (b.ep_target_square() != Board::Square::NONE)
     {
-        unsigned int ep_sq = b.ep_target_square();
-        U64 ep = 1ULL << ep_sq;
-        if (ep & w_pawn_attacks)
+        if (pin)
         {
-            U64 ep_attacks = (bitboard::southwest(ep) & Board::NOT_H_FILE) | (bitboard::southeast(ep) & Board::NOT_A_FILE);
-            for (int epasq : bitboard::serialize(ep_attacks))
+            if (ep_bb & capture)
             {
-                ml.push_back(move(epasq, ep_sq, Move::PieceEncoding::PAWN, flags));
+                generate_pawn_ep(pawns);
             }
+        }
+        else
+        {
+            generate_pawn_ep(pawns);
         }
     }
 }
 
-void generator::generate_black_pawn_moves(const U64 pawns, const U64 capture, const U64 push)
+void generator::generate_pawn_pushes(const U64 pawns, const U64 push)
+{
+    const U64 empty_squares = b.get_empty_squares();
+    const Move::PieceEncoding PAWN_MOVE = Move::PieceEncoding::PAWN;
+
+    U64 tgts;
+    std::vector<int> tgt_sqs;
+    int push_offset;
+    // single pushes
+    tgts = (active == Color::WHITE) ?
+           generate_white_pawn_push_targets(pawns, empty_squares) :
+           generate_black_pawn_push_targets(pawns, empty_squares);
+    push_offset = (active == Color::WHITE) ? -8 : 8;
+    tgts &= push;
+    tgt_sqs = bitboard::serialize(tgts);
+    bool is_promotion;
+    for (int to : tgt_sqs)
+    {
+        is_promotion = (active == Color::WHITE) ?
+                       (to > 55) : (to < 8);
+
+        if (is_promotion)
+        {
+            U64 flags = Move::PROMOTION_FLAG;
+            for (int i = 0; i < 4; ++i)
+            {
+                ml.push_back(move(to + push_offset, to, PAWN_MOVE, flags++));
+            }
+        }
+        else
+        {
+            ml.push_back(move(to + push_offset, to, PAWN_MOVE, Move::QUIET_FLAG));
+        }
+
+    }
+
+    // double pushes
+    tgts = (active == Color::WHITE) ?
+           generate_white_pawn_push_targets(pawns, empty_squares, false) :
+           generate_black_pawn_push_targets(pawns, empty_squares, false);
+    push_offset = (active == Color::WHITE) ? -16 : 16;
+    tgts &= push;
+    tgt_sqs = bitboard::serialize(tgts);
+    for (int to : tgt_sqs)
+    {
+        ml.push_back(move(to + push_offset, to, PAWN_MOVE, Move::DOUBLE_PUSH_FLAG));
+    }
+}
+
+void generator::generate_pawn_promotion_captures(const U64 pawns, const int attacked_square)
 {
     U64 flags;
-    U64 targets;
-    U64 attacks;
-    std::vector<int> target_squares;
-    std::vector<int> attack_squares;
-    const U64 empty_squares = b.get_empty_squares();
+    flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
 
-    // black pawn single push moves
-    flags = Move::QUIET_FLAG;
-    targets = generate_black_pawn_push_targets(pawns, empty_squares, true);
-    targets &= push;
-    target_squares = bitboard::serialize(targets);
-    for (int tsq : target_squares)
-    {
-        // promotions
-        if (tsq < 8)
-        {
-            flags = Move::PROMOTION_FLAG;
-            for (int i = 0; i < 4; i++)
-            {
-                ml.push_back(move(tsq + 8, tsq, Move::PAWN, flags++));
-            }
-        }
-        else
-        {
-            ml.push_back(move(tsq + 8, tsq, Move::PieceEncoding::PAWN, flags));
-        }
+    int left = (active == Color::WHITE) ? Board::SW : Board::NW;
+    int right = (active == Color::WHITE) ? Board::SE : Board::NE;
 
-    }
-    // black pawn double push moves
-    flags = Move::DOUBLE_PUSH_FLAG;
-    targets = generate_black_pawn_push_targets(pawns, empty_squares, false);
-    targets &= push;
-    target_squares = bitboard::serialize(targets);
-    for (int tsq : target_squares)
+    bool on_a_file = (attacked_square % 8 == 0);
+    bool on_h_file = (attacked_square % 8 == 7);
+
+    bool is_pawn_on_left = pawns & (1ULL << (attacked_square + left));
+    bool is_pawn_on_right = pawns & (1ULL << (attacked_square + right));
+
+    if (!on_a_file && is_pawn_on_left)
     {
-        ml.push_back(move(tsq + 16, tsq, Move::PieceEncoding::PAWN, flags));
-    }
-    // black pawn attacks
-    const U64 w_attackables = (b.get_pieces(Color::WHITE) ^ b.get_kings(Color::WHITE)) & capture;
-    flags = Move::CAPTURE_FLAG;
-    attacks = generate_black_pawn_attacks(pawns, w_attackables);
-    attack_squares = bitboard::serialize(attacks);
-    unsigned int from;
-    for (int asq : attack_squares)
-    {
-        if (asq < 8)
+        int from = attacked_square + left;
+        for (int i = 0; i < 4; i++)
         {
-            flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
-            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NW)))
-            {
-                from = asq + Board::Direction::NW;
-                for (int i = 0; i < 4; i++)
-                {
-                    ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags + i));
-                }
-            }
-            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NE)))
-            {
-                from = asq + Board::Direction::NE;
-                for (int i = 0; i < 4; i++)
-                {
-                    ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags + i));
-                }
-            }
-        }
-        else
-        {
-            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NW)))
-            {
-                from = asq + Board::Direction::NW;
-                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
-            }
-            if (b.exists(Color::BLACK, Move::PieceEncoding::PAWN, (Board::Square)(asq + Board::Direction::NE)))
-            {
-                from = asq + Board::Direction::NE;
-                ml.push_back(move(from, asq, Move::PieceEncoding::PAWN, flags));
-            }
+            ml.push_back(move(from, attacked_square, Move::PAWN, flags++));
         }
     }
 
-    // en passant moves, if applicable
-    flags = Move::EN_PASSANT_FLAG;
-    if (b.ep_target_square() != Board::Square::NONE)
+    flags = Move::PROMOTION_FLAG | Move::CAPTURE_FLAG;
+    if (!on_h_file && is_pawn_on_right)
     {
-        unsigned int ep_sq = b.ep_target_square();
-        U64 ep = 1ULL << ep_sq;
-        if (ep & attacks)
+        int from = attacked_square + right;
+        for (int i = 0; i < 4; i++)
         {
-            U64 ep_attacks = (bitboard::northwest(ep) & Board::NOT_H_FILE) | (bitboard::northeast(ep) & Board::NOT_A_FILE);
-            for (int epasq : bitboard::serialize(ep_attacks))
-            {
-                ml.push_back(move(epasq, ep_sq, Move::PieceEncoding::PAWN, flags));
-            }
+            ml.push_back(move(from, attacked_square, Move::PAWN, flags++));
+        }
+    }
+}
+
+void generator::generate_pawn_captures(const U64 pawns, const int attacked_square)
+{
+    const U64 flags = Move::CAPTURE_FLAG;
+
+    int left = (active == Color::WHITE) ? Board::SW : Board::NW;
+    int right = (active == Color::WHITE) ? Board::SE : Board::NE;
+
+    bool on_a_file = (attacked_square % 8 == 0);
+    bool on_h_file = (attacked_square % 8 == 7);
+
+    bool is_pawn_on_left = pawns & (1ULL << (attacked_square + left));
+    bool is_pawn_on_right = pawns & (1ULL << (attacked_square + right));
+    if (!on_a_file && is_pawn_on_left)
+    {
+        int from = attacked_square + left;
+        ml.push_back(move(from, attacked_square, Move::PAWN, flags));
+    }
+
+    if (!on_h_file && is_pawn_on_right)
+    {
+        int from = attacked_square + right;
+        ml.push_back(move(from, attacked_square, Move::PAWN, flags));
+    }
+}
+
+void generator::generate_pawn_ep(const U64 pawns)
+{
+    const U64 flags = Move::EN_PASSANT_FLAG;
+    int ep_sq = b.ep_target_square();
+    int left = (active == Color::WHITE) ? Board::SW : Board::NW;
+    int right = (active == Color::WHITE) ? Board::SE : Board::NE;
+    int from;
+
+    bool on_a_file = (ep_sq % 8 == 0);
+    bool on_h_file = (ep_sq % 8 == 7);
+
+    bool is_pawn_on_left = pawns & (1ULL << (ep_sq + left));
+    bool is_pawn_on_right = pawns & (1ULL << (ep_sq + right));
+
+    if (!on_a_file && is_pawn_on_left)
+    {
+        from = ep_sq + left;
+
+        // en passant capture leading to discovered check
+        U64 active_bb = 1ULL << from;
+        int ep_offset = (active == Color::WHITE) ? -8 : 8;
+        U64 inactive_bb = 1ULL << ((unsigned) (ep_sq + ep_offset));
+        U64 active_pawns = b.get_pawns(active) ^ active_bb;
+        U64 inactive_pawns = b.get_pawns(inactive) ^ inactive_bb;
+
+        U64 occupied_squares = b.get_occupied_squares();
+        occupied_squares ^= b.get_pawns(Color::BOTH);
+        occupied_squares |= (active_pawns | inactive_pawns);
+
+        U64 king = b.get_kings(active);
+        U64 k_attacks = bitboard::occ_fill_west(king, occupied_squares ^ king)
+                | bitboard::occ_fill_east(king, occupied_squares ^ king);
+
+        if (!(k_attacks & b.get_rooks(inactive) || k_attacks & b.get_queens(inactive)))
+        {
+            ml.push_back(move(from, ep_sq, Move::PieceEncoding::PAWN, flags));
+        }
+
+    }
+    if (!on_h_file && is_pawn_on_right)
+    {
+        from = ep_sq + right;
+        // en passant capture leading to discovered check
+        U64 active_bb = 1ULL << from;
+        int ep_offset = (active == Color::WHITE) ? -8 : 8;
+        U64 inactive_bb = 1ULL << ((unsigned) (ep_sq + ep_offset));
+        U64 active_pawns = b.get_pawns(active) ^ active_bb;
+        U64 inactive_pawns = b.get_pawns(inactive) ^ inactive_bb;
+
+        U64 occupied_squares = b.get_occupied_squares();
+        occupied_squares ^= b.get_pawns(Color::BOTH);
+        occupied_squares |= (active_pawns | inactive_pawns);
+
+        U64 king = b.get_kings(active);
+        U64 k_attacks = bitboard::occ_fill_west(king, occupied_squares ^ king)
+                        | bitboard::occ_fill_east(king, occupied_squares ^ king);
+
+        if (!(k_attacks & b.get_rooks(inactive) || k_attacks & b.get_queens(inactive)))
+        {
+            ml.push_back(move(from, ep_sq, Move::PieceEncoding::PAWN, flags));
         }
     }
 }
