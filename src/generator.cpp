@@ -622,9 +622,18 @@ U64 generator::get_checkers(const U64 w_king, const U64 blockers)
 
 U64 generator::get_king_danger_squares(const U64 blockers)
 {
-    const U64 attackables = b.get_empty_squares() | b.get_pieces(active);
+    const U64 attackables = Board::ALL_SQUARES;
     // get white king danger squares
-    const U64 pawn_attacks = generate_black_pawn_attacks(b.get_pawns(inactive), attackables);
+    U64 pawn_attacks;
+    if (active == Color::WHITE)
+    {
+        pawn_attacks = generate_black_pawn_attacks(b.get_pawns(inactive), attackables);
+    }
+    else
+    {
+        pawn_attacks = generate_white_pawn_attacks(b.get_pawns(inactive), attackables);
+    }
+
     const U64 knight_attacks = generate_knight_attacks(b.get_knights(inactive), attackables,
                                                        b.get_knight_targets());
     const U64 bishop_attacks = generate_bishop_attacks(b.get_bishops(inactive),
@@ -638,6 +647,7 @@ U64 generator::get_king_danger_squares(const U64 blockers)
 
     const U64 w_king_danger_squares =
             pawn_attacks | knight_attacks | bishop_attacks | rook_attacks | queen_attacks | king_attacks;
+
     return w_king_danger_squares;
 }
 
