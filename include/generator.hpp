@@ -53,12 +53,15 @@ private:
     Move::PieceEncoding get_pinned_piece(U64 pinned_piece_bb);
     U64 calculate_push_mask(U64 checkers, U64 w_king);
 
-    void generate_white_pawn_moves(U64 w_pawns, U64 capture, U64 push);
-    void generate_black_pawn_moves(U64 b_pawns, U64 capture, U64 push);
+    void generate_pawn_pushes(U64 pawns, U64 push);
+    void generate_pawn_promotion_captures(U64 pawns, int attacked_square);
+    void generate_pawn_captures(U64 pawns, int attacked_square);
+    void generate_pawn_ep(U64 pawns);
 
     void generate_white_castle_moves(int ksq, U64 danger_squares);
     void generate_black_castle_moves(int ksq, U64 danger_squares);
 
+    void generate_pawn_moves(U64 pawns, U64 capture, U64 push, bool pin = false);
     void generate_knight_moves(U64 knights, U64 open_squares);
     void generate_bishop_moves(U64 bishops, U64 open_squares);
     void generate_rook_moves(U64 rooks, U64 open_squares);
