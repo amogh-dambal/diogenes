@@ -608,7 +608,7 @@ void board::unmake(const move& m)
             }
             else
             {
-                castle_bb |= (1ULL << Board::Square::h8) | (1ULL << Board::Square::e8);
+                castle_bb |= (1ULL << Board::Square::h8) | (1ULL << Board::Square::f8);
             }
             kings[active] >>= 2ULL;
         }
