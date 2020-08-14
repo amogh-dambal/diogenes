@@ -562,13 +562,6 @@ void board::unmake(const move& m)
                     break;
             }
         }
-        // replace capturing piece
-        update_bitboards(m, bb_move);
-    }
-    else if (m.is_promotion())
-    {
-        bb_move |= (1ULL << from) | (1ULL << to);
-        pawns[active] ^= bb_move;
 
         // replace pawn back to original square
         pawns[active] |= (1ULL << from);
@@ -611,7 +604,7 @@ void board::unmake(const move& m)
         {
             if (active == Color::WHITE)
             {
-                castle_bb |= (1ULL << Board::Square::h1) | (1ULL << Board::Square::e1);
+                castle_bb |= (1ULL << Board::Square::h1) | (1ULL << Board::Square::f1);
             }
             else
             {
