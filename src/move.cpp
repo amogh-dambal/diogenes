@@ -48,6 +48,8 @@ move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const 
  */
 std::ostream& operator<<(std::ostream& out, const move& m)
 {
+    // TODO: write output logic for when two
+    //  - pieces can move to the same square
     // handle simple castle case
     if (m.is_castle_)
     {
@@ -197,6 +199,11 @@ std::string move::get_square_as_string(Board::Square sq)
     return s + file + rank;
 }
 
+void move::perft_print() const
+{
+    std::cout << move::get_square_as_string(from_) << move::get_square_as_string(to_);
+}
+
 /**
  * if the move is a promotion,
  * return the kind of piece
@@ -234,7 +241,7 @@ Move::PieceEncoding move::promoted_piece() const
     }
     else
     {
-        // ERROR return code 
+        // ERROR return code
         return Move::PieceEncoding::KING;
     }
 }
