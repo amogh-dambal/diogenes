@@ -897,29 +897,64 @@ U64 generator::calculate_push_mask(const U64 checkers, const U64 w_king)
 std::vector<U64> generator::get_pin_rays()
 {
     const U64 king = b.get_kings(active);
-    const U64 opp_sliders = b.get_pieces(inactive) ^ 
-            (b.get_kings(inactive) | b.get_pawns(inactive) | b.get_knights(inactive));
     const U64 pieces = b.get_pieces(active) ^ king;
-
+    const U64 opp_bishops = b.get_bishops(inactive); 
+    const U64 opp_rooks = b.get_rooks(inactive); 
+    const U64 opp_queens = b.get_queens(inactive);
     const U64 blockers = b.get_pieces(Color::BOTH);
     std::vector<U64> rays;
 
-    U64 ray, k, sliders;
+    U64 ray, k_attacks, slider_attacks, opp_sliders;
 
     for (auto dir : filler)
     {
-        k = 0;
-        sliders = 0;
-        k |= (*dir.second)(king, blockers ^ king);
-        sliders |= (*(filler.find((int)dir.first * -1)->second))(opp_sliders, blockers ^ opp_sliders);
-        U64 pin_test = k & sliders;
-
-        if (pin_test & pieces)
+        // calculate sliding piece moves based on direction
+        slider_attacks = 0;
+        opp_sliders = 0;
+        if (is_direction_diagonal(static_cast<Board::Direction>(dir.first)))
         {
-            ray = k | sliders;
+            opp_sliders |= opp_bishops;
+            slider_attacks |= opp_bishops; 
+        }
+        else 
+        {
+            opp_sliders |= opp_rooks;
+            slider_attacks |= opp_rooks;
+        }
+        opp_sliders |= opp_queens;
+        slider_attacks |= opp_queens;
+        slider_attacks |= (*(filler.find(dir.first * -1)->second))(opp_sliders, king);
+
+        // calculate king 'attacks' in opposite direction
+        k_attacks = 0;
+        k_attacks |= (*dir.second)(king, opp_sliders);
+
+        // check if there is a pin
+        // pin needs three things
+        // 1. ray has only three pieces
+        // 2. ray has only one active piece excluding king
+        // 3. ray has only one black slider
+        ray = (k_attacks & slider_attacks);
+
+        U64 squares_between = ray;
+        squares_between ^= opp_sliders;
+        squares_between &= ray;
+        squares_between ^= king;
+        squares_between &= ray;
+
+        bool pin_exists = bitboard::pop_count(squares_between & pieces) == 1 &&
+                bitboard::pop_count(squares_between & b.get_pieces(inactive)) == 0;
+        if (pin_exists)
+        {
             rays.push_back(ray);
         }
     }
 
     return rays;
+}
+
+bool generator::is_direction_diagonal(Board::Direction dir)
+{
+    return dir == Board::Direction::NW || dir == Board::Direction::NE ||
+    dir == Board::Direction::SE || dir == Board::Direction::SW;
 }
