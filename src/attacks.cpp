@@ -14,7 +14,7 @@
 U64 generate_white_pawn_attacks(const U64 w_pawns, const U64 possible_mvs)
 {
     U64 attacks = 0;
-    attacks |= bitboard::northeast(w_pawns) | bitboard::northwest(w_pawns);
+    attacks |= (bitboard::northeast(w_pawns) & Board::NOT_A_FILE) | (bitboard::northwest(w_pawns) & Board::NOT_H_FILE);
     attacks &= possible_mvs;
     return attacks;
 }
@@ -69,7 +69,7 @@ U64 generate_black_pawn_push_targets(const U64 b_pawns, const U64 empty, bool si
 U64 generate_black_pawn_attacks(const U64 b_pawns, const U64 possible_mvs)
 {
     U64 attacks = 0;
-    attacks |= bitboard::southwest(b_pawns) | bitboard::southeast(b_pawns);
+    attacks |= (bitboard::southwest(b_pawns) & Board::NOT_H_FILE) | (bitboard::southeast(b_pawns) & Board::NOT_A_FILE);
     attacks &= possible_mvs;
 
     return attacks;
