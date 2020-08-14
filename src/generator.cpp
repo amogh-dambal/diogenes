@@ -509,6 +509,7 @@ void generator::generate_king_moves(const U64 king, const U64 danger_squares, co
     }
 
     // captures
+    flags = Move::CAPTURE_FLAG;
     const U64 opp_pcs = b.get_pieces(inactive) ^ b.get_kings(inactive);
     U64 capture_squares = opp_pcs & king_targets & ~danger_squares;
     for (int sq : bitboard::serialize(capture_squares))
@@ -541,24 +542,36 @@ void generator::generate_white_castle_moves(const int ksq, const U64 danger_squa
 
     if (b.can_white_castle_qside())
     {
-        is_castle_blocked = (b.get_occupied_squares() & Move::WHITE_QUEENSIDE_CASTLE_FREE);
-        is_castle_attacked = danger_squares & Move::WHITE_QUEENSIDE_CASTLE_FREE;
-
-        if (!is_castle_attacked && !is_castle_blocked)
+        if (
+                b.exists(Color::WHITE, Move::PieceEncoding::KING, Board::Square::e1) &&
+                b.exists(Color::WHITE, Move::PieceEncoding::ROOK, Board::Square::a1)
+        )
         {
-            // mark flags as QUEENSIDE castle
-            flags |= 0x1ULL;
-            ml.push_back(move(ksq, ksq - 2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
+            is_castle_blocked = (b.get_occupied_squares() & Move::WHITE_QUEENSIDE_CASTLE_FREE);
+            is_castle_attacked = danger_squares & (Move::WHITE_QUEENSIDE_CASTLE_FREE ^ (1ULL << 1ULL));
+
+            if (!is_castle_attacked && !is_castle_blocked)
+            {
+                // mark flags as QUEENSIDE castle
+                flags |= 0x1ULL;
+                ml.push_back(move(ksq, ksq - 2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
+            }
         }
     }
     if (b.can_white_castle_kside())
     {
-        is_castle_blocked = (b.get_occupied_squares() & Move::WHITE_KINGSIDE_CASTLE_FREE);
-        is_castle_attacked = danger_squares & Move::WHITE_KINGSIDE_CASTLE_FREE;
-
-        if (!is_castle_attacked && !is_castle_blocked)
+        if (
+                b.exists(Color::WHITE, Move::PieceEncoding::KING, Board::Square::e1) &&
+                b.exists(Color::WHITE, Move::PieceEncoding::ROOK, Board::Square::h1)
+                )
         {
-            ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
+            is_castle_blocked = (b.get_occupied_squares() & Move::WHITE_KINGSIDE_CASTLE_FREE);
+            is_castle_attacked = danger_squares & Move::WHITE_KINGSIDE_CASTLE_FREE;
+
+            if (!is_castle_attacked && !is_castle_blocked)
+            {
+                ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
+            }
         }
     }
 }
@@ -574,25 +587,39 @@ void generator::generate_black_castle_moves(const int ksq, const U64 danger_squa
 
     if (b.can_black_castle_qside())
     {
-        is_castle_blocked = (b.get_occupied_squares() & Move::BLACK_QUEENSIDE_CASTLE_FREE);
-        is_castle_attacked = danger_squares & Move::BLACK_QUEENSIDE_CASTLE_FREE;
-
-        if (!is_castle_attacked && !is_castle_blocked)
+        if (
+                b.exists(Color::BLACK, Move::PieceEncoding::KING, Board::Square::e8) &&
+                b.exists(Color::BLACK, Move::PieceEncoding::ROOK, Board::Square::a8)
+        )
         {
-            // mark flags as QUEENSIDE castle
-            flags |= 0x1ULL;
-            ml.push_back(move(ksq, ksq - 2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
+            is_castle_blocked = (b.get_occupied_squares() & Move::BLACK_QUEENSIDE_CASTLE_FREE);
+            is_castle_attacked = danger_squares & (Move::BLACK_QUEENSIDE_CASTLE_FREE ^ (1ULL << 57ULL));
+
+            if (!is_castle_attacked && !is_castle_blocked)
+            {
+                // mark flags as QUEENSIDE castle
+                flags |= 0x1ULL;
+                ml.push_back(move(ksq, ksq - 2, Move::PieceEncoding::QUEENSIDE_CASTLE, flags));
+            }
         }
+
     }
     if (b.can_black_castle_kside())
     {
-        is_castle_blocked = (b.get_occupied_squares() & Move::BLACK_KINGSIDE_CASTLE_FREE);
-        is_castle_attacked = danger_squares & Move::BLACK_KINGSIDE_CASTLE_FREE;
-
-        if (!is_castle_attacked && !is_castle_blocked)
+        if (
+                b.exists(Color::BLACK, Move::PieceEncoding::KING, Board::Square::e8) &&
+                b.exists(Color::BLACK, Move::PieceEncoding::ROOK, Board::Square::h8)
+                )
         {
-            ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
+            is_castle_blocked = (b.get_occupied_squares() & Move::BLACK_KINGSIDE_CASTLE_FREE);
+            is_castle_attacked = danger_squares & Move::BLACK_KINGSIDE_CASTLE_FREE;
+
+            if (!is_castle_attacked && !is_castle_blocked)
+            {
+                ml.push_back(move(ksq, ksq + 2, Move::PieceEncoding::KINGSIDE_CASTLE, flags));
+            }
         }
+
     }
 }
 
