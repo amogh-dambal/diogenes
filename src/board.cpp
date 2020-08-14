@@ -279,6 +279,7 @@ void board::make(const move& m)
 
     U8 capture_type = 0x0;
     if (m.is_capture())
+    if (m.is_promotion())
     {
         U64 capture_loc = 1ULL << to;
         U64 capture_mask = ~(capture_loc);
@@ -296,6 +297,8 @@ void board::make(const move& m)
             knights[inactive] &= capture_mask;
         }
         else if (capture_loc & bishops[inactive])
+        // remove captured piece if applicable
+        if (m.is_capture())
         {
             capture_type = 0x3;
             bishops[inactive] &= capture_mask;
@@ -309,6 +312,31 @@ void board::make(const move& m)
         {
             capture_type = 0x5;
             queens[inactive] &= capture_mask;
+            U64 capture_loc = 1ULL << to;
+            U64 capture_mask = ~(capture_loc);
+
+            // get type of piece captured
+            // and remove it
+            if (capture_loc & knights[inactive])
+            {
+                capture_type = 0x2;
+                knights[inactive] &= capture_mask;
+            }
+            else if (capture_loc & bishops[inactive])
+            {
+                capture_type = 0x3;
+                bishops[inactive] &= capture_mask;
+            }
+            else if (capture_loc & rooks[inactive])
+            {
+                capture_type = 0x4;
+                rooks[inactive] &= capture_mask;
+            }
+            else if (capture_loc & queens[inactive])
+            {
+                capture_type = 0x5;
+                queens[inactive] &= capture_mask;
+            }
         }
 
         // update moved piece
@@ -317,9 +345,11 @@ void board::make(const move& m)
     }
     else if (m.is_promotion())
     {
+        // remove pawn from bitboards
         bitboard_move = 1ULL << from;
         pawns[active] ^=  bitboard_move;
 
+        // add new piece to board
         U64 new_piece_bb = 1ULL << to;
         switch (m.promoted_piece())
         {
@@ -342,17 +372,82 @@ void board::make(const move& m)
     else if (m.is_castle())
     {
         unsigned int rook_sq = (active == Color::WHITE) ? Board::Square::a1 : Board::Square::a8;
-        if (m.piece() == Move::QUEENSIDE_CASTLE)
+        // update castle game state
+        if (active == Color::WHITE)
         {
-            rooks[active] ^= (1ULL << rook_sq) | (1ULL << (rook_sq + 3));
+            can_white_castle_kside_ = false;
+            can_white_castle_qside_ = false;
         }
         else
         {
+            can_black_castle_kside_ = false;
+            can_black_castle_qside_ = false;
+        }
+
+        unsigned int rook_sq;
+        if (m.piece() == Move::QUEENSIDE_CASTLE)
+        {
+            rook_sq = (active == Color::WHITE) ? Board::Square::a1 : Board::Square::a8;
+            rooks[active] ^= (1ULL << rook_sq) | (1ULL << (rook_sq + 3));
+            kings[active] >>= 2ULL;
+        }
+        else
+        {
+            rook_sq = (active == Color::WHITE) ? Board::Square::h1 : Board::Square::h8;
             rooks[active] ^= (1ULL << rook_sq) | (1ULL << (rook_sq - 2));
+            kings[active] <<= 2ULL;
+        }
+    }
+    // non promotion captures
+    else if (m.is_capture())
+    {
+        // remove captured piece
+        if (m.is_ep())
+        {
+            int ep_offset = (active == Color::WHITE) ? -8 : 8;
+            U64 capture_loc = 1ULL << ((unsigned)(to + ep_offset));
+            capture_type = 0x1;
+            pawns[inactive] &= ~capture_loc;
+        }
+        else
+        {
+            U64 capture_loc = 1ULL << to;
+            U64 capture_mask = ~(capture_loc);
+
+            // get type of piece captured
+            // and remove it
+            if (capture_loc & pawns[inactive])
+            {
+                capture_type = 0x1;
+                pawns[inactive] &= capture_mask;
+            }
+            else if (capture_loc & knights[inactive])
+            {
+                capture_type = 0x2;
+                knights[inactive] &= capture_mask;
+            }
+            else if (capture_loc & bishops[inactive])
+            {
+                capture_type = 0x3;
+                bishops[inactive] &= capture_mask;
+            }
+            else if (capture_loc & rooks[inactive])
+            {
+                capture_type = 0x4;
+                rooks[inactive] &= capture_mask;
+            }
+            else if (capture_loc & queens[inactive])
+            {
+                capture_type = 0x5;
+                queens[inactive] &= capture_mask;
+            }
         }
         kings[active] <<= 2ULL;
+
+        // update moved piece
+        bitboard_move |= (1ULL << from) | (1ULL << to);
+        update_bitboards(m, bitboard_move);
     }
-    // quiet moves
     else
     {
         bitboard_move |= (1ULL << from) | (1ULL << to);
@@ -365,6 +460,10 @@ void board::make(const move& m)
         ep_target_sq_ = (side_to_move_ == Color::WHITE) ?
                 (Board::Square) (to - 8) :
                 (Board::Square)(to + 8);
+    }
+    else
+    {
+        ep_target_sq_ = Board::Square::NONE;
     }
 
     update_board();
