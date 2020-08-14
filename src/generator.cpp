@@ -806,79 +806,82 @@ U64 generator::calculate_push_mask(const U64 checkers, const U64 w_king)
         checker_type = Move::PieceEncoding::PAWN;
     }
 
-    int ksq = bitboard::bitscan_forward(w_king);
-    int csq = bitboard::bitscan_forward(checkers);
-
     U64 push_mask = 0;
-    int dirs[4] = {Board::Direction::N, Board::Direction::NE, Board::Direction::NW, Board::Direction::E};
-    bool above = ksq > csq;
-    // only calculate push mask for checks given by sliding pieces
-    if (
-            checker_type == Move::PieceEncoding::ROOK ||
-            checker_type == Move::PieceEncoding::BISHOP ||
-            checker_type == Move::PieceEncoding::QUEEN
-    )
+    if (!(checker_type == Move::PieceEncoding::KNIGHT))
     {
-        int distance;
-        for (int dir : dirs)
+        int ksq = bitboard::bitscan_forward(w_king);
+        int csq = bitboard::bitscan_forward(checkers);
+
+        int dirs[4] = {Board::Direction::N, Board::Direction::NE, Board::Direction::NW, Board::Direction::E};
+        bool above = ksq > csq;
+        // only calculate push mask for checks given by sliding pieces
+        if (
+                checker_type == Move::PieceEncoding::ROOK ||
+                checker_type == Move::PieceEncoding::BISHOP ||
+                checker_type == Move::PieceEncoding::QUEEN
+                )
         {
-            distance = (above) ? (ksq - csq) : (csq - ksq);
-            if ((distance % dir) == 0)
+            int distance;
+            for (int dir : dirs)
             {
-                if (above)
+                distance = (above) ? (ksq - csq) : (csq - ksq);
+                if ((distance % dir) == 0)
                 {
-                    switch (dir)
+                    if (above)
                     {
-                        case Board::Direction::N:
-                            push_mask = bitboard::occ_fill_north(checkers, w_king);
-                            break;
-                        case Board::Direction::NE:
-                            push_mask = bitboard::occ_fill_northeast(checkers, w_king);
-                            break;
-                        case Board::Direction::NW:
-                            push_mask = bitboard::occ_fill_northwest(checkers, w_king);
-                            break;
-                        case Board::Direction::E:
-                            push_mask = bitboard::occ_fill_east(checkers, w_king);
-                            break;
-                        default:
-                            break;
+                        switch (dir)
+                        {
+                            case Board::Direction::N:
+                                push_mask = bitboard::occ_fill_north(checkers, w_king);
+                                break;
+                            case Board::Direction::NE:
+                                push_mask = bitboard::occ_fill_northeast(checkers, w_king);
+                                break;
+                            case Board::Direction::NW:
+                                push_mask = bitboard::occ_fill_northwest(checkers, w_king);
+                                break;
+                            case Board::Direction::E:
+                                push_mask = bitboard::occ_fill_east(checkers, w_king);
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                }
-                else
-                {
-                    dir *= -1;
-                    switch (dir)
+                    else
                     {
-                        case Board::Direction::S:
-                            push_mask = bitboard::occ_fill_south(checkers, w_king);
-                            break;
-                        case Board::Direction::SE:
-                            push_mask = bitboard::occ_fill_southeast(checkers, w_king);
-                            break;
-                        case Board::Direction::SW:
-                            push_mask = bitboard::occ_fill_southwest(checkers, w_king);
-                            break;
-                        case Board::Direction::W:
-                            push_mask = bitboard::occ_fill_west(checkers, w_king);
-                            break;
-                        default:
-                            break;
+                        dir *= -1;
+                        switch (dir)
+                        {
+                            case Board::Direction::S:
+                                push_mask = bitboard::occ_fill_south(checkers, w_king);
+                                break;
+                            case Board::Direction::SE:
+                                push_mask = bitboard::occ_fill_southeast(checkers, w_king);
+                                break;
+                            case Board::Direction::SW:
+                                push_mask = bitboard::occ_fill_southwest(checkers, w_king);
+                                break;
+                            case Board::Direction::W:
+                                push_mask = bitboard::occ_fill_west(checkers, w_king);
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                    break;
                 }
-                break;
+            }
+            push_mask ^= (checkers | w_king);
+        }
+        else
+        {
+            int ep_sq = b.ep_target_square();
+            if (ep_sq != Board::Square::NONE)
+            {
+                push_mask |= (1ULL << ep_sq);
             }
         }
     }
-    else if (checker_type == Move::PieceEncoding::PAWN)
-    {
-        int ep_sq = b.ep_target_square();
-        if (ep_sq != Board::Square::NONE)
-        {
-            push_mask |= (1ULL << ep_sq);
-        }
-    }
-    push_mask ^= (checkers | w_king);
 
     return push_mask;
 
