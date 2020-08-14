@@ -411,7 +411,11 @@ bool bitboard::is_diagonal(const U64 ray)
     int bottom = bitscan_forward(ray);
 
     int r = top - bottom;
-    return (r % 7 == 0) || (r % 9) == 0;
+
+    const U64 c = 1ULL << (top - 8);
+    bool res = (r % 9 == 0) || (r % 7 == 0 && !(c & ray));
+
+    return res;
 }
 
 /**
