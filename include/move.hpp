@@ -31,6 +31,8 @@ public:
     bool is_ep() const;
     bool is_promotion() const;
 
+    void perft_print() const;
+
 private:
     // 32 bit integer encoding move information
     U32 mv;
