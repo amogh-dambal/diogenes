@@ -91,15 +91,8 @@ void generator::generate_pseudolegal_moves()
     open_squares = ~(b.get_pieces(active));
     push = b.get_empty_squares();
     capture = b.get_pieces(inactive) ^ b.get_kings(inactive);
-    if (active == Color::WHITE)
-    {
-        generate_white_pawn_moves(b.get_pawns(Color::WHITE), capture, push);
-    }
-    else
-    {
-        generate_black_pawn_moves(b.get_pawns(Color::BLACK), capture, push);
-    }
 
+    generate_pawn_moves(b.get_pawns(active), capture, push);
     generate_knight_moves(b.get_knights(active), open_squares);
     generate_bishop_moves(b.get_bishops(active), open_squares);
     generate_rook_moves(b.get_rooks(active), open_squares);
@@ -155,13 +148,13 @@ void generator::generate_legal_moves()
     }
 
     const U64 move_to = capture_mask | push_mask;
+    const U64 pawns = b.get_pawns(active) & pieces;
     const U64 bishops = b.get_bishops(active) & pieces;
     const U64 knights = b.get_knights(active) & pieces;
     const U64 rooks = b.get_rooks(active) & pieces;
     const U64 queens = b.get_queens(active) & pieces;
-    const U64 pawns = b.get_pawns(active) & pieces;
 
-    generate_bishop_moves(bishops, move_to);
+    generate_pawn_moves(pawns, capture_mask, push_mask);
     generate_knight_moves(knights, move_to);
     generate_rook_moves(rooks, move_to);
     generate_queen_moves(queens, move_to);
