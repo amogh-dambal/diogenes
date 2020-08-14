@@ -42,7 +42,8 @@ U64 generate_white_pawn_push_targets(const U64 w_pawns, const U64 empty, bool si
         {
             // only calculate double pushes for
             // pawns in their original squares
-            attacks |= bitboard::north(bitboard::north(w_pawns & 0xff00ULL) & empty) & empty;
+            const U64 original_squares_mask = 0xff00ULL;
+            attacks |= bitboard::north(bitboard::north(w_pawns & original_squares_mask) & empty) & empty;
         }
     }
     return attacks;
@@ -60,7 +61,8 @@ U64 generate_black_pawn_push_targets(const U64 b_pawns, const U64 empty, bool si
     else
     {
         // only calculate double pushes for pawns in their original squares
-        attacks |= bitboard::south(bitboard::south(b_pawns & 0x00ff000000000000ULL) & empty) & empty;
+        const U64 original_squares_mask = 0x00ff000000000000ULL;
+        attacks |= bitboard::south(bitboard::south(b_pawns & original_squares_mask) & empty) & empty;
 
     }
     return attacks;
