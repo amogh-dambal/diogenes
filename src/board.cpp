@@ -275,7 +275,7 @@ void board::make(const move& m)
     U64 bitboard_move = 0;
 
     auto active = side_to_move_;
-    auto inactive = (Color::Value) !side_to_move_;
+    auto inactive = static_cast<Color::Value>(!side_to_move_);
 
     U8 capture_type = 0x0;
     if (m.is_capture())
