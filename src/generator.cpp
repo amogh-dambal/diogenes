@@ -35,6 +35,7 @@ Color::Value generator::side_to_move() const
 movelist generator::get_moves()
 {
     active = b.side_to_move();
+    inactive = static_cast<Color::Value>(!inactive);
     ml.clear();
     run(Move::GeneratorStatus::PSEUDOLEGAL);
     return ml;
@@ -47,6 +48,7 @@ movelist generator::get_moves()
 movelist generator::get_legal_moves()
 {
     active = b.side_to_move();
+    inactive = static_cast<Color::Value>(!active);
     ml.clear();
     run(Move::GeneratorStatus::LEGAL);
     return ml;
@@ -949,6 +951,8 @@ std::vector<U64> generator::get_pin_rays()
 
     U64 ray, k_attacks, slider_attacks, opp_sliders;
 
+    auto filler = generator::get_filler();
+
     for (auto dir : filler)
     {
         // calculate sliding piece moves based on direction
@@ -1000,4 +1004,19 @@ bool generator::is_direction_diagonal(Board::Direction dir)
 {
     return dir == Board::Direction::NW || dir == Board::Direction::NE ||
     dir == Board::Direction::SE || dir == Board::Direction::SW;
+}
+
+std::map<int, FillFunctionPtr>& generator::get_filler()
+{
+    static std::map<int, FillFunctionPtr> filler = {
+            {Board::Direction::N, &bitboard::occ_fill_north},
+            {Board::Direction::S, &bitboard::occ_fill_south},
+            {Board::Direction::E, &bitboard::occ_fill_east},
+            {Board::Direction::W, &bitboard::occ_fill_west},
+            {Board::Direction::NE, &bitboard::occ_fill_northeast},
+            {Board::Direction::SE, &bitboard::occ_fill_southeast},
+            {Board::Direction::SW, &bitboard::occ_fill_southwest},
+            {Board::Direction::NW, &bitboard::occ_fill_northwest},
+    };
+    return filler;
 }

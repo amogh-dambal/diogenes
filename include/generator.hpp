@@ -74,17 +74,7 @@ private:
     void generate_queen_moves(U64 queens, U64 open_squares);
     void generate_king_moves(U64 king, U64 danger_squares = Board::NO_SQUARES, bool in_check = false);
 
-    const std::map<int, FillFunctionPtr> filler = {
-            {Board::Direction::N, &bitboard::occ_fill_north},
-            {Board::Direction::S, &bitboard::occ_fill_south},
-            {Board::Direction::E, &bitboard::occ_fill_east},
-            {Board::Direction::W, &bitboard::occ_fill_west},
-            {Board::Direction::NE, &bitboard::occ_fill_northeast},
-            {Board::Direction::SE, &bitboard::occ_fill_southeast},
-            {Board::Direction::SW, &bitboard::occ_fill_southwest},
-            {Board::Direction::NW, &bitboard::occ_fill_northwest},
-    };
-
+    static std::map<int, FillFunctionPtr>& get_filler();
 };
 
 
