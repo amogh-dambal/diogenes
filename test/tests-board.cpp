@@ -93,7 +93,7 @@ TEST_CASE("make move", "[make]")
     b.make(moves.at(0));
 
     REQUIRE(b.side_to_move() == Color::BLACK);
-    REQUIRE(b.ply() == 1);
+    REQUIRE(b.ply() == 0);
     REQUIRE(b.ep_target_square() == Board::Square::NONE);
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::a3));
@@ -112,7 +112,7 @@ TEST_CASE("make move - double push", "[make]")
     b.make(e4);
 
     REQUIRE(b.side_to_move() == Color::BLACK);
-    REQUIRE(b.ply() == 1);
+    REQUIRE(b.ply() == 0);
     REQUIRE(b.ep_target_square() == Board::Square::e3);
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
@@ -137,7 +137,7 @@ TEST_CASE("series of moves", "[make]")
     b.make(w_e4);
 
     REQUIRE(b.side_to_move() == Color::BLACK);
-    REQUIRE(b.ply() == 1);
+    REQUIRE(b.ply() == 0);
     REQUIRE(b.ep_target_square() == Board::Square::e3);
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
@@ -145,12 +145,11 @@ TEST_CASE("series of moves", "[make]")
     b.make(b_e5);
 
     REQUIRE(b.side_to_move() == Color::WHITE);
-    REQUIRE(b.ply() == 2);
+    REQUIRE(b.ply() == 0);
     REQUIRE(b.ep_target_square() == Board::Square::e6);
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::WHITE, Move::PieceEncoding::PAWN, Board::Square::e4));
     REQUIRE(b.exists(Color::BLACK, Move::PieceEncoding::PAWN, Board::Square::e5));
-
 }
 
 TEST_CASE("make/unmake", "[make/unmake]")
@@ -179,7 +178,6 @@ TEST_CASE("make/unmake", "[make/unmake]")
 // TODO: write more thorough tests for make/unmake - there cannot be errors
 TEST_CASE("make/unmake - random pos - 1")
 {
-
     std::string fen_record = "1R6/2bnQP1K/br1N1BP1/nPkp1P2/2p1P1P1/4Ppqp/p1r1ppp1/2NR3B w - - 0 1";
     board b(fen_record);
 
@@ -193,7 +191,7 @@ TEST_CASE("make/unmake - random pos - 1")
     b.make(qxd7);
 
     REQUIRE(b.side_to_move() == Color::BLACK);
-    REQUIRE(b.ply() == 1);
+    REQUIRE(b.ply() == 0);
     REQUIRE(b.ep_target_square() == Board::Square::NONE);
     REQUIRE(!b.game_over());
     REQUIRE(!b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, Board::Square::d7));
@@ -206,97 +204,4 @@ TEST_CASE("make/unmake - random pos - 1")
     REQUIRE(!b.game_over());
     REQUIRE(b.exists(Color::BLACK, Move::PieceEncoding::KNIGHT, Board::Square::d7));
     REQUIRE(!b.exists(Color::WHITE, Move::PieceEncoding::QUEEN, Board::Square::d7));
-
-}
-
-// TODO: write more make/unmake tests
-TEST_CASE("make/unmake - 2")
-{
-    SECTION("quiet pawn move - double push - WHITE")
-    {
-        std::string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-        board b(fen);
-        board unmade(fen);
-        move a4(Board::Square::a2, Board::Square::a4, Move::PieceEncoding::PAWN, Move::DOUBLE_PUSH_FLAG);
-
-        b.make(a4);
-
-        board made("r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1");
-        REQUIRE(b == made);
-
-        b.unmake(a4);
-        REQUIRE(b == unmade);
-    }
-
-    SECTION("kingside castle - WHITE")
-    {
-        std::string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-        board b(fen);
-        board original(fen);
-        move kcastle(Board::e1, Board::g1, Move::KINGSIDE_CASTLE, Move::CASTLE_FLAG);
-
-        b.make(kcastle);
-        board made("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R4RK1 b kq - 1 1");
-        bool make_move = b == made;
-        REQUIRE(make_move);
-
-        b.unmake(kcastle);
-        REQUIRE(b == original);
-    }
-
-    SECTION("queenside castle - WHITE")
-    {
-        std::string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-        board b(fen);
-        board original(fen);
-        move qcastle(Board::e1, Board::c1, Move::QUEENSIDE_CASTLE, Move::CASTLE_FLAG);
-
-        b.make(qcastle);
-        board made("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/2KR3R b kq - 1 1");
-        REQUIRE(b == made);
-
-        b.unmake(qcastle);
-        REQUIRE(b == original);
-    }
-
-    SECTION("pawn capture - BLACK")
-    {
-        std::string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/P1N2Q1p/1PPBBPPP/R3K2R b KQkq - 0 1";
-
-        board b(fen);
-        board original(fen);
-
-        move bxa3(Board::b4, Board::Square::a3, Move::PAWN, Move::CAPTURE_FLAG);
-
-        b.make(bxa3);
-
-        board made("r3k2r/p1ppqpb1/bn2pnp1/3PN3/4P3/p1N2Q1p/1PPBBPPP/R3K2R w KQkq - 0 1");
-
-        REQUIRE(b == made);
-
-        b.unmake(bxa3);
-
-        REQUIRE(b == original);
-    }
-
-    SECTION("quiet pawn move - double push - BLACK")
-    {
-        std::string fen ="r3k2r/Pppp1ppp/1b3nbN/nPP5/BB2P3/q4N2/Pp1P2PP/R2Q1RK1 b kq - 0 1" ;
-        board b(fen);
-        board unmade(fen);
-
-        move d7d5(Board::d7, Board::d5, Move::PAWN, Move::DOUBLE_PUSH_FLAG);
-
-        b.make(d7d5);
-
-        board made("r3k2r/Ppp2ppp/1b3nbN/nPPp4/BB2P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 2");
-        REQUIRE(b == made);
-
-        b.unmake(d7d5);
-
-        REQUIRE(b == unmade);
-
-
-    }
-
 }
