@@ -191,4 +191,36 @@ namespace Move
     const U64 BLACK_KINGSIDE_CASTLE_FREE     = 0x6000000000000000;
     const U64 BLACK_QUEENSIDE_CASTLE_FREE    = 0x0e00000000000000;
 }
+
+namespace Eval
+{
+    enum class GamePhase
+    {
+        OPENING,
+        MIDDLEGAME,
+        ENDGAME
+    };
+
+    namespace CentipawnValue
+    {
+        const int PAWN = 100;
+        const int BISHOP = 300;
+        const int KNIGHT = 300;
+        const int ROOK = 500;
+        const int QUEEN = 900;
+    }
+
+    const U32 DOUBLED_PAWN_PENALTY =        10;
+    const U32 ISOLATED_PAWN_PENALTY =       20;
+    const U32 BACKWARDS_PAWN_PENALTY =      8;
+    const U32 PASSED_PAWN_BONUS =           20;
+    const U32 ROOK_SEMI_OPEN_FILE_BONUS =   20;
+    const U32 ROOK_OPEN_FILE_BONUS =        15;
+    const U32 ROOK_ON_SEVENTH_BONUS =       20;
+}
+
+namespace Search
+{
+
+}
 #endif //DIOGENES_STDS_HPP
