@@ -4,8 +4,15 @@
 
 #include "move.hpp"
 
+move::move()
+{
+    this->mv = 0;
+    this->null = true;
+}
+
+
 move::move(const U32 move)
-: mv(move)
+: mv(move), null(false)
 {
     // set square variables
     from_ = (Board::Square)(move & Move::FROM_MASK);
@@ -19,7 +26,7 @@ move::move(const U32 move)
 }
 
 move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const U32 flags)
-: piece_encoding(piece)
+: piece_encoding(piece), null(false)
 {
     from_ = (Board::Square) from;
     to_ = (Board::Square) to;
@@ -37,6 +44,11 @@ move::move(const U32 from, const U32 to, const Move::PieceEncoding piece, const 
     is_double_push_ = (flags == Move::DOUBLE_PUSH_FLAG);
     // prevents captures from being flagged as EP moves
     is_ep_ = ((mv & Move::EN_PASSANT_MASK) == Move::EN_PASSANT_MASK);
+}
+
+bool move::is_null() const
+{
+    return this->null;
 }
 
 /**

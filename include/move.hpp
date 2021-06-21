@@ -15,8 +15,11 @@
 class move
 {
 public:
-    move(U32 move);
+    move();
+    explicit move(U32 move);
     move(U32 from, U32 to, Move::PieceEncoding piece, U32 flags);
+
+    bool is_null() const;
 
     friend std::ostream& operator<<(std::ostream& out, const move& m);
     std::string to_string() const;
@@ -36,6 +39,8 @@ public:
 private:
     // 32 bit integer encoding move information
     U32 mv;
+
+    bool null;
 
     // various states of the move
     bool is_double_push_;
