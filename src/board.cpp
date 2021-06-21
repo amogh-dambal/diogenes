@@ -10,7 +10,7 @@
  * default constructor
  */
 board::board() :
-ply_(0), side_to_move_(Color::WHITE),
+ply_(0), move_clock(2), side_to_move_(Color::WHITE),
 game_over_(false),
 ep_target_sq_(Board::Square::NONE),
 can_black_castle_kside_(true),
@@ -18,24 +18,7 @@ can_black_castle_qside_(true),
 can_white_castle_kside_(true),
 can_white_castle_qside_(true)
 {
-    // white pieces
-    pawns[Color::WHITE] = 0xff00;
-    knights[Color::WHITE] = 0x42;
-    bishops[Color::WHITE] = 0x24;
-    rooks[Color::WHITE] = 0x81;
-    queens[Color::WHITE] = 0x08;
-    kings[Color::WHITE] = 0x10;
-
-    // black pieces
-    pawns[Color::BLACK] = pawns[Color::WHITE] << 40ULL;
-    knights[Color::BLACK] = knights[Color::WHITE] << 56ULL;
-    bishops[Color::BLACK] = bishops[Color::WHITE] << 56ULL;
-    rooks[Color::BLACK] = rooks[Color::WHITE] << 56ULL;
-    queens[Color::BLACK] = queens[Color::WHITE] << 56ULL;
-    kings[Color::BLACK] = kings[Color::WHITE] << 56ULL;
-
-    write_to_history(0x0);
-    update_board();
+    reset();
     populate_lookup_tables();
 }
 
@@ -55,114 +38,7 @@ can_white_castle_qside_(true)
 board::board(const std::string& fen_str) :
 game_over_(false)
 {
-    std::vector<std::string> fen = util::split_string(fen_str);
-    assert(fen.size() == 6);
-
-    // get side-to-move
-    side_to_move_ = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
-
-    // get castling permissions
-    std::string castling = fen.at(2);
-    can_white_castle_qside_ = util::string_contains(castling, "Q");
-    can_white_castle_kside_ = util::string_contains(castling, "K");
-    can_black_castle_qside_ = util::string_contains(castling, "q");
-    can_black_castle_kside_ = util::string_contains(castling, "k");
-
-    // get eq target square
-    std::string ep = fen.at(3);
-    if (ep == "-")
-    {
-        ep_target_sq_ = Board::Square::NONE;
-    }
-    else
-    {
-        ep_target_sq_ = parse_square(ep);
-    }
-
-    // get half-move clock
-    ply_ = stoi(fen.at(4));
-
-    // build position and place pieces
-    std::string pos = fen.at(0);
-    int sq = 0;
-    int rank = 7, i = 0;
-    for (char piece : pos)
-    {
-        // skip rank delimiters/EMPTY SQUARES in FEN notation
-        if (piece == Board::FEN_RANK_DELIMITER)
-        {
-            rank--;
-            i = 0;
-        }
-        else if (isnumber(piece))
-        {
-            i += (piece - '0');
-        }
-        else
-        {
-            sq = (rank * 8) + i;
-            // WHITE piece
-            if (isupper(piece))
-            {
-                switch (piece)
-                {
-                    case 'P':
-                        pawns[Color::WHITE] |= 1ULL << sq;
-                        break;
-                    case 'N':
-                        knights[Color::WHITE] |= 1ULL << sq;
-                        break;
-                    case 'B':
-                        bishops[Color::WHITE] |= 1ULL << sq;
-                        break;
-                    case 'R':
-                        rooks[Color::WHITE] |= 1ULL << sq;
-                        break;
-                    case 'Q':
-                        queens[Color::WHITE] |= 1ULL << sq;
-                        break;
-                    case 'K':
-                        kings[Color::WHITE] |= 1ULL << sq;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            // BLACK piece
-            else
-            {
-                switch (piece)
-                {
-                    case 'p':
-                        pawns[Color::BLACK] |= 1ULL << sq;
-                        break;
-                    case 'n':
-                        knights[Color::BLACK] |= 1ULL << sq;
-                        break;
-                    case 'b':
-                        bishops[Color::BLACK] |= 1ULL << sq;
-                        break;
-                    case 'r':
-                        rooks[Color::BLACK] |= 1ULL << sq;
-                        break;
-                    case 'q':
-                        queens[Color::BLACK] |= 1ULL << sq;
-                        break;
-                    case 'k':
-                        kings[Color::BLACK] |= 1ULL << sq;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            // increment square counter to
-            // keep mapping consistent
-            i++;
-        }
-    }
-
-    write_to_history(0x0);
-    update_board();
+    setpos(fen_str);
     populate_lookup_tables();
 }
 
@@ -176,6 +52,9 @@ game_over_(false)
 bool board::operator==(const board& rhs) const
 {
     return
+    this->ply_ == rhs.ply_ &&
+    this->move_clock == rhs.move_clock &&
+
     this->can_black_castle_qside_ == rhs.can_black_castle_qside_ &&
     this->can_black_castle_kside_ == rhs.can_black_castle_kside_ &&
     this->can_white_castle_kside_ == rhs.can_white_castle_kside_ &&
@@ -258,7 +137,44 @@ std::ostream& operator<<(std::ostream& out, const board& b)
     return out;
 }
 
+
 /* PUBLIC FUNCTIONS */
+
+/**
+ * returns whether the active side
+ * i.e. the side to move
+ * is in check or not
+ * @return boolean value : true if the king of the
+ * active player is in check
+ *
+ */
+bool board::in_check() const
+{
+    auto active = side_to_move_; 
+    auto inactive = static_cast<Color::Value>(!side_to_move_); 
+    
+    const U64 king = kings[active];
+    const U64 blockers = get_pieces(Color::BOTH) ^ king; 
+    
+    const U64 pawn_attacks = (inactive == Color::WHITE) ?
+            generate_white_pawn_attacks(pawns[inactive], Board::ALL_SQUARES) : 
+            generate_black_pawn_attacks(pawns[inactive], Board::ALL_SQUARES);
+    const U64 knight_attacks = generate_knight_attacks(knights[inactive], Board::ALL_SQUARES,
+                                                       knight_targets);
+    const U64 bishop_attacks = generate_bishop_attacks(bishops[inactive],
+                                                       blockers ^ bishops[inactive]);
+    const U64 rook_attacks = generate_rook_attacks(rooks[inactive],
+                                                   blockers ^ rooks[inactive]);
+    const U64 queen_attacks = generate_queen_attacks(queens[inactive],
+                                                     blockers ^ queens[inactive]);
+    const U64 king_attacks = generate_king_attacks(kings[inactive], Board::ALL_SQUARES,
+                                                   king_targets);
+
+    const U64 king_danger_squares =
+            pawn_attacks | knight_attacks | bishop_attacks | rook_attacks | queen_attacks | king_attacks;
+
+    return king_danger_squares & king;
+}
 
 /**
  * function to make a move on the board
@@ -428,9 +344,55 @@ void board::make(const move& m)
         ep_target_sq_ = Board::Square::NONE;
     }
 
+    // update castle state
+    if (m.piece() == Move::PieceEncoding::KING)
+    {
+        if (active == Color::WHITE)
+        {
+            can_white_castle_qside_ = false;
+            can_white_castle_kside_ = false;
+        }
+        else
+        {
+            can_black_castle_qside_ = false;
+            can_black_castle_kside_ = false;
+        }
+    }
+    else if (m.piece() == Move::PieceEncoding::ROOK)
+    {
+        if (active == Color::WHITE)
+        {
+            if (from == Board::Square::a1)
+            {
+                can_white_castle_qside_ = false;
+            }
+            else if (from == Board::Square::h1)
+            {
+                can_white_castle_kside_ = false;
+            }
+        }
+        else
+        {
+            if (from == Board::Square::a8)
+            {
+                can_black_castle_qside_ = false;
+            }
+            else if (from == Board::Square::h8)
+            {
+                can_black_castle_kside_ = false;
+            }
+        }
+    }
+
+    if (!(m.piece() == Move::PAWN || m.is_capture()))
+    {
+        ply_++;
+    }
+
     update_board();
-    ply_++;
-    side_to_move_ = (Color::Value) !side_to_move_;
+    move_clock++;
+
+    side_to_move_ = static_cast<Color::Value>(!side_to_move_);
 
     write_to_history(capture_type);
 }
@@ -460,6 +422,7 @@ void board::unmake(const move& m)
     can_black_castle_kside_ = castling & Board::GameStateEncoding::BK_MASK;
     game_over_ = prev_game_state & Board::GameStateEncoding::GAME_OVER_MASK;
     side_to_move_ = static_cast<Color::Value>((prev_game_state & Board::GameStateEncoding::SIDE_TO_MOVE_MASK) >> Board::GameStateEncoding::SIDE_TO_MOVE_SHIFT);
+    ply_ = (prev_game_state & 0xffff0000ULL) >> 16;
 
     U64 bb_move = 0;
     int from = m.from();
@@ -601,7 +564,157 @@ void board::unmake(const move& m)
         update_bitboards(m, bb_move);
     }
 
-    ply_--;
+    move_clock--;
+    update_board();
+}
+
+void board::reset()
+{
+    ply_ = 0;
+    move_clock = 2;
+    side_to_move_ = Color::WHITE;
+    game_over_ = false;
+    ep_target_sq_ = Board::Square::NONE;
+    can_white_castle_qside_ = true;
+    can_white_castle_kside_ = true;
+    can_black_castle_qside_ = true;
+    can_black_castle_kside_ = true;
+    history.clear();
+
+    // white pieces
+    pawns[Color::WHITE] = 0xff00;
+    knights[Color::WHITE] = 0x42;
+    bishops[Color::WHITE] = 0x24;
+    rooks[Color::WHITE] = 0x81;
+    queens[Color::WHITE] = 0x08;
+    kings[Color::WHITE] = 0x10;
+
+    // black pieces
+    pawns[Color::BLACK] = pawns[Color::WHITE] << 40ULL;
+    knights[Color::BLACK] = knights[Color::WHITE] << 56ULL;
+    bishops[Color::BLACK] = bishops[Color::WHITE] << 56ULL;
+    rooks[Color::BLACK] = rooks[Color::WHITE] << 56ULL;
+    queens[Color::BLACK] = queens[Color::WHITE] << 56ULL;
+    kings[Color::BLACK] = kings[Color::WHITE] << 56ULL;
+
+    write_to_history(0x0);
+    update_board();
+}
+
+void board::setpos(const std::string& fenstr)
+{
+    game_over_ = false;
+    history.clear();
+
+    std::vector<std::string> fen = util::split_string(fenstr);
+
+    // get side-to-move
+    side_to_move_ = (fen.at(1) == "w") ? Color::WHITE : Color::BLACK;
+
+    // get castling permissions
+    std::string castling = fen.at(2);
+    can_white_castle_qside_ = util::string_contains(castling, "Q");
+    can_white_castle_kside_ = util::string_contains(castling, "K");
+    can_black_castle_qside_ = util::string_contains(castling, "q");
+    can_black_castle_kside_ = util::string_contains(castling, "k");
+
+    // get eq target square
+    std::string ep = fen.at(3);
+    if (ep == "-")
+    {
+        ep_target_sq_ = Board::Square::NONE;
+    }
+    else
+    {
+        ep_target_sq_ = parse_square(ep);
+    }
+
+    // get half-move clock
+    ply_ = stoi(fen.at(4));
+
+    // get full-move clock
+    move_clock = stoi(fen.at(5)) * 2;
+
+    // build position and place pieces
+    std::string pos = fen.at(0);
+    int sq = 0;
+    int rank = 7, i = 0;
+    for (char piece : pos)
+    {
+        // skip rank delimiters/EMPTY SQUARES in FEN notation
+        if (piece == Board::FEN_RANK_DELIMITER)
+        {
+            rank--;
+            i = 0;
+        }
+        else if (isnumber(piece))
+        {
+            i += (piece - '0');
+        }
+        else
+        {
+            sq = (rank * 8) + i;
+            // WHITE piece
+            if (isupper(piece))
+            {
+                switch (piece)
+                {
+                    case 'P':
+                        pawns[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'N':
+                        knights[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'B':
+                        bishops[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'R':
+                        rooks[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'Q':
+                        queens[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    case 'K':
+                        kings[Color::WHITE] |= 1ULL << sq;
+                        break;
+                    default:
+                        break;
+                }
+            }
+                // BLACK piece
+            else
+            {
+                switch (piece)
+                {
+                    case 'p':
+                        pawns[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'n':
+                        knights[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'b':
+                        bishops[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'r':
+                        rooks[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'q':
+                        queens[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    case 'k':
+                        kings[Color::BLACK] |= 1ULL << sq;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // increment square counter to
+            // keep mapping consistent
+            i++;
+        }
+    }
+
+    write_to_history(0x0);
     update_board();
 }
 
@@ -728,6 +841,11 @@ Color::Value board::side_to_move() const
 int board::ply() const
 {
     return ply_;
+}
+
+int board::full_move_clock() const
+{
+    return move_clock / 2;
 }
 
 /**
@@ -1088,7 +1206,7 @@ void board::populate_lookup_tables()
 
 void board::write_to_history(const U8 capture_type)
 {
-    U16 gs = 0;
+    U32 gs = 0;
     gs |= ep_target_sq_;
     unsigned char castling = 0;
     castling |=
@@ -1101,6 +1219,7 @@ void board::write_to_history(const U8 capture_type)
     gs |= (game_over_       << Board::GameStateEncoding::GAME_OVER_SHIFT);
     gs |= (side_to_move_    << Board::GameStateEncoding::SIDE_TO_MOVE_SHIFT);
     gs |= (capture_type     << Board::GameStateEncoding::CAPTURE_TYPE_SHIFT);
+    gs |= (ply_             << 16ULL);
 
     history.push_back(gs);
 }

@@ -52,7 +52,7 @@ namespace bitboard
     bool is_diagonal(U64 ray);
 
     // output a given bitboard
-    void print_bitboard(U64 bb);
+    void print(U64 bb);
 }
 
 #endif //DIOGENES_BITBOARD_HPP

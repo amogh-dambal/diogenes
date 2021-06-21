@@ -16,7 +16,6 @@
 #include "attacks.hpp"
 
 typedef std::map<std::string, Board::Square> square_parser;
-typedef const U64 TARGET_LOOKUP_TABLE[64];
 
 // TODO: FIX PLY/HALFMOVE IMPLEMENTATION
 
@@ -29,6 +28,9 @@ public:
     bool operator==(const board& rhs) const;
     friend std::ostream& operator<<(std::ostream& out, const board& b);
     std::string to_string() const;
+
+    void reset();
+    void setpos(const std::string& fen);
 
     void make(const move& m);
     void unmake(const move& m);
@@ -53,9 +55,12 @@ public:
     U64 get_queen_targets(Board::Square sq) const;
     U64 get_king_targets(Board::Square sq) const;
 
+
+
     // functions to return elements of the position
     Color::Value side_to_move() const;
     int ply() const;
+    int full_move_clock() const;
     bool game_over() const;
     Board::Square ep_target_square() const;
     bool exists(Color::Value color, Move::PieceEncoding piece, Board::Square) const;
@@ -65,6 +70,8 @@ public:
     bool can_white_castle_kside() const;
     bool can_black_castle_qside() const;
     bool can_black_castle_kside() const;
+
+    bool in_check() const;
 
     const U64* const get_knight_targets() const;
     const U64* const get_king_targets() const;
@@ -107,6 +114,7 @@ private:
     Color::Value side_to_move_;
     int ply_;
     bool game_over_;
+    int move_clock;
 
     bool can_white_castle_qside_;
     bool can_white_castle_kside_;
@@ -115,7 +123,7 @@ private:
 
     Board::Square ep_target_sq_;
 
-    std::deque<U16> history;
+    std::deque<U32> history;
 
     // function that initializes lookup tables
     void populate_lookup_tables();

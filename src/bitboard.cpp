@@ -423,7 +423,7 @@ bool bitboard::is_diagonal(const U64 ray)
  * in an 8x8 chessboard style, viewed from White's perspective
  * @param bb the U64 type representing the chess board
  */
-void bitboard::print_bitboard(const U64 bb)
+void bitboard::print(const U64 bb)
 {
     char pieces[Board::SQUARES];
     U64 k;

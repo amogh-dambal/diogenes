@@ -59,7 +59,7 @@ ull perft(int depth, board& b, bool divide = false)
     return knodes;
 }
 
-
+/*
 TEST_CASE("PERFT Correctness", "[perft]")
 {
     // main
@@ -75,7 +75,10 @@ TEST_CASE("PERFT Correctness", "[perft]")
         REQUIRE(perft(3, b) == 97862);
         REQUIRE(perft(4, b) == 4085603);
 
+        // slow
+        // REQUIRE(perft(5, b, true) == 193690690);
     }
+
 
     // Rb1
     SECTION("FEN: r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/1R2K2R b Kkq - 1 1")
@@ -186,3 +189,5 @@ TEST_CASE("PERFT correctness - 5", "[perft]")
     REQUIRE(perft(4, b) == 3894594);
 
 }
+
+*/
