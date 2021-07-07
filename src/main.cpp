@@ -4,10 +4,10 @@
 
 #include "gui.hpp"
 
-//int main(int argc, char** argv)
-//{
-//    gui handler;
-//
-//    handler.run();
-//    return 0;
-//}
+int main(int argc, char** argv)
+{
+    gui handler;
+
+    handler.run();
+    return 0;
+}
