@@ -33,6 +33,3 @@
 
 # cmake
 cmake-build-debug
-
-# text files
-CMakeLists.txt
