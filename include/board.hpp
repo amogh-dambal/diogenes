@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <deque>
 
 #include "stds.hpp"
 #include "move.hpp"
