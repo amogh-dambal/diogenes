@@ -8,10 +8,10 @@
 // #define C64(x) x##ULL
 #include <cstdint>
 
-typedef u_int64_t   U64;
-typedef u_int8_t    U8;
-typedef u_int16_t   U16;
-typedef u_int32_t   U32;
+typedef uint_fast8_t    U8;
+typedef uint_fast16_t   U16;
+typedef uint_fast32_t   U32;
+typedef uint_fast64_t   U64;
 
 namespace Color
 {
