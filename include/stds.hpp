@@ -164,14 +164,14 @@ namespace Move
         PSEUDOLEGAL,
         LEGAL
     };
-    const U8 EN_PASSANT_FLAG = 0x5;
-    const U8 CAPTURE_FLAG = 0x4;
-    const U8 CASTLE_FLAG = 0x2;
-    const U8 PROMOTION_FLAG = 0x8;
-    const U8 KNIGHT_PROMOTION = PROMOTION_FLAG | 0x0;
-    const U8 BISHOP_PROMOTION = PROMOTION_FLAG | 0x1;
-    const U8 ROOK_PROMOTION = PROMOTION_FLAG | 0x2;
-    const U8 QUEEN_PROMOTION = PROMOTION_FLAG | 0x3;
+    const U8 EN_PASSANT_FLAG    = 0x5;
+    const U8 CAPTURE_FLAG       = 0x4;
+    const U8 CASTLE_FLAG        = 0x2;
+    const U8 PROMOTION_FLAG     = 0x8;
+    const U8 KNIGHT_PROMOTION   = PROMOTION_FLAG  | 0x0U;
+    const U8 BISHOP_PROMOTION   = PROMOTION_FLAG  | 0x1U;
+    const U8 ROOK_PROMOTION     = PROMOTION_FLAG  | 0x2U;
+    const U8 QUEEN_PROMOTION    = PROMOTION_FLAG  | 0x3U;
 
     const U8 DOUBLE_PUSH_FLAG = 0x1;
 
@@ -179,17 +179,17 @@ namespace Move
     const U32 TO_MASK = 0xfa0;
     const U32 PIECE_MASK = 0x70000;
 
-    const U32 DOUBLE_PUSH_MASK = DOUBLE_PUSH_FLAG << 12;
-    const U32 EN_PASSANT_MASK = EN_PASSANT_FLAG << 12;
-    const U32 CAPTURE_MASK = CAPTURE_FLAG << 12;
-    const U32 CASTLE_MASK = CASTLE_FLAG << 12;
-    const U32 PROMOTION_MASK = PROMOTION_FLAG << 12;
+    const U32 DOUBLE_PUSH_MASK  = DOUBLE_PUSH_FLAG << 12U;
+    const U32 EN_PASSANT_MASK   = EN_PASSANT_FLAG << 12U;
+    const U32 CAPTURE_MASK      = CAPTURE_FLAG << 12U;
+    const U32 CASTLE_MASK       = CASTLE_FLAG << 12U;
+    const U32 PROMOTION_MASK    = PROMOTION_FLAG << 12U;
 
-    const U8 WHITE_KINGSIDE_CASTLE_FREE     = 0x60;
-    const U8 WHITE_QUEENSIDE_CASTLE_FREE    = 0x0e;
+    const U8 WHITE_KINGSIDE_CASTLE_FREE     = 0x60U;
+    const U8 WHITE_QUEENSIDE_CASTLE_FREE    = 0x0eU;
 
-    const U64 BLACK_KINGSIDE_CASTLE_FREE     = 0x6000000000000000;
-    const U64 BLACK_QUEENSIDE_CASTLE_FREE    = 0x0e00000000000000;
+    const U64 BLACK_KINGSIDE_CASTLE_FREE     = 0x6000000000000000U;
+    const U64 BLACK_QUEENSIDE_CASTLE_FREE    = 0x0e00000000000000U;
 }
 
 namespace Eval
@@ -203,20 +203,20 @@ namespace Eval
 
     namespace CentipawnValue
     {
-        const int PAWN = 100;
-        const int BISHOP = 300;
-        const int KNIGHT = 300;
-        const int ROOK = 500;
-        const int QUEEN = 900;
+        const int PAWN      = 100;
+        const int BISHOP    = 300;
+        const int KNIGHT    = 300;
+        const int ROOK      = 500;
+        const int QUEEN     = 900;
     }
 
-    const U32 DOUBLED_PAWN_PENALTY =        10;
-    const U32 ISOLATED_PAWN_PENALTY =       20;
-    const U32 BACKWARDS_PAWN_PENALTY =      8;
-    const U32 PASSED_PAWN_BONUS =           20;
-    const U32 ROOK_SEMI_OPEN_FILE_BONUS =   20;
-    const U32 ROOK_OPEN_FILE_BONUS =        15;
-    const U32 ROOK_ON_SEVENTH_BONUS =       20;
+    const U32 DOUBLED_PAWN_PENALTY      = 10U;
+    const U32 ISOLATED_PAWN_PENALTY     = 20U;
+    const U32 BACKWARDS_PAWN_PENALTY    =  8U;
+    const U32 PASSED_PAWN_BONUS         = 20U;
+    const U32 ROOK_SEMI_OPEN_FILE_BONUS = 20U;
+    const U32 ROOK_OPEN_FILE_BONUS      = 15U;
+    const U32 ROOK_ON_SEVENTH_BONUS     = 20U;
 }
 
 namespace Search
