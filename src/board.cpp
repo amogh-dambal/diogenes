@@ -647,7 +647,7 @@ void board::setpos(const std::string& fenstr)
             rank--;
             i = 0;
         }
-        else if (isnumber(piece))
+        else if (isdigit(piece))
         {
             i += (piece - '0');
         }
