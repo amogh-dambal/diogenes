@@ -1,9 +1,18 @@
 language: cpp
 
 before_script:
-  - mkdir build
-  - cd build
-  - cmake ..
+    # install catch2
+    - git clone https://github.com/catchorg/Catch2 catch2
+    - cd catch2
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
+    - sudo make install
+    - cd ../../
+    - mkdir build
+    - cd build
+    - cmake ..
 
 script:
   - make
