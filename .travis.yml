@@ -4,6 +4,7 @@ before_script:
     # install catch2
     - git clone https://github.com/catchorg/Catch2 catch2
     - cd catch2
+    - git checkout "v2.x"
     - mkdir build
     - cd build
     - cmake ..
