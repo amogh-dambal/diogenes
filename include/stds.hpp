@@ -6,6 +6,7 @@
 #define DIOGENES_STDS_HPP
 
 // #define C64(x) x##ULL
+#include <cstdint>
 
 typedef u_int64_t   U64;
 typedef u_int8_t    U8;
